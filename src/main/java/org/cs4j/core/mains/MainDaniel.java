@@ -875,10 +875,10 @@ public class MainDaniel {
         SearchAlgorithmArr = AlgoArr;
 
         String[] domains = {
-            "Pancakes",
-            "FifteenPuzzle",
-            "VacuumRobot",
-            "DockyardRobot",
+            //"Pancakes",
+            //"FifteenPuzzle",
+            //"VacuumRobot",
+            //"DockyardRobot",
             "GridPathFinding"
         };
 
@@ -915,11 +915,12 @@ public class MainDaniel {
 
     private static void runGridPathFinding() throws IOException {
         String gridName = "brc202d.map";
-        System.out.println("Solving VacuumRobot");
+        System.out.println("Solving GridPathFinding");
         inputPath = relPath + "input/GridPathFinding/" + gridName;
         outputPath = relPath + "results/GridPathFinding/" + gridName;
         summarySheetName = gridName;
         filePrefix = globalPrefix+"";
+        afterSetDomain();
     }
 
     private static void runDockyardRobot() throws IOException {

@@ -66,6 +66,13 @@ public class OutputResult {
         } else if (fileExists && !f.delete()) {
             throw new IOException("File " + this.fname + " was marked for deletion, but failed!");
         }
+
+        // If the file does not exist, create it and releveant subdirectories, if needed.
+        if(f.exists()==false)
+        {
+            f.getParentFile().mkdirs();
+            f.createNewFile();
+        }
         this.writer = new FileWriter(f);
         this.currentResult = new StringBuilder();
     }
