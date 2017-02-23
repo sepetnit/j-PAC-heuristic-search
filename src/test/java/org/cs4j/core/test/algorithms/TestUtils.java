@@ -3,7 +3,7 @@ package org.cs4j.core.test.algorithms;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.domains.FifteenPuzzle;
+import org.cs4j.core.domains.*;
 import org.junit.Assert;
 
 import java.io.File;
@@ -18,6 +18,30 @@ public class TestUtils {
     public static SearchDomain createFifteenPuzzle(String instance) throws FileNotFoundException {
         InputStream is = new FileInputStream(new File("./input/fifteenpuzzle/korf100/"+instance+".in"));
         FifteenPuzzle puzzle = new FifteenPuzzle(is);
+        return puzzle;
+    }
+
+    public static SearchDomain createPancakePuzzle(int pancakeSize, String instance) throws FileNotFoundException {
+        InputStream is = new FileInputStream(new File("./input/pancakes/generated-"+ pancakeSize+ "/"+instance+".in"));
+        Pancakes puzzle = new Pancakes(is);
+        return puzzle;
+    }
+
+    public static SearchDomain createGridPathFinding(String mapName, String instance) throws FileNotFoundException {
+        InputStream is = new FileInputStream(new File("./input/GridPathFinding/"+ mapName+ "/"+instance+".in"));
+        GridPathFinding puzzle = new GridPathFinding(is);
+        return puzzle;
+    }
+
+    public static SearchDomain createVacuumRobot(int numberOfDirts, String instance) throws FileNotFoundException {
+        InputStream is = new FileInputStream(new File("./input/vacuumrobot/generated-"+ numberOfDirts+ "-dirt/"+instance+".in"));
+        VacuumRobot puzzle = new VacuumRobot(is);
+        return puzzle;
+    }
+
+    public static SearchDomain createDockyardRobot(String instance) throws FileNotFoundException {
+        InputStream is = new FileInputStream(new File("./input/dockyard-robot-max-edge-2-out-of-place-30/"+instance+".in"));
+        DockyardRobot puzzle = new DockyardRobot(is);
         return puzzle;
     }
 
