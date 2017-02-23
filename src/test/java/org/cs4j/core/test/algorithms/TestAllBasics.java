@@ -40,58 +40,42 @@ public class TestAllBasics {
 		
 	@Test
 	public void testAstarBinHeap() throws FileNotFoundException {
-		SearchDomain domain = createFifteenPuzzle("12");
+		SearchDomain domain = TestUtils.createFifteenPuzzle("12");
 		SearchAlgorithm algo = new WAStar();
-		testSearchAlgorithm(domain, algo, 65271, 32470, 45);
+		TestUtils.testSearchAlgorithm(domain, algo, 65271, 32470, 45);
 	}	
 
 	@Test
 	public void testRBFS() throws FileNotFoundException {
-		SearchDomain domain = createFifteenPuzzle("12");
+		SearchDomain domain = TestUtils.createFifteenPuzzle("12");
 		SearchAlgorithm algo = new RBFS();
-		testSearchAlgorithm(domain, algo, 301098, 148421, 45);
+		TestUtils.testSearchAlgorithm(domain, algo, 301098, 148421, 45);
 	}	
 	
 	@Test
 	public void testIDAstar() throws FileNotFoundException {
-		SearchDomain domain = createFifteenPuzzle("12");
+		SearchDomain domain = TestUtils.createFifteenPuzzle("12");
 		SearchAlgorithm algo = new IDAstar();
-		testSearchAlgorithm(domain, algo, 546343, 269708, 45);
+		TestUtils.testSearchAlgorithm(domain, algo, 546343, 269708, 45);
 	}		
 
 	@Test
 	public void testEES() throws FileNotFoundException {
-		SearchDomain domain = createFifteenPuzzle("12");
+		SearchDomain domain = TestUtils.createFifteenPuzzle("12");
 		SearchAlgorithm algo = new EES(2);
-		testSearchAlgorithm(domain, algo, 5131, 2506, 55);
+		TestUtils.testSearchAlgorithm(domain, algo, 5131, 2506, 55);
 	}	
 	
 	@Test
 	public void testWRBFS() throws FileNotFoundException {
-		SearchDomain domain = createFifteenPuzzle("12");
+		SearchDomain domain = TestUtils.createFifteenPuzzle("12");
 		SearchAlgorithm algo = new WRBFS();
-		testSearchAlgorithm(domain, algo, 301098, 148421, 45);
+		TestUtils.testSearchAlgorithm(domain, algo, 301098, 148421, 45);
 	}	
 	
-	public SearchDomain createFifteenPuzzle(String instance) throws FileNotFoundException {
-		InputStream is = new FileInputStream(new File("cs4j-master/input/fifteenpuzzle/korf100/"+instance));
-		FifteenPuzzle puzzle = new FifteenPuzzle(is);
-		return puzzle;
-	}
+
 	
-	public void testSearchAlgorithm(SearchDomain domain, SearchAlgorithm algo, 
-			long generated, long expanded, double cost) {
-		SearchResult result = algo.search(domain);
-		Solution sol = result.getSolutions().get(0);
-		Assert.assertTrue(result.getWallTimeMillis() > 1);
-		Assert.assertTrue(result.getWallTimeMillis() < 200);
-		Assert.assertTrue(result.getCpuTimeMillis() > 1);
-		Assert.assertTrue(result.getCpuTimeMillis() < 200);
-		Assert.assertTrue(result.getGenerated() == generated);
-		Assert.assertTrue(result.getExpanded() == expanded);
-		Assert.assertTrue(sol.getCost() == cost);
-		Assert.assertTrue(sol.getLength() == cost+1);
-	}
+
 	
 	public static void main(String[] args) throws FileNotFoundException {
 		TestAllBasics test = new TestAllBasics();
