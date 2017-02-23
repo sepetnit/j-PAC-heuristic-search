@@ -30,7 +30,7 @@ public class MainDaniel {
     private static String fileEnd;
     private static String filePrefix;
     private static SearchAlgorithm alg;
-    private static String[] relPathes = {"C:/Users/user/Documents/Gal/PAC/PAC_Daniel/"};
+    private static String[] relPathes = {"./"};
     private static String relPath;
     private static String inputPath;
     private static String outputPath;
@@ -120,7 +120,7 @@ public class MainDaniel {
                         else alg.setAdditionalParameter("max-cost", optimalBounded + "");
 //                        else alg.setAdditionalParameter("optimalSolution", optimalSolution + "");
                     }
-                    InputStream is = new FileInputStream(new File(inputPath /*+ "/" + i + ".in"*/ ));
+                    InputStream is = new FileInputStream(new File(inputPath + "/" + i + ".in" ));
                     SearchDomain domain;
                     domain = (SearchDomain) cons.newInstance(is);
                     for(Map.Entry<String, String> entry : domainParams.entrySet()) {
@@ -875,11 +875,11 @@ public class MainDaniel {
         SearchAlgorithmArr = AlgoArr;
 
         String[] domains = {
-//            "Pancakes",
-//            "FifteenPuzzle",
-//            "VacuumRobot",
+            "Pancakes",
+            "FifteenPuzzle",
+            "VacuumRobot",
             "DockyardRobot",
-//            "GridPathFinding"
+            "GridPathFinding"
         };
 
         for (String dN : domains) {
@@ -887,29 +887,83 @@ public class MainDaniel {
             domainParams = new HashMap<>();
             switch (domainName) {
                 case "FifteenPuzzle": {
-                    summaryName = "15DP-ALL";
-                    for(int i = 0 ; i <= 0 ; i++) {
-                        int resolution = 1;
-                        double alpha;
-                        if(i%2 == 1)alpha = (double) ((i+1)/2) / resolution;
-                        else        alpha = (double) (-i/2) / resolution;
-                        domainParams.put("cost-function", alpha+"");
-                        filePrefix = globalPrefix+"alpha" + alpha + "_";  //for cost-function
-//                    filePrefix = "";  //for unit costs
-                        System.out.println("Solving FifteenPuzzle " + filePrefix);
-                        inputPath = relPath + "input/FifteenPuzzle/states15";
-//                        inputPath = relPath + "input/FifteenPuzzle/fif1000";
-//                    inputPath = relPath + "input/FifteenPuzzle/states15InstanceByStep/43";
-                        outputPath = relPath + "results/FifteenPuzzle/" + filePrefix;
-//                        outputPath = relPath + "results/tests/"+filePrefix;
-                        summarySheetName = filePrefix + "FifteenPuzzle";
-                        afterSetDomain();
-                    }
+                    runFifteenPuzzle();
                     break;
                 }
                 case "Pancakes": {
-                    int[] pancakesNum;
-                    summaryName = "Pancakes";
+                    runPancake();
+                    break;
+                }
+                case "VacuumRobot": {
+                    runVacuumRobot();
+                    break;
+                }
+                case "DockyardRobot": {
+                    runDockyardRobot();
+                    break;
+                }
+                case "GridPathFinding": {
+                    runGridPathFinding();
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException();
+                }
+            }
+        }
+    }
+
+    private static void runGridPathFinding() throws IOException {
+        String gridName = "brc202d.map";
+        System.out.println("Solving VacuumRobot");
+        inputPath = relPath + "input/GridPathFinding/" + gridName;
+        outputPath = relPath + "results/GridPathFinding/" + gridName;
+        summarySheetName = gridName;
+        filePrefix = globalPrefix+"";
+    }
+
+    private static void runDockyardRobot() throws IOException {
+        filePrefix = "";
+        System.out.println("Solving DockyardRobot "+filePrefix);
+        inputPath = relPath + "input/dockyard-robot-max-edge-2-out-of-place-30/";
+        outputPath = relPath + "results/dockyard-robot-max-edge-2-out-of-place-30/"+filePrefix;
+        summarySheetName = "dockyard-robot";
+        afterSetDomain();
+    }
+
+    private static void runVacuumRobot() throws IOException {
+        int[] dirts;
+        dirts = new int[]{10};
+//                    dirts = new int[]{5};
+//                    int[] dirts = new int[]{5, 10};
+        for(int i=0 ; i <= 0 ; i+=1) {
+            int resolution = 1;
+            double alpha;
+            if(i%2 == 1)alpha = (double) ((i+1)/2) / resolution;
+            else        alpha = (double) (-i/2) / resolution;
+            for (int j = 0; j < dirts.length; j++) {
+                for(int shrinkTo = dirts[j] ; shrinkTo <= dirts[j] ; shrinkTo+=1){
+                    filePrefix = globalPrefix + "";
+
+                    domainParams.put("cost-function", alpha+"");
+                    filePrefix += "alpha"+alpha+"_";
+
+                    domainParams.put("shrinkTo", shrinkTo+"");
+                    filePrefix += "shrinkTo"+shrinkTo+"_";
+
+                    System.out.println("Solving VacuumRobot "+filePrefix);
+                    inputPath = relPath + "input/VacuumRobot/generated-" + dirts[j] + "-dirt";
+                    outputPath = relPath + "results/VacuumRobot/" + dirts[j] + "-dirt/" + filePrefix;
+                    summarySheetName = "Vacuum-" + dirts[j] + "-a"+alpha+"-s"+shrinkTo;
+                    afterSetDomain();
+                }
+            }
+        }
+    }
+
+    private static void runPancake() throws IOException {
+        int[] pancakesNum;
+        summaryName = "Pancakes";
 //                    pancakesNum = new int[]{10, 12, 16, 20, 40};
 //                    pancakesNum = new int[]{10, 12, 16};
 //                    pancakesNum = new int[]{16,20,40};
@@ -917,86 +971,51 @@ public class MainDaniel {
 //                    pancakesNum = new int[]{101};
 //                    pancakesNum = new int[]{20};
 //                    pancakesNum = new int[]{16};
-                    pancakesNum = new int[]{10};
-                    for(int gap = 0 ; gap <= 0  ; gap++) {
+        pancakesNum = new int[]{10};
+        for(int gap = 0 ; gap <= 0  ; gap++) {
 //                        double GAPK = ((double)gap/2);
-                        double GAPK = (double)gap;
-                        for (int j = 0; j < pancakesNum.length; j++) {
-                            int num = pancakesNum[j];
-                            for(int i = 0 ; i <= 0 ; i+=1) {
-                                int resolution = 1;
-                                double alpha;
-                                if(i%2 == 1)alpha = (double) ((i+1)/2) / resolution;
-                                else        alpha = (double) (-i/2) / resolution;
-                                domainParams.put("cost-function", alpha+"");
-                                filePrefix = globalPrefix + num + "_alpha" + alpha + "_";  //for cost-function
+            double GAPK = (double)gap;
+            for (int j = 0; j < pancakesNum.length; j++) {
+                int num = pancakesNum[j];
+                for(int i = 0 ; i <= 0 ; i+=1) {
+                    int resolution = 1;
+                    double alpha;
+                    if(i%2 == 1)alpha = (double) ((i+1)/2) / resolution;
+                    else        alpha = (double) (-i/2) / resolution;
+                    domainParams.put("cost-function", alpha+"");
+                    filePrefix = globalPrefix + num + "_alpha" + alpha + "_";  //for cost-function
 
-                                domainParams.put("GAP-k", GAPK + "");
-                                filePrefix += "GAP-" + GAPK + "_";
+                    domainParams.put("GAP-k", GAPK + "");
+                    filePrefix += "GAP-" + GAPK + "_";
 
-                                System.out.println("Solving Pancakes " + num + " " + filePrefix);
-                                inputPath = relPath + "input/pancakes/generated-" + num;
-                                outputPath = relPath + "results/pancakes/" + num + "/" + filePrefix;
-                                summarySheetName = filePrefix + "pancakes";
-                                afterSetDomain();
-                            }
-                        }
-                    }
-                    break;
-                }
-                case "VacuumRobot": {
-                    int[] dirts;
-                    dirts = new int[]{10};
-//                    dirts = new int[]{5};
-//                    int[] dirts = new int[]{5, 10};
-                    for(int i=0 ; i <= 0 ; i+=1) {
-                        int resolution = 1;
-                        double alpha;
-                        if(i%2 == 1)alpha = (double) ((i+1)/2) / resolution;
-                        else        alpha = (double) (-i/2) / resolution;
-                        for (int j = 0; j < dirts.length; j++) {
-                            for(int shrinkTo = dirts[j] ; shrinkTo <= dirts[j] ; shrinkTo+=1){
-                                filePrefix = globalPrefix + "";
-
-                                domainParams.put("cost-function", alpha+"");
-                                filePrefix += "alpha"+alpha+"_";
-
-                                domainParams.put("shrinkTo", shrinkTo+"");
-                                filePrefix += "shrinkTo"+shrinkTo+"_";
-
-                                System.out.println("Solving VacuumRobot "+filePrefix);
-                                inputPath = relPath + "input/VacuumRobot/generated-" + dirts[j] + "-dirt";
-                                outputPath = relPath + "results/VacuumRobot/" + dirts[j] + "-dirt/" + filePrefix;
-                                summarySheetName = "Vacuum-" + dirts[j] + "-a"+alpha+"-s"+shrinkTo;
-                                afterSetDomain();
-                            }
-                        }
-                    }
-                    break;
-                }
-                case "DockyardRobot": {
-                    filePrefix = "";
-                    System.out.println("Solving DockyardRobot "+filePrefix);
-                    inputPath = relPath + "input/dockyard-robot-max-edge-2-out-of-place-30/";
-                    outputPath = relPath + "results/dockyard-robot-max-edge-2-out-of-place-30/"+filePrefix;
-                    summarySheetName = "dockyard-robot";
+                    System.out.println("Solving Pancakes " + num + " " + filePrefix);
+                    inputPath = relPath + "input/pancakes/generated-" + num;
+                    outputPath = relPath + "results/pancakes/" + num + "/" + filePrefix;
+                    summarySheetName = filePrefix + "pancakes";
                     afterSetDomain();
-                    break;
-                }
-                case "GridPathFinding": {
-                    String gridName = "brc202d.map";
-                    System.out.println("Solving VacuumRobot");
-                    inputPath = relPath + "input/GridPathFinding/" + gridName;
-                    outputPath = relPath + "results/GridPathFinding/" + gridName;
-                    summarySheetName = gridName;
-                    filePrefix = globalPrefix+"";
-                    afterSetDomain();
-                    break;
-                }
-                default: {
-                    throw new IllegalArgumentException();
                 }
             }
+        }
+    }
+
+    private static void runFifteenPuzzle() throws IOException {
+        summaryName = "15DP-ALL";
+        for(int i = 0 ; i <= 0 ; i++) {
+            int resolution = 1;
+            double alpha;
+            if(i%2 == 1)alpha = (double) ((i+1)/2) / resolution;
+            else        alpha = (double) (-i/2) / resolution;
+            domainParams.put("cost-function", alpha+"");
+            filePrefix = globalPrefix+"alpha" + alpha + "_";  //for cost-function
+//                    filePrefix = "";  //for unit costs
+            System.out.println("Solving FifteenPuzzle " + filePrefix);
+            inputPath = relPath + "input/FifteenPuzzle/states15";
+//                        inputPath = relPath + "input/FifteenPuzzle/fif1000";
+//                    inputPath = relPath + "input/FifteenPuzzle/states15InstanceByStep/43";
+            outputPath = relPath + "results/FifteenPuzzle/" + filePrefix;
+//                        outputPath = relPath + "results/tests/"+filePrefix;
+            summarySheetName = filePrefix + "FifteenPuzzle";
+            afterSetDomain();
         }
     }
 }
