@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by user on 23/02/2017.
+ * Created by Roni Stern on 23/02/2017.
  */
 public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
 
@@ -20,7 +20,9 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     protected SearchDomain domain;
 
     // OPEN and CLOSED lists
-    protected SearchQueue<Node> open;
+//    protected SearchQueue<Node> open;
+    protected SearchQueue<Node> open;//gh_heap
+
     protected Map<PackedElement, Node> closed;
 
     // Inconsistent list
@@ -32,6 +34,12 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     // Whether reopening is allowed
     protected boolean reopen;
 
+
+    // A data structure to maintain minf. @TODO: Allow disabling this for Anytime algorithms that don't care about this
+    protected HashMap<Double, Integer> fCounter = new HashMap<Double,Integer>();
+    protected double maxFmin; // The maximal fmin observed so far. This is a lower bound on the optimal cost
+    protected double fmin; // The minimal f value currently in the open list
+
     public AbstractAnytimeSearch() {
         // Initial values (afterwards they can be set independently)
         this.reopen = true;
@@ -41,18 +49,17 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     /**
      * Initializes the data structures of the search
      *
-     * @param clearOpen Whether to initialize the open list
+     * @param clearOpen   Whether to initialize the open list
      * @param clearClosed Whether to initialize the closed list
      */
-    private void _initDataStructures(boolean clearOpen, boolean clearClosed) {
+    protected void _initDataStructures(boolean clearOpen, boolean clearClosed) {
         if (clearOpen) {
-            this.open = new BinHeap<>(this.createNodeComparator(), 0);
+            this.open = new BinHeap<Node>(this.createNodeComparator(), 0);
         }
         if (clearClosed) {
             this.closed = new HashMap<>();
         }
     }
-
 
 
     /**
@@ -61,43 +68,33 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     abstract protected Comparator<Node> createNodeComparator();
 
 
-
-
     /**
      * The internal main search procedure
      *
      * @return The search result filled by all the results of the search
      */
-    private SearchResult _search() {
+    protected SearchResultImpl _search() {
         // The result will be stored here
         Node goal = null;
         SearchResultImpl result = new SearchResultImpl();
         result.startTimer();
 
-        // Extract the initial state from the domain
-        SearchDomain.State currentState = domain.initialState();
-        // Initialize a search node using the state (contains data according to the current
-        // algorithm)
-        Node initialNode = new Node(currentState);
-
-        // Start the search: Add the node to the OPEN and CLOSED lists
-        this.open.add(initialNode);
-        // n in OPEN ==> n in CLOSED -Thus- ~(n in CLOSED) ==> ~(n in OPEN)
-        this.closed.put(initialNode.packed, initialNode);
-
-        // Loop while there is no solution and there are states in the OPEN list
-        SearchDomain.State childState;
-        Node currentNode,childNode,dupChildNode;
+         // Loop while there is no solution and there are states in the OPEN list
+        SearchDomain.State childState,currentState;
+        Node currentNode, childNode, dupChildNode;
         SearchDomain.Operator op;
+        double childf,dupChildf;
         while ((goal == null) && !this.open.isEmpty()) {
             // Take a node from the OPEN list (nodes are sorted according to the 'u' function)
             currentNode = this.open.poll();
+            this.removeFromfCounter(currentNode.getF());
+
             // Extract a state from the node
             currentState = domain.unpack(currentNode.packed);
             // expand the node (since, if its g satisfies the goal test - it would be already returned)
             ++result.expanded;
-            if(result.expanded % 1000000 ==0)
-                System.out.println("[INFO] Expanded so far "+result.expanded);
+            if (result.expanded % 1000000 == 0)
+                System.out.println("[INFO] Expanded so far " + result.expanded);
 
             // Go over all the successors of the state
             for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
@@ -136,10 +133,11 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
                     ++result.duplicates;
                     // Take the duplicate node
                     dupChildNode = this.closed.get(childNode.packed);
-                    if (dupChildNode.getF() > childNode.getF()) {
+                    childf = childNode.getF();
+                    dupChildf = dupChildNode.getF();
+                    if (dupChildf > childf) {
                         // Consider only duplicates with higher G value
                         if (dupChildNode.g > childNode.g) {
-
                             // Make the duplicate to be successor of the current parent node
                             dupChildNode.g = childNode.g;
                             dupChildNode.op = childNode.op;
@@ -151,11 +149,17 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
                                 ++result.opupdated;
                                 this.open.update(dupChildNode);
                                 this.closed.put(dupChildNode.packed, dupChildNode);
+
+                                // Update fCounter (and possible minf and maxminf)
+                                this.addTofCounter(childf);
+                                this.removeFromfCounter(dupChildf);
                             } else {
                                 // Return to OPEN list only if reopening is allowed
                                 if (this.reopen) {
                                     ++result.reopened;
                                     this.open.add(dupChildNode);
+                                    this.addTofCounter(childf);
+
                                 } else {
                                     // Maybe, we will want to expand these states later
                                     this.incons.put(dupChildNode.packed, dupChildNode);
@@ -169,8 +173,13 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
                 } else {
                     // Otherwise, add the node to the search lists
                     this.open.add(childNode);
+                    this.addTofCounter(childNode.getF());
                     this.closed.put(childNode.packed, childNode);
                 }
+
+
+                // Update the fCounter and possible minf and maxminf
+                this.updateFmin();
             }
         }
         // Stop the timer and check that a goal was found
@@ -181,8 +190,62 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
             result.addSolution(constructSolution(goal, this.domain));
         }
 
+        result.setExtras("fmin",this.maxFmin); // Record the lower bound for future analysis @TODO: Not super elegant
         return result;
     }
+
+
+    /**
+     * After adding a node to OPEN, we update the f-counter
+     * to keep track of minf
+     * @param f the (admissible) f value of the node that was just added to OPEN
+     */
+    private void addTofCounter(double f){
+        if(this.fCounter.containsKey(f))
+            this.fCounter.put(f, this.fCounter.get(f)+1);
+        else
+            this.fCounter.put(f,1);
+
+        // Update fmin if needed
+        if(f<this.fmin)
+            this.fmin=f;
+    }
+    /**
+     * After removing from OPEN a node with a given f-value,
+     */
+    private void removeFromfCounter(double f) {
+        int newfCount = this.fCounter.get(f)-1;
+        this.fCounter.put(f,newfCount);
+
+        if(newfCount==0){
+            this.fCounter.remove(f);
+        }
+    }
+
+    /**
+     * If there are no more nodes with the old fmin, need to update fmin and maybe also maxfmin accordingly.
+     */
+    private void updateFmin(){
+        try{
+
+        // If fmin is no longer fmin, need to search for a new fmin @TODO: May improve efficiency
+        if(this.fCounter.containsKey(fmin)==false){
+            fmin=Double.MAX_VALUE;
+            for(double fInOpen : this.fCounter.keySet()){
+                if(fInOpen<fmin)
+                    fmin=fInOpen;
+            }
+            if(maxFmin<fmin)
+                maxFmin=fmin;
+        }
+
+        }
+        catch(IndexOutOfBoundsException e){
+            e.printStackTrace();
+        }
+
+    }
+
 
 
     /**
@@ -242,6 +305,23 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         // The result will be stored here
         // Initialize all the data structures )
         this._initDataStructures(true, true);
+
+        // Extract the initial state from the domain
+        SearchDomain.State currentState = domain.initialState();
+        // Initialize a search node using the state (contains data according to the current
+        // algorithm)
+        Node initialNode = new Node(currentState);
+
+        // Start the search: Add the node to the OPEN and CLOSED lists
+        this.open.add(initialNode);
+        double startFmin = initialNode.getF();
+        this.fCounter.put(startFmin,1);
+        this.maxFmin = startFmin;
+        this.fmin = startFmin;
+
+        // n in OPEN ==> n in CLOSED -Thus- ~(n in CLOSED) ==> ~(n in OPEN)
+        this.closed.put(initialNode.packed, initialNode);
+
         SearchResult results = this._search();
         if(results.hasSolution())
             this.incumbentSolution=results.getSolutions().get(0).getCost();

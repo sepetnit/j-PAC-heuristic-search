@@ -90,7 +90,7 @@ public interface SearchResult {
      *
      * @return extra parameters for this search;
      */
-    public TreeMap<String,String> getExtras();
+    public TreeMap<String,Object> getExtras();
 
     /**
      * Returns the wall time in milliseconds.

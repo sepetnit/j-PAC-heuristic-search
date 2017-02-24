@@ -224,11 +224,11 @@ public class DP  implements SearchAlgorithm {
                 if (bestGoalNode == null || bestGoalNode.g > currentCost) {
                     bestGoalNode = currentNode;
                 }
-                TreeMap<String, String> extras = result.getExtras();
+                TreeMap<String, Object> extras = result.getExtras();
                 if (extras.get("generatedFirst") == null) {
                     result.setExtras("generatedFirst", result.generated + "");
                 }
-                Double numOfGoalsFound = Double.parseDouble(extras.get("numOfGoalsFound"));
+                Double numOfGoalsFound = Double.parseDouble((String)(extras.get("numOfGoalsFound")));
                 result.setExtras("numOfGoalsFound", numOfGoalsFound + 1 + "");
                 //                        System.out.print("\n[INFO] A goal was found but not under the bound:"+fmin*weight+" f:"+currentNode.f+", W:"+weight+", fmin:"+fmin);
             }

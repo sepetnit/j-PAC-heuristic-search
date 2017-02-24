@@ -1,9 +1,11 @@
 package org.cs4j.core.algorithms;
 
+
+import org.cs4j.core.SearchResult;
+import org.cs4j.core.collections.BinHeap;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Created by user on 23/02/2017.
@@ -45,6 +47,30 @@ public class AnytimePTS extends AbstractAnytimeSearch {
         }
     }
 
+    /**
+     * Continues the search to find better goals
+     * @return a better solution, if exists
+     */
+    @Override
+    public SearchResult continueSearch() {
+        this._initDataStructures(false,false);
+
+        // Resort open according to the new incumbent @TODO: Study if this actually helps or not?
+        List<Node> openNodes = new ArrayList<Node>(this.open.size());
+        while(this.open.size()>0)
+            openNodes.add(this.open.poll());
+        for(Node node : openNodes)
+            this.open.add(node);
+        openNodes.clear();
+
+        SearchResult results = this._search();
+        if(results.hasSolution()) {
+            double solutionCost = results.getSolutions().get(0).getCost();
+            assert solutionCost<this.incumbentSolution;
+            this.incumbentSolution = solutionCost;
+        }
+        return results;
+    }
 
     /**
      * Create a node comparator used by the open list to prioritize the nodes

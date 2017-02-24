@@ -46,9 +46,7 @@ public class TestAnytimeSearchAlgorithms {
 
 
             // Verify that ended up with the optimal solution (the same as A*)
-            WAStar wastar = new WAStar();
-            wastar.setAdditionalParameter("weight","1");
-            results = wastar.search(domain);
+            results = TestUtils.findOptimalSolution(domain);
             Assert.assertTrue(results.hasSolution());
             Assert.assertEquals(solutionCost,results.getSolutions().get(0).getCost());
         }

@@ -58,11 +58,11 @@ public class SearchResultImpl implements SearchResult {
     private List<Solution> solutions = new ArrayList<>();
     private int minTimeOutInMs;
 
-    public void setExtras(String key,String val){
+    public void setExtras(String key,Object val){
         extras.put(key,val);
     }
 
-    public TreeMap<String,String> getExtras(){
+    public TreeMap<String,Object> getExtras(){
         return extras;
     }
 

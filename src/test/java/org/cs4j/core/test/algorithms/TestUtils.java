@@ -3,6 +3,7 @@ package org.cs4j.core.test.algorithms;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
+import org.cs4j.core.algorithms.WAStar;
 import org.cs4j.core.domains.*;
 import org.junit.Assert;
 
@@ -45,6 +46,30 @@ public class TestUtils {
         return puzzle;
     }
 
+
+    /**
+     * Runs A* to find the optimal solution to a givien problem
+     */
+    public static SearchResult findOptimalSolution(SearchDomain domain)
+    {
+        // Verify that ended up with the optimal solution (the same as A*)
+        WAStar wastar = new WAStar();
+        wastar.setAdditionalParameter("weight","1");
+        SearchResult results = wastar.search(domain);
+        junit.framework.Assert.assertTrue(results.hasSolution());
+        return results;
+    }
+
+    /**
+     * Run a given search algorithm on a given domain and verify
+     * the expected runtime, #generated, #expanded, cost, and length
+     * are as expected.
+     * @param domain
+     * @param algo
+     * @param generated
+     * @param expanded
+     * @param cost
+     */
     public static void testSearchAlgorithm(SearchDomain domain, SearchAlgorithm algo,
                                     long generated, long expanded, double cost) {
         SearchResult result = algo.search(domain);
