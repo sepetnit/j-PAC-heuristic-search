@@ -70,7 +70,7 @@ public class TestPacSearchFramework {
         pacSearch.setAdditionalParameter("delta","1");
         pacSearch.setAdditionalParameter("anytimeSearch",AnytimePTS.class.getName());
         pacSearch.setAdditionalParameter("pacCondition",FMinCondition.class.getName());
-        pacSearch.setAdditionalParameter("epsilon",""+50);
+        pacSearch.setAdditionalParameter("epsilon",""+0);
 
         SearchDomain domain = TestUtils.createFifteenPuzzle("98");
         SearchResult pacResults = pacSearch.search(domain);

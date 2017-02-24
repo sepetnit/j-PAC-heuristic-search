@@ -17,4 +17,9 @@ public interface AnytimeSearchAlgorithm extends SearchAlgorithm {
      * @return A better solution, if such exists
      */
     SearchResult continueSearch();
+
+    /**
+     * Returns a SearchResults object that contains all the search results so
+     */
+    SearchResult getTotalSearchResults();
 }

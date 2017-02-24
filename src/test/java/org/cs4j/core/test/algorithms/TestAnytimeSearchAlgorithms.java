@@ -7,6 +7,7 @@ import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.AnytimePTS;
 import org.cs4j.core.algorithms.AnytimeWAStar;
+import org.cs4j.core.algorithms.SearchResultImpl;
 import org.cs4j.core.algorithms.WAStar;
 import org.junit.Test;
 
@@ -30,25 +31,37 @@ public class TestAnytimeSearchAlgorithms {
                 TestUtils.createDockyardRobot("12")
         };
         for(SearchDomain domain : domains){
-            SearchResult results = algorithm.search(domain);
+            SearchResultImpl results = (SearchResultImpl)algorithm.search(domain);
+            SearchResultImpl totalResults;
             Assert.assertTrue(results.hasSolution());
 
             double solutionCost=Double.MAX_VALUE;
             double newSolutionCost;
+            int iteration=0;
             do {
-                System.out.println("Found solution:"+solutionCost);
+                System.out.println(domain.getClass().getName()+" iteration "+iteration +" Found solution: "+solutionCost);
                 newSolutionCost = results.getSolutions().get(0).getCost();
                 Assert.assertTrue("New solution ("+newSolutionCost+") not better than old solution("+solutionCost+")",
                         newSolutionCost<solutionCost);
-                results = algorithm.continueSearch();
+
+                // Check that total search results is valid
+                totalResults = (SearchResultImpl)algorithm.getTotalSearchResults();
+                Assert.assertTrue(iteration==totalResults.getSolutions().size()-1);
+                Assert.assertTrue(totalResults.getExpanded()>=results.getExpanded());
+                Assert.assertTrue(totalResults.getGenerated()>=results.getGenerated());
+                Assert.assertEquals(totalResults.getSolutions().get(iteration),results.getSolutions().get(0));
+
+                // Continue to the next iteration
+                results = (SearchResultImpl)algorithm.continueSearch();
                 solutionCost=newSolutionCost;
+                iteration++;
             }while(results.hasSolution());
 
 
             // Verify that ended up with the optimal solution (the same as A*)
-            results = TestUtils.findOptimalSolution(domain);
-            Assert.assertTrue(results.hasSolution());
-            Assert.assertEquals(solutionCost,results.getSolutions().get(0).getCost());
+            SearchResult optimalResult  = TestUtils.findOptimalSolution(domain);
+            Assert.assertTrue(optimalResult.hasSolution());
+            Assert.assertEquals(solutionCost,optimalResult.getSolutions().get(0).getCost());
         }
     }
 

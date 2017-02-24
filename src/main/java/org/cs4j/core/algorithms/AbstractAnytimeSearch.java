@@ -28,8 +28,14 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     // Inconsistent list
     protected Map<PackedElement, Node> incons;
 
+    // The search results encompasses all the iterations run so far
+    protected SearchResultImpl totalSearchResults;
+
     // The cost of the best solution found so far
     public double incumbentSolution;
+
+    // The number of anytime iteratoins (~ the number of goals found so far)
+    public int iteration;
 
     // Whether reopening is allowed
     protected boolean reopen;
@@ -302,6 +308,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         // Initially all the data structures are cleaned
         this.domain = domain;
         this.incumbentSolution=Double.MAX_VALUE;
+        this.iteration=0;
         // The result will be stored here
         // Initialize all the data structures )
         this._initDataStructures(true, true);
@@ -325,6 +332,9 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         SearchResult results = this._search();
         if(results.hasSolution())
             this.incumbentSolution=results.getSolutions().get(0).getCost();
+
+        // Store these results if we continue the search
+        this.totalSearchResults=(SearchResultImpl)results;
         return results;
     }
 
@@ -334,15 +344,30 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
      */
     @Override
     public SearchResult continueSearch() {
+        this.iteration++;
         this._initDataStructures(false,false);
         SearchResult results = this._search();
+
+        // Update total search results, which contains the effort over all the iterations
+        this.totalSearchResults.addIteration(this.iteration,this.incumbentSolution,results.getExpanded(), results.getGenerated());
+        this.totalSearchResults.increase(results);
+
         if(results.hasSolution()) {
             double solutionCost = results.getSolutions().get(0).getCost();
             assert solutionCost<this.incumbentSolution;
             this.incumbentSolution = solutionCost;
+            this.totalSearchResults.getSolutions().add(results.getSolutions().get(0));
+
         }
         return results;
     }
+
+
+    /**
+     * Returns a SearchResults object that contains all the search results so
+     */
+    @Override
+    public SearchResult getTotalSearchResults() { return this.totalSearchResults; }
 
     /**
      * The Node is the basic data structure which is used by the algorithm during the search -

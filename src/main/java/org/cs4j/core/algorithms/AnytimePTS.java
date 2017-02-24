@@ -53,8 +53,6 @@ public class AnytimePTS extends AbstractAnytimeSearch {
      */
     @Override
     public SearchResult continueSearch() {
-        this._initDataStructures(false,false);
-
         // Resort open according to the new incumbent @TODO: Study if this actually helps or not?
         List<Node> openNodes = new ArrayList<Node>(this.open.size());
         while(this.open.size()>0)
@@ -63,13 +61,7 @@ public class AnytimePTS extends AbstractAnytimeSearch {
             this.open.add(node);
         openNodes.clear();
 
-        SearchResult results = this._search();
-        if(results.hasSolution()) {
-            double solutionCost = results.getSolutions().get(0).getCost();
-            assert solutionCost<this.incumbentSolution;
-            this.incumbentSolution = solutionCost;
-        }
-        return results;
+        return super.continueSearch();
     }
 
     /**

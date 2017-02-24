@@ -9,6 +9,10 @@ import java.util.Map;
  */
 public class Test {
     public static void main(String[] args) {
+
+        double t = 45;
+        System.out.println(t+1);
+
         Map<long[], Integer> test = new HashMap<>();
         long[] temp = new long[2];
         temp[0] = 100;
