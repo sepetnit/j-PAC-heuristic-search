@@ -56,7 +56,7 @@ public class TestUtils {
         WAStar wastar = new WAStar();
         wastar.setAdditionalParameter("weight","1");
         SearchResult results = wastar.search(domain);
-        junit.framework.Assert.assertTrue(results.hasSolution());
+        junit.framework.Assert.assertTrue("Could not find the optimal solution", results.hasSolution());
         return results;
     }
 

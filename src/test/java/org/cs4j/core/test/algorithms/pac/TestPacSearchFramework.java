@@ -50,7 +50,6 @@ public class TestPacSearchFramework {
      * (not that since in this condition delta doesn't matter, we do not vary its values)
      * @throws FileNotFoundException
      */
-    @Test
     public void testPACAnytimePTS() throws FileNotFoundException
     {
         double[] epsilons = {0, 0.1, 0.5, 1, 2};
@@ -64,4 +63,24 @@ public class TestPacSearchFramework {
             testFMinPacCondition(pacSearch,epsilon);
         }
     }
+
+    @Test
+    public void testPACHalts() throws FileNotFoundException{
+        SearchAlgorithm pacSearch = new PACSearchFramework();
+        pacSearch.setAdditionalParameter("delta","1");
+        pacSearch.setAdditionalParameter("anytimeSearch",AnytimePTS.class.getName());
+        pacSearch.setAdditionalParameter("pacCondition",FMinCondition.class.getName());
+        pacSearch.setAdditionalParameter("epsilon",""+50);
+
+        SearchDomain domain = TestUtils.createFifteenPuzzle("98");
+        SearchResult pacResults = pacSearch.search(domain);
+        Assert.assertTrue(pacResults.hasSolution());
+
+        SearchResult optimalResults = TestUtils.findOptimalSolution(domain);
+        double solutionCost = pacResults.getSolutions().get(0).getCost();
+        double optimalCost = optimalResults.getSolutions().get(0).getCost();
+        Assert.assertTrue("A suboptimal solution was found",
+                    solutionCost>optimalCost);
+    }
+
 }
