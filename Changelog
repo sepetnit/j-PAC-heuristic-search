@@ -1,0 +1,11 @@
+Version 0.1.0:
+	- Build experiment runner for preprocess + online search
+	- generate preprocess output statistics
+
+Version 0.0.2:
+	- Roni'e Changes:
+		- Build PAC framework
+
+Version 0.0.1:
+	- initial commit
+	- took the code from Daniel
