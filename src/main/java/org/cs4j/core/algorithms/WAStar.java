@@ -38,9 +38,9 @@ import java.util.*;
  */
 public class WAStar implements SearchAlgorithm {
 
-    private static final int QID = 0;
+	protected static final int QID = 0;
 
-    private static final Map<String, Class> WAStarPossibleParameters;
+	protected static final Map<String, Class> WAStarPossibleParameters;
 
     // Declare the parameters that can be tuned before running the search
     static
@@ -53,36 +53,36 @@ public class WAStar implements SearchAlgorithm {
     }
 
     // The domain for the search
-    private SearchDomain domain;
+    protected SearchDomain domain;
     // Open list (frontier)
-    private SearchQueue<Node> open;
+    protected SearchQueue<Node> open;
 //    private BinHeapF<Node> openF;
     // Closed list (seen states)
-    private TreeMap<PackedElement, Node> closed;
+    protected TreeMap<PackedElement, Node> closed;
 //    private Map<PackedElement, Node> closed;
 
     // TODO ...
-    private HeapType heapType;
+    protected HeapType heapType;
 
     public enum HeapType {BIN, BUCKET}
 
     // For weighted A*
     protected double weight;
     // Whether to perform reopening of states
-    private boolean reopen;
+    protected boolean reopen;
 
     protected double maxCost;
 
     protected boolean useBPMX;
 
-    private int FR;
+    protected int FR;
 
-    private SearchResultImpl result;
+    protected SearchResultImpl result;
 
     /**
      * Sets the default values for the relevant fields of the algorithm
      */
-    private void _initDefaultValues() {
+    protected void _initDefaultValues() {
         // Default values
         this.weight = 1.0;
         this.reopen = true;
@@ -125,7 +125,7 @@ public class WAStar implements SearchAlgorithm {
      * NOTE: In case of unknown type, null is returned (no exception is thrown)
      * @return The created heap
      */
-    private SearchQueue<Node> buildHeap(HeapType heapType, int size) {
+    protected SearchQueue<Node> buildHeap(HeapType heapType, int size) {
         SearchQueue<Node> heap = null;
         switch (heapType) {
             case BUCKET:
@@ -138,7 +138,7 @@ public class WAStar implements SearchAlgorithm {
         return heap;
     }
 
-    private void _initDataStructures(SearchDomain domain) {
+    protected void _initDataStructures(SearchDomain domain) {
         this.domain = domain;
         this.open = new BinHeap<>(new NodeComparator(), 0);
 //        this.openF = new BinHeapF<>(1,domain);
@@ -369,7 +369,7 @@ public class WAStar implements SearchAlgorithm {
      *
      * @return chosen Node for expansion
      */
-    private Node _selectNode() {
+    protected Node _selectNode() {
         Node toReturn;
         toReturn = this.open.peek();
 //        if(openF.getFminCount() < result.generated){
@@ -384,7 +384,7 @@ public class WAStar implements SearchAlgorithm {
      *
      * @param toAdd is the new node toAdd to open
      */
-    private void _addNode(Node toAdd) {
+    protected void _addNode(Node toAdd) {
         this.open.add(toAdd);
 //        this.openF.add(toAdd);
         // The nodes are ordered in the closed list by their packed values
@@ -442,17 +442,17 @@ public class WAStar implements SearchAlgorithm {
      * The node class
      */
     protected final class Node extends SearchQueueElementImpl{
-        private double g;
-        private double h;
+    	protected double g;
+        protected double h;
 
-        private Operator op;
-        private Operator pop;
+        protected Operator op;
+        protected Operator pop;
 
-        private Node parent;
-        private PackedElement packed;
+        protected Node parent;
+        protected PackedElement packed;
 //        private int[] secondaryIndex;
 
-        private Node(State state, Node parent, State parentState, Operator op, Operator pop) {
+        protected Node(State state, Node parent, State parentState, Operator op, Operator pop) {
             // Size of key
             super(2);
             // TODO: Why?
@@ -488,7 +488,7 @@ public class WAStar implements SearchAlgorithm {
          *
          * @param state The state which this node represents
          */
-        private Node(State state) {
+        protected Node(State state) {
             this(state, null, null, null, null);
         }
 
