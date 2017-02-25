@@ -19,6 +19,8 @@ package org.cs4j.core;
 import org.cs4j.core.SearchDomain.Operator;
 import org.cs4j.core.SearchDomain.State;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -177,5 +179,10 @@ public interface SearchResult {
         public int getLength();
 
     }
+    
+    
+    // PAC:
+    public void setInitialH(double h);
+    public double getInitialH();
 
 }

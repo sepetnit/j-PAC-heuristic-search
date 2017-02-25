@@ -6,6 +6,9 @@ import org.cs4j.core.algorithms.pac.FMinCondition;
 import org.cs4j.core.algorithms.pac.PACSearchFramework;
 import org.cs4j.core.domains.*;
 
+import og.cs4j.core.experiments.ExperimentRunner;
+import og.cs4j.core.experiments.OnlinePacExperimentRunner;
+
 import java.io.*;
 import java.util.HashMap;
 
@@ -16,9 +19,10 @@ import java.util.HashMap;
 public class PACMain {
 
 
-    public static void main(String[] args) throws IOException
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void main(String[] args) throws IOException
     {
-        ExperimentRunner runner = new ExperimentRunner();
+        ExperimentRunner runner = new OnlinePacExperimentRunner();
         HashMap domainParams = new HashMap<>();
         double[] epsilons = {2,1.5, 1, 0.75, 0.5, 0.25, 0.1, 0.01, 0}; // Remember these are epsilons, not the 1+eps
         Class[] domains = {
@@ -53,11 +57,13 @@ public class PACMain {
     }
 
 
+
     /**
      * Create a single CSV file for each domain with the different epsilon values
      * @param domains the domains to collect data from
      */
-    public static void collectResults(Class[] domains) throws IOException
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void collectResults(Class[] domains) throws IOException
     {
         for(Class domainClass : domains){
             File domainDir = new File(DomainExperimentData.get(domainClass).outputPath);

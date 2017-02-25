@@ -26,6 +26,8 @@ import org.cs4j.core.SearchDomain.Operator;
 import org.cs4j.core.SearchDomain.State;
 import org.cs4j.core.SearchResult;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * The search result class.
  *
@@ -106,6 +108,10 @@ public class SearchResultImpl implements SearchResult {
             entry.getValue();
         }
     }
+    
+    // PAC:
+    public void setInitialH(double h){throw new NotImplementedException();}
+    public double getInitialH(){throw new NotImplementedException();}
 
     @Override
     public long getExpanded() {
