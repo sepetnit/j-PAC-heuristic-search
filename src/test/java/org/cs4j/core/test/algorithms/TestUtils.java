@@ -5,12 +5,16 @@ import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.WAStar;
 import org.cs4j.core.domains.*;
+import org.cs4j.core.experiments.ExperimentRunner;
+import org.cs4j.core.experiments.ExperimentUtils;
+import org.cs4j.core.mains.DomainExperimentData;
 import org.junit.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * Created by user on 23/02/2017.
@@ -45,7 +49,6 @@ public class TestUtils {
         DockyardRobot puzzle = new DockyardRobot(is);
         return puzzle;
     }
-
 
     /**
      * Runs A* to find the optimal solution to a givien problem

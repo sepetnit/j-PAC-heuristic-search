@@ -47,6 +47,13 @@ public interface SearchResult {
     public List<Solution> getSolutions();
 
     /**
+     * If multiple solutions were found, return the best one
+     * (this is assumed to be the last one) #TODO: Is this assumption Ok?
+     * @return the best solution found
+     */
+    public Solution getBestSolution();
+
+    /**
      * Returns expanded count in the first iteration of running
      *
      * @return The expanded count in the first iteration of running

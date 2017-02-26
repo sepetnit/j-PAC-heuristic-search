@@ -97,18 +97,18 @@ public class PACSearchFramework implements SearchAlgorithm {
     @Override
     public SearchResult search(SearchDomain domain) {
         AnytimeSearchAlgorithm anytimeSearchAlgorithm=this.createAnytimeSearchAlgorithm();
-        PACCondition pacCondition = this.createPacCondition();
+        PACCondition pacCondition = this.createPacCondition(domain,this.epsilon,this.delta);
 
         // Run an anytime search
-        SearchResult results = anytimeSearchAlgorithm.search(domain);
-        if(results.hasSolution()==false) return results;
+        SearchResult result = anytimeSearchAlgorithm.search(domain);
+        if(result.hasSolution()==false) return result;
 
         // Check solution after it is found to see if we should halt
-        SearchResult incumbent=results;
-        while(pacCondition.shouldStop(results, this.epsilon,this.delta)==false){
-            results= anytimeSearchAlgorithm.continueSearch();
-            if(results.hasSolution()==false) return incumbent;
-            incumbent=results;
+        SearchResult incumbent=result;
+        while(pacCondition.shouldStop(result)==false){
+            result= anytimeSearchAlgorithm.continueSearch();
+            if(result.hasSolution()==false) return incumbent;
+            incumbent=result;
         }
         return incumbent;
     }
@@ -137,12 +137,14 @@ public class PACSearchFramework implements SearchAlgorithm {
     /**
      * Create an pac condition instance
      */
-    private PACCondition createPacCondition()
+    private PACCondition createPacCondition(SearchDomain domain, double epsilon, double delta)
     {
         // Create the anytime search algorithm
         try {
             Constructor constructor = this.pacConditionClass.getConstructor();
-            return (PACCondition) (constructor.newInstance());
+            PACCondition pacCondition = (PACCondition) (constructor.newInstance());
+            pacCondition.setup(domain, epsilon,delta);
+            return pacCondition;
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {

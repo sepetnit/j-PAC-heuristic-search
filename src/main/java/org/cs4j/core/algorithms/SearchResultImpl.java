@@ -153,6 +153,13 @@ public class SearchResultImpl implements SearchResult {
         return this.solutions;
     }
 
+    /**
+     * If multiple solutions were found, return the best one
+     * (this is assumed to be the last one) #TODO: Is this assumption Ok?
+     * @return the best solution found
+     */
+    public Solution getBestSolution() {return this.solutions.get(this.solutions.size()-1);}
+
     @Override
     public long getWallTimeMillis() {
         return stopWallTimeMillis - startWallTimeMillis;

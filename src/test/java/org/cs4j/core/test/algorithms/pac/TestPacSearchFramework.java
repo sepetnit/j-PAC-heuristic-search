@@ -50,6 +50,7 @@ public class TestPacSearchFramework {
      * (not that since in this condition delta doesn't matter, we do not vary its values)
      * @throws FileNotFoundException
      */
+    @Test
     public void testPACAnytimePTS() throws FileNotFoundException
     {
         double[] epsilons = {0, 0.1, 0.5, 1, 2};

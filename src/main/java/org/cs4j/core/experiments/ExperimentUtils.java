@@ -1,6 +1,7 @@
 package org.cs4j.core.experiments;
 
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.mains.DomainExperimentData;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,4 +59,13 @@ public class ExperimentUtils {
         }
         return domain;
     }
+
+
+    public static SearchDomain getSearchDomain(Class domainClass, int instance)
+    {
+        String inputPath = DomainExperimentData.get(domainClass).inputPath;
+        Constructor constructor = ExperimentUtils.getSearchDomainConstructor(domainClass);
+        return ExperimentUtils.getSearchDomain(inputPath,new HashMap<>(),constructor,instance);
+    }
+
 }
