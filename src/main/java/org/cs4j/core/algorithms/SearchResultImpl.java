@@ -108,10 +108,6 @@ public class SearchResultImpl implements SearchResult {
             entry.getValue();
         }
     }
-    
-    // PAC:
-    public void setInitialH(double h){throw new NotImplementedException();}
-    public double getInitialH(){throw new NotImplementedException();}
 
     @Override
     public long getExpanded() {

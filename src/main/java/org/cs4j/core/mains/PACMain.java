@@ -6,8 +6,8 @@ import org.cs4j.core.algorithms.pac.FMinCondition;
 import org.cs4j.core.algorithms.pac.PACSearchFramework;
 import org.cs4j.core.domains.*;
 
-import og.cs4j.core.experiments.ExperimentRunner;
-import og.cs4j.core.experiments.OnlinePacExperimentRunner;
+import org.cs4j.core.experiments.ExperimentRunner;
+import org.cs4j.core.experiments.PACOnlineExperimentRunner;
 
 import java.io.*;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class PACMain {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void main(String[] args) throws IOException
     {
-        ExperimentRunner runner = new OnlinePacExperimentRunner();
+        ExperimentRunner runner = new PACOnlineExperimentRunner();
         HashMap domainParams = new HashMap<>();
         double[] epsilons = {2,1.5, 1, 0.75, 0.5, 0.25, 0.1, 0.01, 0}; // Remember these are epsilons, not the 1+eps
         Class[] domains = {

@@ -266,7 +266,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(domain);
         List<SearchDomain.Operator> path = new ArrayList<>();
         List<SearchDomain.State> statesPath = new ArrayList<>();
-        System.out.println("[INFO] Solved - Generating output path.");
+        System.out.print("[INFO] Solved - Generating output path. Cost=");
         double cost = 0;
 
         SearchDomain.State currentPacked = domain.unpack(goal.packed);
@@ -282,6 +282,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
             }
             statesPath.add(domain.unpack(currentNode.packed));
         }
+        System.out.println("Cost="+cost);
         // The actual size of the found path can be only lower the G value of the found goal
         assert cost <= goal.g;
         if (cost - goal.g < 0) {

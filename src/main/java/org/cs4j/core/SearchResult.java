@@ -179,10 +179,4 @@ public interface SearchResult {
         public int getLength();
 
     }
-    
-    
-    // PAC:
-    public void setInitialH(double h);
-    public double getInitialH();
-
 }
