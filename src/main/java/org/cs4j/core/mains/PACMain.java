@@ -22,7 +22,7 @@ public class PACMain {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void main(String[] args) throws IOException
     {
-        ExperimentRunner runner = new PACOnlineExperimentRunner();
+        PACOnlineExperimentRunner runner = new PACOnlineExperimentRunner();
         HashMap domainParams = new HashMap<>();
         double[] epsilons = {2,1.5, 1, 0.75, 0.5, 0.25, 0.1, 0.01, 0}; // Remember these are epsilons, not the 1+eps
         Class[] domains = {
@@ -44,12 +44,14 @@ public class PACMain {
             for(Class domainClass: domains) {
                 pacSearch.setAdditionalParameter("epsilon", "" + epsilon);
                 System.out.println("Running "+ domainClass.getSimpleName() + " with eps="+epsilon);
+                pacSearch.setAdditionalParameter("epsilon", "" + epsilon);
+                pacSearch.setAdditionalParameter("delta", "" + 1.0);
                 runner.run(domainClass, pacSearch,
                         DomainExperimentData.get(domainClass).inputPath,
-                        DomainExperimentData.get(domainClass).outputPath+"eps="+epsilon+"-",
+                        DomainExperimentData.get(domainClass).outputPath,
                         DomainExperimentData.get(domainClass).fromInstance,
                         DomainExperimentData.get(domainClass).toInstance,
-                        domainParams, true);
+                        domainParams);
             }
         }
 

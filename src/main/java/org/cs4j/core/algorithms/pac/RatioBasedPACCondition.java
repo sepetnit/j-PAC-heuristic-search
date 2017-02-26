@@ -38,8 +38,8 @@ public class RatioBasedPACCondition extends ThresholdPACCondition {
      */
     @Override
     protected SortedMap<Double, Double> computeCDF(PACStatistics statistics){
-        Map<Integer,Double> instanceToOptimal = PACUtils.getOptimalSolutions(domain);
-        Map<Integer,Double> instanceToInitialH = PACUtils.getInitialHValues(domain);
+        Map<Integer,Double> instanceToOptimal = PACUtils.getOptimalSolutions(domain.getClass());
+        Map<Integer,Double> instanceToInitialH = PACUtils.getInitialHValues(domain.getClass());
 
         // Building the PDF (  cost -> prob. that optimal is less than or equal to cost)
         SortedMap<Double, Double> ratioToPDF = new TreeMap<Double, Double>();

@@ -93,6 +93,9 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         // The result will be stored here
         Node goal = null;
         this.result = new SearchResultImpl();
+        if(this.totalSearchResults==null)
+            this.totalSearchResults=this.result;
+
         result.startTimer();
 
          // Loop while there is no solution and there are states in the OPEN list

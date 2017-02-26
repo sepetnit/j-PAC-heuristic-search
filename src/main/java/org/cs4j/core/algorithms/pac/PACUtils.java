@@ -7,10 +7,7 @@ import org.cs4j.core.mains.DomainExperimentData;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by Roni Stern on 26/02/2017.
@@ -22,17 +19,17 @@ public class PACUtils {
     final static Logger logger = Logger.getLogger(TrivialPACCondition.class);
 
     // Maps a domain to a PAC statistics object, used later by the PAC conditions
-    private static Map<SearchDomain, PACStatistics> domainToPACStatistics
-            = new TreeMap<SearchDomain,PACStatistics>();
+    private static Map<Class, PACStatistics> domainToPACStatistics
+            = new HashMap<>();
 
-    public static Map<Integer,Double> getOptimalSolutions(SearchDomain domain)
+    public static Map<Integer,Double> getOptimalSolutions(Class domainClass)
     {
-        String inputFile = DomainExperimentData.get(domain.getClass()).inputPath+"/optimalSolutions.in";
+        String inputFile = DomainExperimentData.get(domainClass).inputPath+"/optimalSolutions.in";
         return parseFileWithPairs(inputFile);
     }
-    public static Map<Integer,Double> getInitialHValues(SearchDomain domain)
+    public static Map<Integer,Double> getInitialHValues(Class domainClass)
     {
-        String inputFile = DomainExperimentData.get(domain.getClass()).inputPath+"/initialHValues.csv";
+        String inputFile = DomainExperimentData.get(domainClass).inputPath+"/initialHValues.csv";
         return parseFileWithPairs(inputFile);
     }
 
@@ -41,11 +38,17 @@ public class PACUtils {
      * @param inputFile input file
      */
     private static Map<Integer,Double> parseFileWithPairs(String inputFile){
-        Map<Integer,Double> keyToValue=new TreeMap<Integer,Double>();
+        Map<Integer,Double> keyToValue= new TreeMap<>();
         try{
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
             String line = reader.readLine();
             String[] parts;
+
+            // Handle first line if headers, if such exists
+            parts = line.split(",");
+            if(isDouble(parts[1])==false)// Then this is a header row and should ignore it
+                line = reader.readLine();
+
             while(line!=null){
                 parts = line.split(",");
                 keyToValue.put(Integer.parseInt(parts[0]), Double.parseDouble(parts[1]));
@@ -60,11 +63,26 @@ public class PACUtils {
         return keyToValue;
     }
 
-    public static PACStatistics getStatisticsFile(PACCondition condition, SearchDomain domain){
-        return domainToPACStatistics.get(domain);
+    public static PACStatistics getStatisticsFile(PACCondition condition, Class domainClass){
+        return domainToPACStatistics.get(domainClass);
     }
-    public static void setStatisticFile(PACCondition condition, SearchDomain domain,PACStatistics statistics){
-        domainToPACStatistics.put(domain,statistics);
+    public static void setStatisticFile(PACCondition condition, Class domainClass,PACStatistics statistics){
+        domainToPACStatistics.put(domainClass,statistics);
     }
 
+
+    /**
+     * Check if a string is convertable to double
+     */
+    private static boolean isDouble(String text){
+        try
+        {
+            Double.parseDouble(text);
+        }
+        catch(NumberFormatException nfe)
+        {
+            return false;
+        }
+        return true;
+    }
 }

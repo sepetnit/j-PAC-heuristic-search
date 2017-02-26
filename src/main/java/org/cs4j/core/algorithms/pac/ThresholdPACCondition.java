@@ -33,7 +33,7 @@ public abstract class ThresholdPACCondition extends AbstractPACCondition {
         super.setup(domain,epsilon,delta);
 
         // Load statistics
-        PACStatistics statistics = PACUtils.getStatisticsFile(this, domain);
+        PACStatistics statistics = PACUtils.getStatisticsFile(this, domain.getClass());
 
         // 1. Process the statistics
         // Building the PDF (  cost -> prob. that optimal is less than or equal to cost)
@@ -50,6 +50,9 @@ public abstract class ThresholdPACCondition extends AbstractPACCondition {
     @Override
     public boolean shouldStop(SearchResult incumbentSolution) {
         // Check if fmin is high enough to stop
+        if(incumbentSolution.hasSolution()==false)
+            return false;
+
         double fmin = (Double)incumbentSolution.getExtras().get("fmin");
         double incumbent = incumbentSolution.getBestSolution().getCost();
 

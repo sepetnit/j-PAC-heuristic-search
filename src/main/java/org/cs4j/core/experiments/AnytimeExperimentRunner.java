@@ -128,12 +128,9 @@ public class AnytimeExperimentRunner {
                 results.getExtras().put("initial-h",initialH);
                 return results;
             }};
-
         HashMap domainParams = new HashMap<>();
 
-        //Class[] domains = {Pancakes.class, VacuumRobot.class};
-        Class[] domains = {GridPathFinding.class};//, DockyardRobot.class, FifteenPuzzle.class};
-
+        Class[] domains = {GridPathFinding.class, DockyardRobot.class, FifteenPuzzle.class,Pancakes.class, VacuumRobot.class};
         for(Class domainClass : domains) {
             logger.info("Running anytime for class "+domainClass.getName());
             runner.run(domainClass, algorithm,

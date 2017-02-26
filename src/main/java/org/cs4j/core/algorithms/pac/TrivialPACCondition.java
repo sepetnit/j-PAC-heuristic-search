@@ -29,7 +29,7 @@ public class TrivialPACCondition extends ThresholdPACCondition {
      */
     @Override
     protected SortedMap<Double, Double> computeCDF(PACStatistics statistics){
-        SortedMap<Double, Double> costToPDF = new TreeMap<Double, Double>();
+        SortedMap<Double, Double> costToPDF = new TreeMap<>();
         Collection<Double> optimalSolutions = statistics.instanceToOptimal.values();
         for(Double optimalCost : optimalSolutions){
             if(costToPDF.containsKey(optimalCost)==false)
@@ -41,7 +41,7 @@ public class TrivialPACCondition extends ThresholdPACCondition {
             costToPDF.put(cost,(costToPDF.get(cost)/optimalSolutions.size()));
 
         // Building the CDF (cumulative)
-        SortedMap<Double, Double> costToCDF = new TreeMap<Double, Double>();
+        SortedMap<Double, Double> costToCDF = new TreeMap<>();
         Double oldCDFValue=0.0;
         for(Double cost : costToPDF.keySet()) {
             costToCDF.put(cost, costToPDF.get(cost) + oldCDFValue);
