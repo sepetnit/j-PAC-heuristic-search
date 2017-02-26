@@ -4,6 +4,8 @@ import org.cs4j.core.AnytimeSearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.collections.*;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,6 +33,9 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     // The search results encompasses all the iterations run so far
     protected SearchResultImpl totalSearchResults;
 
+    // The search result of the current iteration
+    protected SearchResultImpl result;
+
     // The cost of the best solution found so far
     public double incumbentSolution;
 
@@ -49,6 +54,11 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     public AbstractAnytimeSearch() {
         // Initial values (afterwards they can be set independently)
         this.reopen = true;
+    }
+
+    @Override
+    public String getName(){
+        return this.getClass().getSimpleName();
     }
 
 
@@ -82,7 +92,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     protected SearchResultImpl _search() {
         // The result will be stored here
         Node goal = null;
-        SearchResultImpl result = new SearchResultImpl();
+        this.result = new SearchResultImpl();
         result.startTimer();
 
          // Loop while there is no solution and there are states in the OPEN list
@@ -231,9 +241,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     /**
      * If there are no more nodes with the old fmin, need to update fmin and maybe also maxfmin accordingly.
      */
-    private void updateFmin(){
-        try{
-
+    protected void updateFmin(){
         // If fmin is no longer fmin, need to search for a new fmin @TODO: May improve efficiency
         if(this.fCounter.containsKey(fmin)==false){
             fmin=Double.MAX_VALUE;
@@ -244,12 +252,6 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
             if(maxFmin<fmin)
                 maxFmin=fmin;
         }
-
-        }
-        catch(IndexOutOfBoundsException e){
-            e.printStackTrace();
-        }
-
     }
 
 
@@ -354,16 +356,30 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         this.totalSearchResults.increase(results);
 
         if(results.hasSolution()) {
-            double solutionCost = results.getSolutions().get(0).getCost();
+            SearchResult.Solution bestSolution = results.getBestSolution();
+            double solutionCost = bestSolution.getCost();
             assert solutionCost<this.incumbentSolution;
             this.incumbentSolution = solutionCost;
-            this.totalSearchResults.getSolutions().add(results.getSolutions().get(0));
-
+            this.totalSearchResults.getSolutions().add(bestSolution);
         }
         return results;
     }
 
 
+    @Override
+    public Map<String, Class> getPossibleParameters() {
+        return new HashMap<>();
+    }
+
+    @Override
+    public void setAdditionalParameter(String parameterName, String value) {
+        switch (parameterName) {
+            default: {
+                System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
+                throw new NotImplementedException();
+            }
+        }
+    }
     /**
      * Returns a SearchResults object that contains all the search results so
      */

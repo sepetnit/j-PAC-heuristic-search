@@ -21,6 +21,10 @@ public class PACUtils {
 
     final static Logger logger = Logger.getLogger(TrivialPACCondition.class);
 
+    // Maps a domain to a PAC statistics object, used later by the PAC conditions
+    private static Map<SearchDomain, PACStatistics> domainToPACStatistics
+            = new TreeMap<SearchDomain,PACStatistics>();
+
     public static Map<Integer,Double> getOptimalSolutions(SearchDomain domain)
     {
         String inputFile = DomainExperimentData.get(domain.getClass()).inputPath+"/optimalSolutions.in";
@@ -56,8 +60,11 @@ public class PACUtils {
         return keyToValue;
     }
 
-    public static String getStatisticsFile(SearchDomain domain){
-        return null; // TODO: Implement
+    public static PACStatistics getStatisticsFile(PACCondition condition, SearchDomain domain){
+        return domainToPACStatistics.get(domain);
+    }
+    public static void setStatisticFile(PACCondition condition, SearchDomain domain,PACStatistics statistics){
+        domainToPACStatistics.put(domain,statistics);
     }
 
 }

@@ -196,6 +196,7 @@ public class SearchResultImpl implements SearchResult {
         this.generated += previous.getGenerated();
         this.reopened += previous.getReopened();
         this.opupdated += previous.getUpdatedInOpen();
+        this.stopTimer(); // To record the stop wall and stop cpu times
     }
 
     public void startTimer() {

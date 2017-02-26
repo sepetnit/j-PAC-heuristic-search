@@ -4,8 +4,7 @@ import org.apache.log4j.Logger;
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.AnytimePTS;
 import org.cs4j.core.algorithms.SearchResultImpl;
-import org.cs4j.core.domains.Pancakes;
-import org.cs4j.core.domains.VacuumRobot;
+import org.cs4j.core.domains.*;
 import org.cs4j.core.mains.DomainExperimentData;
 
 import java.io.FileNotFoundException;
@@ -132,7 +131,8 @@ public class AnytimeExperimentRunner {
 
         HashMap domainParams = new HashMap<>();
 
-        Class[] domains = {Pancakes.class, VacuumRobot.class};
+        //Class[] domains = {Pancakes.class, VacuumRobot.class};
+        Class[] domains = {GridPathFinding.class};//, DockyardRobot.class, FifteenPuzzle.class};
 
         for(Class domainClass : domains) {
             logger.info("Running anytime for class "+domainClass.getName());

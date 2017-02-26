@@ -15,36 +15,8 @@ import java.util.*;
  */
 public class AnytimePTS extends AbstractAnytimeSearch {
 
-    private static final Map<String, Class> POSSIBLE_PARAMETERS;
-
-    // Declare the parameters that can be tunes before running the search
-    static
-    {
-        POSSIBLE_PARAMETERS = new HashMap<>();
-    }
-
     public AnytimePTS() {
         super();
-    }
-
-    @Override
-    public String getName() {
-        return "AnytimePTS";
-    }
-
-    @Override
-    public Map<String, Class> getPossibleParameters() {
-        return AnytimePTS.POSSIBLE_PARAMETERS;
-    }
-
-    @Override
-    public void setAdditionalParameter(String parameterName, String value) {
-        switch (parameterName) {
-            default: {
-                System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
-            }
-        }
     }
 
     /**
@@ -64,6 +36,7 @@ public class AnytimePTS extends AbstractAnytimeSearch {
         return super.continueSearch();
     }
 
+
     /**
      * Create a node comparator used by the open list to prioritize the nodes
      */
@@ -73,10 +46,11 @@ public class AnytimePTS extends AbstractAnytimeSearch {
         return new AnytimePTS.NodeComparator();
     }
 
+
     /**
      * The node comparator class
      */
-    private final class NodeComparator implements Comparator<Node> {
+    public class NodeComparator implements Comparator<Node> {
         @Override
         public int compare(final Node a, final Node b) {
             double aCost = (AnytimePTS.this.incumbentSolution - a.g) / a.h;

@@ -25,10 +25,6 @@ public class AnytimeWAStar extends AbstractAnytimeSearch{
         super();
     }
 
-    @Override
-    public String getName() {
-        return "AnytimeWA*";
-    }
 
     @Override
     public Map<String, Class> getPossibleParameters() {

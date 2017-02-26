@@ -98,6 +98,8 @@ public class PACSearchFramework implements SearchAlgorithm {
     public SearchResult search(SearchDomain domain) {
         AnytimeSearchAlgorithm anytimeSearchAlgorithm=this.createAnytimeSearchAlgorithm();
         PACCondition pacCondition = this.createPacCondition(domain,this.epsilon,this.delta);
+        if(anytimeSearchAlgorithm instanceof AnytimePACSearch)
+            ((AnytimePACSearch)anytimeSearchAlgorithm).setPacCondition(pacCondition);
 
         // Run an anytime search
         SearchResult result = anytimeSearchAlgorithm.search(domain);
@@ -105,10 +107,17 @@ public class PACSearchFramework implements SearchAlgorithm {
 
         // Check solution after it is found to see if we should halt
         SearchResult incumbent=result;
-        while(pacCondition.shouldStop(result)==false){
-            result= anytimeSearchAlgorithm.continueSearch();
-            if(result.hasSolution()==false) return incumbent;
-            incumbent=result;
+        try {
+            while (pacCondition.shouldStop(result) == false) {
+                result = anytimeSearchAlgorithm.continueSearch();
+                if (result.hasSolution() == false) return incumbent;
+                incumbent = result;
+            }
+        }catch(PACConditionSatisfied conditionSatisfied){
+            // This part is designed for the search-aware PAC conditions
+            incumbent = anytimeSearchAlgorithm.getTotalSearchResults();
+            if(incumbent.hasSolution())
+                return incumbent;
         }
         return incumbent;
     }
