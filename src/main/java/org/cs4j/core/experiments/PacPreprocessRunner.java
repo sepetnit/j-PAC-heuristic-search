@@ -9,7 +9,6 @@ import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.WAStar;
-import org.cs4j.core.algorithms.pac.PacSearchResult;
 import org.cs4j.core.domains.*;
 import org.cs4j.core.mains.DomainExperimentData;
 
@@ -34,8 +33,8 @@ public class PacPreprocessRunner {
 			public SearchResult search(SearchDomain domain) {
 				double initialH = domain.initialState().getH();
 				SearchResult results = super.search(domain);
-				PacSearchResult pacResults = new PacSearchResult(initialH, results);
-				return pacResults;
+				results.getExtras().put("initial-h",initialH);
+				return results;
 			}};
 		astar.setAdditionalParameter("weight","1.0");
 
@@ -79,13 +78,11 @@ public class PacPreprocessRunner {
 	private void setResultsData(SearchResult result, double[] resultsData, int i) {
 		int instanceId = i;
 		double cost=-1;
-		PacSearchResult preprocessResults = (PacSearchResult)result;
-
 		// RONI: I hate these unreadable one-liners
-		if(preprocessResults.hasSolution()){
-			cost = preprocessResults.getSolutions().get(0).getCost();
+		if(result.hasSolution()){
+			cost = result.getSolutions().get(0).getCost();
 		}
-		double initialH = preprocessResults.getInitialH();
+		double initialH = (double)result.getExtras().get("initial-h");
 		double suboptimality = cost / initialH;
 		
 		resultsData[0] = instanceId;
