@@ -16,7 +16,6 @@ import org.cs4j.core.collections.BinHeap;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * An implementation of Bounded Cost Explicit Estimation Search
@@ -133,7 +132,7 @@ public class BEES implements SearchAlgorithm {
                 break;
             } default: {
                 System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }

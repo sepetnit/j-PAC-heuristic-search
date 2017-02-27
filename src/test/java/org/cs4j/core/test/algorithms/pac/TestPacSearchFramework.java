@@ -7,8 +7,11 @@ import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.AnytimePTS;
 import org.cs4j.core.algorithms.WAStar;
+import org.cs4j.core.algorithms.pac.AnytimePTS4PAC;
 import org.cs4j.core.algorithms.pac.FMinCondition;
 import org.cs4j.core.algorithms.pac.PACSearchFramework;
+import org.cs4j.core.algorithms.pac.PACUtils;
+import org.cs4j.core.domains.GridPathFinding;
 import org.cs4j.core.test.algorithms.TestUtils;
 import org.junit.Test;
 
@@ -84,4 +87,66 @@ public class TestPacSearchFramework {
                     solutionCost>optimalCost);
     }
 
+
+    @Test
+    public void testConvergeToOptimal() throws FileNotFoundException {
+        SearchDomain domain = TestUtils.createGridPathFinding("brc202d.map","1");
+        //AnytimeSearchAlgorithm apts = new AnytimePTS();
+        AnytimePTS4PAC apts = new AnytimePTS4PAC();
+        apts.setPacCondition(new FMinCondition());
+        SearchResult result = apts.search(domain);
+        int iteration=0;
+        while(result.hasSolution()){
+            iteration++;
+            System.out.println(iteration+","+result.getBestSolution().getCost());
+            Assert.assertEquals(iteration, apts.getTotalSearchResults().getSolutions().size());
+            result = apts.continueSearch();
+        }
+        result = apts.getTotalSearchResults();
+        Assert.assertTrue(result.hasSolution());
+        double observedOptimal = result.getBestSolution().getCost();
+        double expectedOptimal = PACUtils.getOptimalSolutions(GridPathFinding.class).get(1);
+
+        Assert.assertEquals(expectedOptimal,observedOptimal);
+    }
+
+    @Test
+    public void testPACOptimal() throws FileNotFoundException {
+        SearchDomain domain = TestUtils.createGridPathFinding("brc202d.map","1");
+        //AnytimeSearchAlgorithm apts = new AnytimePTS();
+        double optimal = PACUtils.getOptimalSolutions(GridPathFinding.class).get(1);
+
+        // Run PSF with epsilon and delta zero, and verify that the result in the optimal solution
+        PACSearchFramework psf = new PACSearchFramework();
+        psf.setAdditionalParameter("epsilon", "" + 0);
+        psf.setAdditionalParameter("delta", "" + 0);
+        psf.setAdditionalParameter("pacCondition", FMinCondition.class.getName());
+        psf.setAdditionalParameter("anytimeSearch",AnytimePTS4PAC.class.getName());
+
+        SearchResult result = psf.search(domain);
+
+        Assert.assertTrue(result.hasSolution());
+        Assert.assertEquals(result.getBestSolution().getCost(),optimal);
+        Assert.assertEquals(result.getSolutions().size(),9);
+    }
+
+    @Test
+    public void testPACSubptimal() throws FileNotFoundException {
+        SearchDomain domain = TestUtils.createGridPathFinding("brc202d.map","1");
+        //AnytimeSearchAlgorithm apts = new AnytimePTS();
+        double optimal = PACUtils.getOptimalSolutions(GridPathFinding.class).get(1);
+
+        // Run PSF with epsilon and delta zero, and verify that the result in the optimal solution
+        PACSearchFramework psf = new PACSearchFramework();
+        psf.setAdditionalParameter("epsilon", "" + 10000);
+        psf.setAdditionalParameter("delta", "" + 0);
+        psf.setAdditionalParameter("pacCondition", FMinCondition.class.getName());
+        psf.setAdditionalParameter("anytimeSearch",AnytimePTS4PAC.class.getName());
+
+        SearchResult result = psf.search(domain);
+
+        Assert.assertTrue(result.hasSolution());
+        Assert.assertTrue(result.getBestSolution().getCost()>optimal);
+        Assert.assertEquals(result.getSolutions().size(),1);
+    }
 }

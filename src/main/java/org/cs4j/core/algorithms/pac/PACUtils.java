@@ -85,4 +85,16 @@ public class PACUtils {
         }
         return true;
     }
+
+    /**
+     * Load PAC statistics for the given domain
+     * @param domainClass the class of domains for which to load statistics
+     */
+    public static void loadPACStatistics(Class domainClass)
+    {
+        PACStatistics pacStatistics = new PACStatistics();
+        pacStatistics.instanceToInitialH = getInitialHValues(domainClass);
+        pacStatistics.instanceToOptimal= getOptimalSolutions(domainClass);
+        setStatisticFile(null,domainClass,pacStatistics);
+    }
 }

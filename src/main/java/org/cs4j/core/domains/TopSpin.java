@@ -3,8 +3,6 @@ package org.cs4j.core.domains;
 import com.carrotsearch.hppc.LongByteHashMap;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.collections.PackedElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -15,8 +13,6 @@ import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-
 
 /**
  * Created by user on 17/12/2015.
@@ -256,7 +252,7 @@ public class TopSpin implements SearchDomain {
 
     @Override
     public int maxGeneratedSize() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**

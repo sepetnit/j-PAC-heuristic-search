@@ -1,13 +1,14 @@
 package org.cs4j.core.algorithms.pac;
 
+import org.apache.log4j.Logger;
 import org.cs4j.core.algorithms.AbstractAnytimeSearch;
 import org.cs4j.core.algorithms.SearchResultImpl;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Created by user on 26/02/2017.
  */
 public abstract class AnytimePACSearch extends AbstractAnytimeSearch {
+    final static Logger logger = Logger.getLogger(AnytimePACSearch.class);
 
     protected PACCondition pacCondition;
 
@@ -21,8 +22,8 @@ public abstract class AnytimePACSearch extends AbstractAnytimeSearch {
     public void setAdditionalParameter(String parameterName, String value) {
         switch (parameterName) {
             default: {
-                System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
+                logger.error("No such parameter: " + parameterName + " (value: " + value + ")");
+                throw new UnsupportedOperationException();
             }
         }
     }

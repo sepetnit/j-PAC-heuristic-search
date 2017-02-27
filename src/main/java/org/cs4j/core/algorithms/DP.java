@@ -6,7 +6,7 @@ import org.cs4j.core.SearchResult;
 import org.cs4j.core.collections.GH_heap;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -127,6 +127,8 @@ public class DP  implements SearchAlgorithm {
 
         // Create a graph node from this state
         Node initNode = new Node(currentState);
+        bestGoalNode=null;
+
         // And add it to the frontier
         _addNode(initNode);
 
@@ -344,7 +346,7 @@ public class DP  implements SearchAlgorithm {
                 break;
             }
             default: {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }

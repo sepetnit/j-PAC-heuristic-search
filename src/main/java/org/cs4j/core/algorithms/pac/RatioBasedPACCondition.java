@@ -59,7 +59,7 @@ public class RatioBasedPACCondition extends ThresholdPACCondition {
         Double oldCDFValue=0.0;
         for(Double cost : ratioToPDF.keySet()) {
             ratioToCDF.put(cost*this.initialH, ratioToPDF.get(cost) + oldCDFValue);
-            oldCDFValue = ratioToCDF.get(cost);
+            oldCDFValue = ratioToCDF.get(cost*this.initialH);
         }
 
         // Accuracy issues

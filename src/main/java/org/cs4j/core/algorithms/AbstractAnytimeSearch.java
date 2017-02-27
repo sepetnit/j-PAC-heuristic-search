@@ -1,10 +1,10 @@
 package org.cs4j.core.algorithms;
 
+import org.apache.log4j.Logger;
 import org.cs4j.core.AnytimeSearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.collections.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +17,7 @@ import java.util.Map;
  * Created by Roni Stern on 23/02/2017.
  */
 public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
+    final static Logger logger = Logger.getLogger(AbstractAnytimeSearch.class);
 
     // The domain to which the search problem belongs
     protected SearchDomain domain;
@@ -113,7 +114,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
             // expand the node (since, if its g satisfies the goal test - it would be already returned)
             ++result.expanded;
             if (result.expanded % 1000000 == 0)
-                System.out.println("[INFO] Expanded so far " + result.expanded);
+                logger.info("[INFO] Expanded so far " + result.expanded);
 
             // Go over all the successors of the state
             for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
@@ -232,7 +233,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     /**
      * After removing from OPEN a node with a given f-value,
      */
-    private void removeFromfCounter(double f) {
+    protected void removeFromfCounter(double f) {
         int newfCount = this.fCounter.get(f)-1;
         this.fCounter.put(f,newfCount);
 
@@ -379,7 +380,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         switch (parameterName) {
             default: {
                 System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }

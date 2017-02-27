@@ -1,11 +1,10 @@
 package org.cs4j.core.algorithms.pac;
 
+import org.apache.log4j.Logger;
 import org.cs4j.core.AnytimeSearchAlgorithm;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -17,6 +16,10 @@ import java.util.Map;
  * Created by Roni Stern on 23/02/2017.
  */
 public class PACSearchFramework implements SearchAlgorithm {
+
+    final static Logger logger = Logger.getLogger(PACSearchFramework.class);
+
+
     private static final Map<String, Class> POSSIBLE_PARAMETERS;
     private double epsilon; // Desired suboptimality
     private double delta; // Required confidence
@@ -80,7 +83,7 @@ public class PACSearchFramework implements SearchAlgorithm {
                 break;
             default: {
                 System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }
@@ -106,20 +109,17 @@ public class PACSearchFramework implements SearchAlgorithm {
         if(result.hasSolution()==false) return result;
 
         // Check solution after it is found to see if we should halt
-        SearchResult incumbent=result;
         try {
             while (pacCondition.shouldStop(result) == false) {
                 result = anytimeSearchAlgorithm.continueSearch();
-                if (result.hasSolution() == false) return incumbent;
-                incumbent = result;
+                if (result.hasSolution() == false)
+                    break;
             }
         }catch(PACConditionSatisfied conditionSatisfied){
             // This part is designed for the search-aware PAC conditions
-            incumbent = anytimeSearchAlgorithm.getTotalSearchResults();
-            if(incumbent.hasSolution())
-                return incumbent;
+            logger.info(conditionSatisfied.getClass().getSimpleName());
         }
-        return incumbent;
+        return anytimeSearchAlgorithm.getTotalSearchResults();
     }
 
 

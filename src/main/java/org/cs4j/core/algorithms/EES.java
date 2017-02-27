@@ -1,6 +1,6 @@
 package org.cs4j.core.algorithms;
 
-import com.sun.istack.internal.NotNull;
+
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchDomain.Operator;
@@ -8,7 +8,7 @@ import org.cs4j.core.SearchDomain.State;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.SearchResultImpl.SolutionImpl;
 import org.cs4j.core.collections.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -185,14 +185,14 @@ public class EES implements SearchAlgorithm {
                 break;
             }
             default: {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }
 
     /**
      * (non-Javadoc)
-     * @see edu.unh.ai.search.SearchAlgorithm#search(java.lang.Object)
+     * see edu.unh.ai.search.SearchAlgorithm#search(java.lang.Object)
      */
     @Override
     public SearchResult search(SearchDomain domain) {
@@ -660,7 +660,7 @@ public class EES implements SearchAlgorithm {
         }
 
         @Override
-        public int compareTo(@NotNull Node other) {
+        public int compareTo( Node other) {
             // Nodes are compared by default by their f value (and if f values are equal - by g value)
 
             // F value: lower f is better

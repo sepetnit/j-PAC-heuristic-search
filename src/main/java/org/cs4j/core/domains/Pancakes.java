@@ -2,8 +2,6 @@ package org.cs4j.core.domains;
 
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.collections.PackedElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -543,7 +541,7 @@ public class Pancakes implements SearchDomain {
                 unpack(pack(state));
                 unpack(pack(parent));
                 computeCost(state,parent,value);
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
             return cost;
         }

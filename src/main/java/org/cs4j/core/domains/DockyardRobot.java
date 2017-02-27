@@ -16,17 +16,14 @@
  */
 package org.cs4j.core.domains;
 
-import com.sun.istack.internal.NotNull;
+
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.collections.PackedElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
@@ -1062,7 +1059,7 @@ public class DockyardRobot implements SearchDomain {
          * all the boxes are different)
          */
         @Override
-        public int compareTo(@NotNull Pile toCompare) {
+        public int compareTo( Pile toCompare) {
             return this.stack.get(0) - toCompare.stack.get(0);
         }
 
@@ -1509,7 +1506,7 @@ public class DockyardRobot implements SearchDomain {
         @Override
         public Operator reverse(State state) {
             return null;
-            //throw new NotImplementedException();
+            //throw new UnsupportedOperationException();
         }
 
         public String toString() {
@@ -1587,7 +1584,7 @@ public class DockyardRobot implements SearchDomain {
 
     @Override
     public void setAdditionalParameter(String parameterName, String value) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**

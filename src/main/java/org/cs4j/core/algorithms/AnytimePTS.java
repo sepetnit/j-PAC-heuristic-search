@@ -2,8 +2,7 @@ package org.cs4j.core.algorithms;
 
 
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.collections.BinHeap;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 import java.util.*;
 

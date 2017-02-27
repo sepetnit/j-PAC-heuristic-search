@@ -4,29 +4,44 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
+import org.cs4j.core.algorithms.SearchResultImpl;
+import org.cs4j.core.algorithms.pac.PACCondition;
+import org.cs4j.core.algorithms.pac.PACUtils;
+import org.cs4j.core.algorithms.pac.RatioBasedPACCondition;
 import org.cs4j.core.algorithms.pac.TrivialPACCondition;
 import org.cs4j.core.domains.*;
 import org.cs4j.core.experiments.ExperimentUtils;
-import org.cs4j.core.test.algorithms.TestUtils;
 import org.junit.Test;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
 /**
  * Created by user on 26/02/2017.
  *
- * Test case for the Trivial PAC condition
+ * Test case for the threshold-based  PAC condition
  */
-public class TestTrivialPacCondition {
+public class TestThresholdPACConditions {
 
-    final static Logger logger = Logger.getLogger(TestTrivialPacCondition.class);
-
+    final static Logger logger = Logger.getLogger(TestThresholdPACConditions.class);
+    @Test
+    public void testRatioBased(){
+        testSetup(new RatioBasedPACCondition());
+    }
 
     @Test
-    public void testSetup() throws FileNotFoundException {
+    public void testTrivialSetup()    {
+        testSetup(new TrivialPACCondition());
+    }
+
+
+    /**
+     * Tests the setup function of a given condition and some extreme values
+     * @param condition the conditon to evaluate
+     */
+    private void testSetup(PACCondition condition){
 
         Class[] domains = {
                 FifteenPuzzle.class,
@@ -37,14 +52,18 @@ public class TestTrivialPacCondition {
 
         for(Class domainClass :domains){
             logger.info("Testing domain "+domainClass.getName());
+            PACUtils.loadPACStatistics(domainClass);
             SearchDomain instance = ExperimentUtils.getSearchDomain(domainClass,12);
             SearchResult resultZero = new SearchResultsStub(0);
             SearchResult resultMax = new SearchResultsStub(Double.MAX_VALUE);
-            TrivialPACCondition condition = new TrivialPACCondition();
+
+            // We don't want the f-min rule to be used here
+            resultMax.getExtras().put("fmin",1.0);
+            resultZero.getExtras().put("fmin",1.0);
 
             condition.setup(instance,0,0);
             Assert.assertFalse(condition.shouldStop(resultMax));
-            Assert.assertTrue(condition.shouldStop(resultZero));
+            Assert.assertTrue("Solution of cost zero must be PAC", condition.shouldStop(resultZero));
 
             condition.setup(instance,1,0);
             Assert.assertFalse(condition.shouldStop(resultMax));
@@ -97,78 +116,12 @@ public class TestTrivialPacCondition {
 
 
 
-    private class SearchResultsStub implements SearchResult
+    private class SearchResultsStub extends SearchResultImpl
     {
         private Solution solution;
 
         public SearchResultsStub(double cost){
-            this.solution = new SolutionStub(cost);
-        }
-        @Override
-        public boolean hasSolution() {
-            return true;
-        }
-        @Override
-        public Solution getBestSolution() {
-            return this.solution;
-        }
-
-
-        @Override
-        public List<Solution> getSolutions() {
-            return null;
-        }
-
-
-
-        @Override
-        public long getFirstIterationExpanded() {
-            return 0;
-        }
-
-        @Override
-        public long getExpanded() {
-            return 0;
-        }
-
-        @Override
-        public long getGenerated() {
-            return 0;
-        }
-
-        @Override
-        public long getDuplicates() {
-            return 0;
-        }
-
-        @Override
-        public long getUpdatedInOpen() {
-            return 0;
-        }
-
-        @Override
-        public long getReopened() {
-            return 0;
-        }
-
-        @Override
-        public TreeMap<String, Object> getExtras() {
-            return null;
-        }
-
-        @Override
-        public long getWallTimeMillis() {
-            return 0;
-        }
-
-        @Override
-        public long getCpuTimeMillis() {
-            return 0;
-        }
-
-        @Override
-        public void increase(SearchResult previous) {
-
+            this.addSolution(new SolutionStub(cost));
         }
     }
 

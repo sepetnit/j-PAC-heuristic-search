@@ -27,7 +27,7 @@ import org.cs4j.core.SearchDomain.Operator;
 import org.cs4j.core.SearchDomain.State;
 import org.cs4j.core.algorithms.SearchResultImpl.SolutionImpl;
 import org.cs4j.core.SearchResult;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 /**
  * Recursive Best-First Search
@@ -63,7 +63,7 @@ public class RBFS implements SearchAlgorithm {
 
   @Override
   public void setAdditionalParameter(String parameterName, String value) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override

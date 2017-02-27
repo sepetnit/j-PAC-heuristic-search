@@ -7,8 +7,6 @@ import org.cs4j.core.SearchDomain.State;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.SearchResultImpl.SolutionImpl;
 import org.cs4j.core.collections.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -122,7 +120,7 @@ public class PHS implements SearchAlgorithm {
                 break;
             } default: {
                 System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }

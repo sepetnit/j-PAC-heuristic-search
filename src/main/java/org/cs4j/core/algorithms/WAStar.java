@@ -23,8 +23,6 @@ import org.cs4j.core.SearchDomain.State;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.SearchResultImpl.SolutionImpl;
 import org.cs4j.core.collections.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -433,7 +431,7 @@ public class WAStar implements SearchAlgorithm {
                 break;
             }
             default: {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }

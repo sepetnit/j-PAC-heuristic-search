@@ -5,8 +5,6 @@ import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.*;
 
 /**
@@ -45,7 +43,7 @@ public class DFS implements SearchAlgorithm {
 
     @Override
     public void setAdditionalParameter(String parameterName, String value) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override

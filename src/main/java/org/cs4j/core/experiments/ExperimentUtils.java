@@ -41,7 +41,7 @@ public class ExperimentUtils {
      * @return A SearchDomain object
      *
      */
-    public static SearchDomain getSearchDomain(String inputPath, HashMap<String, String> domainParams, Constructor<?> cons, int i){
+    public static SearchDomain getSearchDomain(String inputPath, Map<String, String> domainParams, Constructor<?> cons, int i){
         InputStream is = null;
         SearchDomain domain=null;
         try {

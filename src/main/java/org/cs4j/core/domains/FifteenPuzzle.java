@@ -19,8 +19,6 @@ package org.cs4j.core.domains;
 import com.carrotsearch.hppc.LongByteHashMap;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.collections.PackedElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -28,8 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -428,7 +424,7 @@ public final class FifteenPuzzle implements SearchDomain {
     }
 
     private double[] _computeHDNoMDFromDisk(TileState state) {
-       throw new NotImplementedException();
+       throw new UnsupportedOperationException();
     }
 
     /**
@@ -467,7 +463,7 @@ public final class FifteenPuzzle implements SearchDomain {
                 break;
             }
             default: {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
         return new double[] {h, d};

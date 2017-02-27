@@ -1,20 +1,13 @@
 package org.cs4j.core.domains;
 
+import org.apache.log4j.Logger;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.Pair;
 import org.cs4j.core.collections.PairInt;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Represents some grid (not a full problem!!!, only the grid!!!
@@ -26,7 +19,7 @@ import java.util.Vector;
  * </p>
  */
 public class GridPathFinding implements SearchDomain {
-
+    final static Logger logger = Logger.getLogger(GridPathFinding.class);
     private static final int NUM_MOVES = 4;
 
     public static final char OBSTACLE_MARKER = '@';
@@ -349,12 +342,12 @@ public class GridPathFinding implements SearchDomain {
             Utils.fatal("Too many bits required: " + locationBits);
         }
         if (log) {
-            System.out.println("[INFO] Initializes reverse operators");
+            logger.debug("[INFO] Initializes reverse operators");
         }
         // Initialize the array of reverse operators
         this._initializeReverseOperatorsArray();
         if (log) {
-            System.out.println("[INFO] Finished initializing reverse operators");
+            logger.debug("[INFO] Finished initializing reverse operators");
         }
     }
 
@@ -905,7 +898,7 @@ public class GridPathFinding implements SearchDomain {
     @Override
     public int maxGeneratedSize() {
     	return Integer.MAX_VALUE;
-//        throw new NotImplementedException();
+//        throw new UnsupportedOperationException();
     }
 
     /**

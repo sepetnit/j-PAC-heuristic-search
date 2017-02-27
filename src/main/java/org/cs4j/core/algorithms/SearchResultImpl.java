@@ -26,8 +26,6 @@ import org.cs4j.core.SearchDomain.Operator;
 import org.cs4j.core.SearchDomain.State;
 import org.cs4j.core.SearchResult;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * The search result class.
  *

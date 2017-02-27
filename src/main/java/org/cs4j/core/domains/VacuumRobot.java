@@ -1,10 +1,9 @@
 package org.cs4j.core.domains;
 
-import com.sun.istack.internal.NotNull;
+
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.PairInt;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -156,7 +155,7 @@ public class VacuumRobot implements SearchDomain {
     }
 
     public VacuumRobot(InputStream stream,COST_FUNCTION costfunction) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -382,7 +381,7 @@ public class VacuumRobot implements SearchDomain {
          * and 0 if the weights are equal
          */
         @Override
-        public int compareTo(@NotNull MSTEdge other) {
+        public int compareTo( MSTEdge other) {
             return this.weight - other.weight;
         }
     }

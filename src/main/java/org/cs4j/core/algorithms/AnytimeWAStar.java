@@ -1,7 +1,5 @@
 package org.cs4j.core.algorithms;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +44,7 @@ public class AnytimeWAStar extends AbstractAnytimeSearch{
             }
             default: {
                 System.err.println("No such parameter: " + parameterName + " (value: " + value + ")");
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }

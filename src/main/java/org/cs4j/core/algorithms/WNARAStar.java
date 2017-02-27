@@ -3,10 +3,7 @@ package org.cs4j.core.algorithms;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by user on 29/11/2015.

@@ -13,6 +13,9 @@ import org.cs4j.core.SearchResult;
 public class FMinCondition extends AbstractPACCondition {
     @Override
     public boolean shouldStop(SearchResult incumbentSolution) {
+        if(incumbentSolution.hasSolution()==false)
+            return false;
+
         double fmin = (Double)incumbentSolution.getExtras().get("fmin");
         double incumbent = incumbentSolution.getSolutions().get(0).getCost();
 

@@ -152,13 +152,23 @@ public class OutputResult {
      *
      * @param result The generated result
      */
-    public void appendNewResult(double[] result) {
-        for (double d : result) {
-            this.currentResult.append(d);
+    public void appendNewResult(Object[] result) {
+        for (Object value : result) {
+            this.currentResult.append(value);
             this.currentResult.append(",");
         }
     }
-
+    /**
+     * Appends a new result (of a single run) to the output
+     *
+     * @param result The generated result
+     */
+    public void appendNewResult(double[] result) {
+        for (Double value : result) {
+            this.currentResult.append(value);
+            this.currentResult.append(",");
+        }
+    }
     /**
      * Writes a String line into the result without a newline
      *

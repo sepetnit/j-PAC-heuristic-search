@@ -24,7 +24,7 @@ import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.SearchResultImpl.SolutionImpl;
 import org.cs4j.core.collections.*;
 import org.cs4j.core.collections.BucketHeap.BucketHeapElement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -168,7 +168,7 @@ public class WRAStar implements SearchAlgorithm {
                 break;
             }
             default: {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }
     }
