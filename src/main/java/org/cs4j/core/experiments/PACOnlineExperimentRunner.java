@@ -34,10 +34,6 @@ public class PACOnlineExperimentRunner{
 		resultsData.add(result.getWallTimeMillis());
 	}
 
-
-
-
-
 	public void run(Class domainClass, SearchAlgorithm alg, String inputPath,
 					OutputResult output,
 					int startInstance,

@@ -21,7 +21,7 @@ import org.cs4j.core.collections.PackedElement;
 /**
  * The search domain interface.
  *
- * @author Matthew Hatem
+ * @author Matthew Hatem & Vitali Sepetnitsky
  */
 public interface SearchDomain extends SearchConfigurable {
 
