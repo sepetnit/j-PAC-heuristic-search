@@ -23,7 +23,7 @@ import java.util.Comparator;
  * An implementation of a binary heap where elements are aware of their 
  * location (index) in the heap.
  *
- * @author Matthew Hatem
+ * @author Matthew Hatem & Vitali Sepetnitsky
  */
 public class BinHeap<E extends SearchQueueElement> implements SearchQueue<E> {
 
