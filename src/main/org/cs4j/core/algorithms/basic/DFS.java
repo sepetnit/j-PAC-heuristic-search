@@ -1,10 +1,10 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.basic;
 
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 
 import java.util.*;
 
@@ -13,12 +13,12 @@ import java.util.*;
  *
  * Implementation of the simple DFS algorithm (iterative implementation)
  */
-public class DFS implements SearchAlgorithm {
+public class DFS extends GenericSearchAlgorithm {
 
     // The domain for the search
     private SearchDomain domain;
-    private List<SearchDomain.Operator> path = new ArrayList<>(3);
-    private List<SearchDomain.State> statesPath = new ArrayList<>(3);
+    private List<Operator> path = new ArrayList<>(3);
+    private List<SearchState> statesPath = new ArrayList<>(3);
     // Visited list (seen states)
     private Map<PackedElement, Node> visited;
 
@@ -58,7 +58,7 @@ public class DFS implements SearchAlgorithm {
         result.startTimer();
 
         // Let's instantiate the initial state
-        SearchDomain.State state = domain.initialState();
+        SearchState state = domain.initialState();
         // Create a graph node from this state
         Node initNode = new Node(state);
 
@@ -99,12 +99,12 @@ public class DFS implements SearchAlgorithm {
                 Stack<Node> auxiliaryStack = new Stack<>();
                 // Go over all the possible operators and apply them
                 for (int i = 0; i < domain.getNumOperators(state); ++i) {
-                    SearchDomain.Operator op = domain.getOperator(state, i);
+                    Operator op = domain.getOperator(state, i);
                     // Try to avoid loops
                     if (op.equals(currentNode.pop)) {
                         continue;
                     }
-                    SearchDomain.State childState = domain.applyOperator(state, op);
+                    SearchState childState = domain.applyOperator(state, op);
                     Node childNode = new Node(childState, currentNode, op, op.reverse(state));
                     // Ignore if duplicate
                     if (!this.visited.containsKey(childNode.packed)) {
@@ -143,10 +143,10 @@ public class DFS implements SearchAlgorithm {
     protected final class Node extends SearchQueueElementImpl {
         private Node parent;
         private PackedElement packed;
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
-        private Node(SearchDomain.State state, Node parent, SearchDomain.Operator op, SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, Operator op, Operator pop) {
             // Size of key
             super(0);
             // Parent node
@@ -161,7 +161,7 @@ public class DFS implements SearchAlgorithm {
          *
          * @param state The state which this node represents
          */
-        private Node(SearchDomain.State state) {
+        private Node(SearchState state) {
             this(state, null, null, null);
         }
 

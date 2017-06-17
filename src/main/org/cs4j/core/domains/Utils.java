@@ -22,7 +22,7 @@ public class Utils {
      *
      * @return Value of n! calculation
      */
-    public static int fact(int n) {
+    static int fact(int n) {
         if (n == 1) {
             return 1;
         }
@@ -116,7 +116,7 @@ public class Utils {
      * @param x The input number for the calculation
      * @return The calculated value
      */
-    public static double log2(int x) {
+    static double log2(int x) {
         return Math.log(x) / Math.log(2);
     }
 
@@ -127,7 +127,7 @@ public class Utils {
      *
      * @return The calculated bit count
      */
-    public static int bits(int number) {
+    static int bits(int number) {
         return (int) Math.ceil(Utils.log2(number));
     }
 
@@ -137,7 +137,7 @@ public class Utils {
      * @param bits The number of bits whose bit-mask should be computed
      * @return The calculated bit-mask
      */
-    public static long mask(int bits) {
+    static long mask(int bits) {
         return ~((~0) << bits);
     }
 
@@ -148,7 +148,7 @@ public class Utils {
      *
      * @return The total sum
      */
-    public static int sumOfArrayValues(int[] array) {
+    static int sumOfArrayValues(int[] array) {
         int sum = 0;
         for (int val : array) {
             sum += val;
@@ -204,7 +204,7 @@ public class Utils {
      *
      * @return The result array
      */
-    public static int[] stringToIntegerArray(String input) {
+    static int[] stringToIntegerArray(String input) {
         if (!input.startsWith("(") && !input.startsWith("{") && !input.startsWith("[")) {
             System.out.println("[ERROR] Illegal start (" + input.charAt(0) + ") of integer array: " + input);
             throw new IllegalArgumentException();

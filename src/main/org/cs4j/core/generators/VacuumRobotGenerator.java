@@ -4,7 +4,7 @@ import org.cs4j.core.SearchDomain;
 import org.cs4j.core.domains.GridPathFinding;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.WAStar;
+import org.cs4j.core.algorithms.weighted.WAStar;
 import org.cs4j.core.collections.PairInt;
 
 import java.io.*;

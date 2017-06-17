@@ -13,9 +13,4 @@ public abstract class ExperimentRunner {
 	public abstract double[] run(Class domainClass, SearchAlgorithm alg, String inputPath, String outputPath, int startInstance,
 			int stopInstance, HashMap<String, String> domainParams, boolean overwriteFile);
 
-
-
-
-
-
 }

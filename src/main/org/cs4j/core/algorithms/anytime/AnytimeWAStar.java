@@ -1,4 +1,4 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.anytime;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by Roni Stern on 23/02/2017.
  */
-public class AnytimeWAStar extends AbstractAnytimeSearch{
+public class AnytimeWAStar extends AbstractAnytimeSearch {
     private static final Map<String, Class> POSSIBLE_PARAMETERS;
     private double weight;
 

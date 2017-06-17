@@ -1,9 +1,9 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.basic;
 
-import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchResult;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.*;
-import org.cs4j.core.SearchAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import java.util.Map;
  * is greater than the maximum value can be pruned
  */
 
-public class PHS implements SearchAlgorithm {
+public class PHS extends GenericSearchAlgorithm {
 
     private static final Map<String, Class> PHSPossibleParameters;
 
@@ -132,7 +132,7 @@ public class PHS implements SearchAlgorithm {
         result.startTimer();
 
         // Let's instantiate the initial state
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
         // Create a graph node from this state
         Node initNode = new Node(currentState);
 
@@ -159,14 +159,14 @@ public class PHS implements SearchAlgorithm {
             ++result.expanded;
             // Go over all the possible operators and apply them
             for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
-                SearchDomain.Operator op = domain.getOperator(currentState, i);
+                Operator op = domain.getOperator(currentState, i);
                 // Try to avoid loops
                 if (op.equals(currentNode.pop)) {
                     continue;
                 }
                 // Here we actually generate a new state
                 ++result.generated;
-                SearchDomain.State childState = domain.applyOperator(currentState, op);
+                SearchState childState = domain.applyOperator(currentState, op);
                 Node childNode = new Node(childState, currentNode, currentState, op, op.reverse(currentState));
 
                 // Ignore the node if its f value is too big
@@ -227,13 +227,13 @@ public class PHS implements SearchAlgorithm {
         // If a goal was found: update the solution
         if (goal != null) {
             SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-            List<SearchDomain.Operator> path = new ArrayList<>();
-            List<SearchDomain.State> statesPath = new ArrayList<>();
+            List<Operator> path = new ArrayList<>();
+            List<SearchState> statesPath = new ArrayList<>();
             System.out.println("[INFO] Solved - Generating output path.");
             double cost = 0;
 
-            SearchDomain.State currentPacked = domain.unpack(goal.packed);
-            SearchDomain.State currentParentPacked = null;
+            SearchState currentPacked = domain.unpack(goal.packed);
+            SearchState currentParentPacked = null;
             for (Node currentNode = goal;
                  currentNode != null;
                  currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -294,14 +294,14 @@ public class PHS implements SearchAlgorithm {
         private double h;
         private double d;
 
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
         private Node parent;
         private PackedElement packed;
         private int[] secondaryIndex;
 
-        private Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, SearchState parentState, Operator op, Operator pop) {
             // Size of key
             super(1);
             // TODO: Why?
@@ -333,7 +333,7 @@ public class PHS implements SearchAlgorithm {
          *
          * @param state The state which this node represents
          */
-        private Node(SearchDomain.State state) {
+        private Node(SearchState state) {
             this(state, null, null, null, null);
         }
 

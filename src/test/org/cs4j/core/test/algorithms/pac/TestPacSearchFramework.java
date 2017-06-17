@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.AnytimePTS;
+import org.cs4j.core.algorithms.anytime.AnytimePTS;
 import org.cs4j.core.algorithms.pac.AnytimePTS4PAC;
 import org.cs4j.core.algorithms.pac.FMinCondition;
 import org.cs4j.core.algorithms.pac.PACSearchFramework;

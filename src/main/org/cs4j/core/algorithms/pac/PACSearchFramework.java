@@ -2,11 +2,8 @@ package org.cs4j.core.algorithms.pac;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cs4j.core.AnytimeSearchAlgorithm;
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
 import org.cs4j.core.domains.GridPathFinding;
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +15,7 @@ import java.util.Map;
  * Requires an anytime search algorith and a PAC condition.
  * Created by Roni Stern on 23/02/2017.
  */
-public class PACSearchFramework implements SearchAlgorithm {
+public class PACSearchFramework extends GenericSearchAlgorithm {
     
     private final static Logger logger = LogManager.getLogger(GridPathFinding.class);
 

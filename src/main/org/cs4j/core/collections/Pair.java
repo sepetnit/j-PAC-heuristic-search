@@ -1,10 +1,11 @@
 package org.cs4j.core.collections;
 
 /**
- * Created by Dima on 2/18/2015.
+ * Created by Dima on 18/02/2015.
  *
  */
 public class Pair<Key,Value> {
+    
     private Key key;
     private Value value;
 
@@ -13,11 +14,21 @@ public class Pair<Key,Value> {
         this.value = value;
     }
 
-    public Key getKey(){ return this.key; }
-    public Value getValue(){ return this.value; }
+    public Key getKey() {
+        return this.key;
+    }
+    
+    public Value getValue() {
+        return this.value;
+    }
 
-    public void setKey(Key key){ this.key = key; }
-    public void setValue(Value value){ this.value = value; }
+    public void setKey(Key key) {
+        this.key = key;
+    }
+    
+    public void setValue(Value value) {
+        this.value = value;
+    }
 
     @Override
     public String toString() {

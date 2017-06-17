@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.weighted;
 
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.*;
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchDomain.State;
-import org.cs4j.core.SearchResult;
 
 
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ import java.util.Map;
  *
  * (Edited by Vitali Sepetnitsky)
  */
-public class WRAStar implements SearchAlgorithm {
+public class WRAStar extends GenericSearchAlgorithm {
 
     private static final int QID = 0;
 
@@ -172,11 +171,11 @@ public class WRAStar implements SearchAlgorithm {
 
     private SearchResult.Solution createSolution(Node goal) {
         SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-        List<SearchDomain.Operator> path = new ArrayList<>();
-        List<SearchDomain.State> statesPath = new ArrayList<>();
+        List<Operator> path = new ArrayList<>();
+        List<SearchState> statesPath = new ArrayList<>();
         double cost = 0;
-        SearchDomain.State currentPacked = domain.unpack(goal.packed);
-        SearchDomain.State currentParentPacked = null;
+        SearchState currentPacked = domain.unpack(goal.packed);
+        SearchState currentParentPacked = null;
         for (Node currentNode = goal;
              currentNode != null;
              currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -208,7 +207,7 @@ public class WRAStar implements SearchAlgorithm {
     protected Node _search(SearchDomain domain, int iterationIndex,
                            double maxPreviousCost, SearchResultImpl result) {
         Node goal = null;
-        SearchDomain.State currentState;
+        SearchState currentState;
 
         result.startTimer();
 
@@ -242,7 +241,7 @@ public class WRAStar implements SearchAlgorithm {
                 break;
             }
 
-            List<Pair<State, Node>> children = new ArrayList<>();
+            List<Pair<SearchState, Node>> children = new ArrayList<>();
 
             // Expand the current node
             ++result.expanded;
@@ -251,12 +250,12 @@ public class WRAStar implements SearchAlgorithm {
             // First, let's generate all the children
             // Go over all the possible operators and apply them
             for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
-                SearchDomain.Operator op = domain.getOperator(currentState, i);
+                Operator op = domain.getOperator(currentState, i);
                 // Try to avoid loops
                 if (op.equals(currentNode.pop)) {
                     continue;
                 }
-                SearchDomain.State childState = domain.applyOperator(currentState, op);
+                SearchState childState = domain.applyOperator(currentState, op);
                 Node childNode = new Node(childState, currentNode, currentState, op, op.reverse(currentState));
                 // Prune
                 if (childNode.getRf() >= maxPreviousCost) {
@@ -281,8 +280,8 @@ public class WRAStar implements SearchAlgorithm {
             }
 
             // Go over all the possible operators and apply them
-            for (Pair<SearchDomain.State, Node> currentChild : children) {
-                SearchDomain.State childState = currentChild.getKey();
+            for (Pair<SearchState, Node> currentChild : children) {
+                SearchState childState = currentChild.getKey();
                 Node childNode = currentChild.getValue();
                 double edgeCost = childNode.op.getCost(childState, currentState);
 
@@ -341,7 +340,7 @@ public class WRAStar implements SearchAlgorithm {
                             // Never Reopen: Use Incons
                             if (!reopen) {
                                 this.incons.put(dupChildNode.packed, dupChildNode);
-                                // Always Reopen: Perform standard reopening
+                                // Always Reopen: Perform familiar reopening
                             } else {
                                 ++result.reopened;
                                 this.open.add(dupChildNode);
@@ -407,7 +406,7 @@ public class WRAStar implements SearchAlgorithm {
         this._initDataStructures();
 
         // Let's instantiate the initial state
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
         // Create a graph node from this state
         Node initNode = new Node(currentState);
 
@@ -527,14 +526,14 @@ public class WRAStar implements SearchAlgorithm {
         private double g;
         private double h;
 
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
         private Node parent;
         protected PackedElement packed;
         private int[] secondaryIndex;
 
-        private Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, SearchState parentState, Operator op, Operator pop) {
             // Size of key
             super(2);
             // TODO: Why?
@@ -571,7 +570,7 @@ public class WRAStar implements SearchAlgorithm {
          *
          * @param state The state which this node represents
          */
-        protected Node(SearchDomain.State state) {
+        protected Node(SearchState state) {
             this(state, null, null, null, null);
         }
 

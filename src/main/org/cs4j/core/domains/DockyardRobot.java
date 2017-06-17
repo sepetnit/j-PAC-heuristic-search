@@ -17,8 +17,11 @@
 package org.cs4j.core.domains;
 
 
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.Operator;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.SingleGoalSearchDomain;
 import org.cs4j.core.collections.PackedElement;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +33,7 @@ import java.util.Vector;
 /*
  * DockyardRobot domain
  */
-public class DockyardRobot implements SearchDomain {
+public class DockyardRobot extends SingleGoalSearchDomain {
 
     private Location[] initialLocation;
     private int[] goals;
@@ -314,7 +317,7 @@ public class DockyardRobot implements SearchDomain {
                 // The locations can't be reached one from another
                 } else if (Double.MAX_VALUE == cost) {
                     this.shortest[i * this.locationsCount + j] = new double[]{cost, cost};
-                // Two standard locations
+                // Two familiar locations
                 } else {
                     this.shortest[i * this.locationsCount + j] = new double[]{cost, 1.0d};
                 }
@@ -367,13 +370,13 @@ public class DockyardRobot implements SearchDomain {
     }
 
     @Override
-    public boolean isGoal(State state) {
+    public boolean isGoal(SearchState state) {
         DRobotState drs = (DRobotState)state;
         return drs.leftBoxesNumber == 0;
     }
 
     @Override
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         DRobotState drs = (DRobotState)state;
         if (drs.ops == null) {
             this.initOps(drs);
@@ -382,7 +385,7 @@ public class DockyardRobot implements SearchDomain {
     }
 
     @Override
-    public Operator getOperator(State state, int index) {
+    public Operator getOperator(SearchState state, int index) {
         DRobotState drs = (DRobotState)state;
         if (drs.ops == null) {
             initOps(drs);
@@ -391,7 +394,7 @@ public class DockyardRobot implements SearchDomain {
     }
 
     @Override
-    public State copy(State state) {
+    public SearchState copy(SearchState state) {
         return new DRobotState((DRobotState)state);
     }
 
@@ -406,7 +409,7 @@ public class DockyardRobot implements SearchDomain {
      * number of cranes at the location
      */
     @Override
-    public PackedElement pack(State s) {
+    public PackedElement pack(SearchState s) {
         DRobotState state = (DRobotState)s;
         // Current index
         int cur = 0;
@@ -874,7 +877,7 @@ public class DockyardRobot implements SearchDomain {
      * @return The new generated state
      */
     @Override
-    public State applyOperator(State state, Operator op) {
+    public SearchState applyOperator(SearchState state, Operator op) {
         DRobotState s = (DRobotState)state;
         DRobotState drs = (DRobotState)copy(s);
         DRobotOperator o = (DRobotOperator)op;
@@ -1267,7 +1270,7 @@ public class DockyardRobot implements SearchDomain {
     }
 
 
-    private final class DRobotState implements State {
+    private final class DRobotState extends SearchState {
         private double h;
         private double d;
 
@@ -1398,7 +1401,7 @@ public class DockyardRobot implements SearchDomain {
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -1485,7 +1488,7 @@ public class DockyardRobot implements SearchDomain {
         }
 
         @Override
-        public double getCost(State s, State parent) {
+        public double getCost(SearchState s, SearchState parent) {
             assert parent != null;
             DRobotState drs = (DRobotState)parent;
             /*
@@ -1504,7 +1507,7 @@ public class DockyardRobot implements SearchDomain {
          * operator
          */
         @Override
-        public Operator reverse(State state) {
+        public Operator reverse(SearchState state) {
             return null;
             //throw new UnsupportedOperationException();
         }
@@ -1573,7 +1576,7 @@ public class DockyardRobot implements SearchDomain {
     }
 
     @Override
-    public String dumpStatesCollection(State[] states) {
+    public String dumpStatesCollection(SearchState[] states) {
         return null;
     }
 

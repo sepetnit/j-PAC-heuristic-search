@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.domains.GridPathFinding;
-import org.cs4j.core.mains.DomainExperimentData;
+import org.cs4j.core.domains.DomainExperimentData;
 import org.cs4j.core.SearchResult;
 
 import java.io.BufferedWriter;

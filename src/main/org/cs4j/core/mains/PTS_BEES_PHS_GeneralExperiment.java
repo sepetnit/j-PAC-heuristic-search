@@ -3,7 +3,7 @@ package org.cs4j.core.mains;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.PTS;
+import org.cs4j.core.algorithms.familiar.PTS;
 import org.cs4j.core.domains.Utils;
 import org.cs4j.core.SearchAlgorithm;
 

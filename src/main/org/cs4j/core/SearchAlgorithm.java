@@ -21,15 +21,24 @@ package org.cs4j.core;
  *
  * @author Matthew Hatem
  */
-public interface SearchAlgorithm extends SearchConfigurable{
-
-    String getName();
+public interface SearchAlgorithm extends SearchConfigurable {
 
     /**
-     * Performs a search beginning at the specified state.
-     *
-     * @param domain The domain to apply the search on
-     * @return search results
+     * @return The name of the algorithm
      */
+    String getName();
+
+    SearchResult concreteSearch(MultipleGoalsSearchDomain domain);
+
+    SearchResult concreteSearch(SingleGoalSearchDomain domain);
+
+
     SearchResult search(SearchDomain domain);
+
+    boolean improveStateHValue(SearchState s, SearchDomain domain);
+
+    boolean concreteImproveStateHValue(SearchState s, SingleGoalSearchDomain domain);
+
+    boolean concreteImproveStateHValue(SearchState s, MultipleGoalsSearchDomain domain);
+
 }

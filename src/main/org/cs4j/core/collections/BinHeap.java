@@ -1,19 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.cs4j.core.collections;
 
 import java.util.ArrayList;
@@ -27,7 +11,7 @@ import java.util.Comparator;
  */
 public class BinHeap<E extends SearchQueueElement> implements SearchQueue<E> {
 
-	final ArrayList<E> heap;
+	private final ArrayList<E> heap;
 	private final Comparator<E> cmp;
 	private final int key;
     
@@ -35,10 +19,10 @@ public class BinHeap<E extends SearchQueueElement> implements SearchQueue<E> {
      * Constructor of the heap
      *
      * @param cmp Comparator that allows comparison of the heap elements
-     * @param key The index at the element, that contains its index in the heap
+     * @param key The index at the single heap element, that allows accessing a single element
      */
 	public BinHeap(Comparator<E> cmp, int key) {
-		this.heap = new ArrayList<E>();
+		this.heap = new ArrayList<>();
 		this.cmp = cmp;
 		this.key = key;
 	}
@@ -196,7 +180,7 @@ public class BinHeap<E extends SearchQueueElement> implements SearchQueue<E> {
         }
         // Get the parent element of the given one
 		int p = this.parent(i);
-		// If element at i has smallest value, swap between it and its parent
+		// If element at i has smaller value, swap between it and its parent
 		if (this.compare(i, p) < 0) {
 		    // Swap between the element at i and element at p (move i up)
 			this.swap(i, p);

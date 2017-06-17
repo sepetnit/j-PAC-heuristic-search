@@ -1,4 +1,4 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.auxiliary;
 
 import org.cs4j.core.collections.SearchQueueElement;
 

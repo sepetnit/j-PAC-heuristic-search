@@ -1,17 +1,15 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.familiar;
 
-
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchResult;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.*;
-
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
-public class EES implements SearchAlgorithm {
+public class EES extends GenericSearchAlgorithm {
     private static final int CLEANUP_ID = 0;
     private static final int FOCAL_ID = 1;
 
@@ -32,12 +30,13 @@ public class EES implements SearchAlgorithm {
     private SearchResultImpl result;
 
     /**
-     * Initializes all the data structures required for the search, especially OPEN, FOCAL, CLEANUP and CLOSED lists
+     * Initializes all the data structures required for the search,
+     * especially OPEN, FOCAL, CLEANUP and CLOSED lists
      */
     private void _initDataStructures() {
-        //this.closed = new LongObjectOpenHashMap<>();
+        // this.closed = new LongObjectOpenHashMap<>();
+        // this.closed = new HashMap<>();
         this.closed = new TreeMap<>();
-//        this.closed = new HashMap<>();
 
         this.gequeue =
                 new GEQueue<>(
@@ -118,23 +117,27 @@ public class EES implements SearchAlgorithm {
         this.gequeue.add(node, oldBest);
         this.cleanup.add(node);
         this.closed.put(node.packed, node);
-//        this.closed.put(node.packed, node);
     }
 
     /**
-     * Given that a child node was generated, which is already contained in the CLOSED or OPEN list, we may want to
-     * reinsert it to the lists. In that case we want to update the parent pointers/
+     * Given that a child node was generated, which is already contained in the
+     * CLOSED or OPEN list, we may want to reinsert it to the lists. In that case
+     * we want to update the parent pointers
      *
      * @param dupChildNode The duplicate node, found in CLOSED
-     * @param newParentNode The parent node from which {@see dupChildNode} was generated
+     * @param newParentNode The parent node from which {@see dupChildNode} was
+     *                      generated
      * @param newChildNode The newly generated node
      */
-    private void _updateParentAndChildPointers(Node dupChildNode, Node newParentNode, Node newChildNode) {
+    private void _updateParentAndChildPointers(Node dupChildNode,
+                                               Node newParentNode,
+                                               Node newChildNode) {
 
         //           (parent)
         // parent <-          duplicate
 
-        // Go to the parent of the duplicate node and remove the duplicated node from the parent's children
+        // Go to the parent of the duplicate node and remove the duplicated node
+        // from the parent's children
         if (dupChildNode.parent != null) {
             dupChildNode.parent.children.remove(dupChildNode.packed);
             dupChildNode.parent = null;
@@ -204,7 +207,7 @@ public class EES implements SearchAlgorithm {
         result.startTimer();
         try {
             // Create the initial state and node
-            SearchDomain.State initState = domain.initialState();
+            SearchState initState = domain.initialState();
             Node initNode = new Node(initState, null, null, null, null);
             // Insert the initial node into all the lists
             this._insertNode(initNode, initNode);
@@ -222,7 +225,7 @@ public class EES implements SearchAlgorithm {
                     break;
                 }
                 // Extract the state from the chosen node
-                SearchDomain.State state = domain.unpack(bestNode.packed);
+                SearchState state = domain.unpack(bestNode.packed);
                 // Check if it is a goal
                 if (domain.isGoal(state)) {
                     goal = bestNode;
@@ -234,7 +237,7 @@ public class EES implements SearchAlgorithm {
                 int numOps = domain.getNumOperators(state);
                 // Go over all the possible operators
                 for (int i = 0; i < numOps; ++i) {
-                    SearchDomain.Operator op = domain.getOperator(state, i);
+                    Operator op = domain.getOperator(state, i);
                     // Bypass reverse operations
                     if (op.equals(bestNode.pop)) {
                         continue;
@@ -247,7 +250,7 @@ public class EES implements SearchAlgorithm {
                                 +"\tWall Time:" + formatter.format(result.getWallTimePassedInMS()));
                     }*/
                     // Apply the operator and extract the child state
-                    SearchDomain.State childState = domain.applyOperator(state, op);
+                    SearchState childState = domain.applyOperator(state, op);
                     // Create the child node
                     Node childNode = new Node(childState, bestNode, state, op, op.reverse(state));
                     // merge duplicates
@@ -339,13 +342,13 @@ public class EES implements SearchAlgorithm {
         if (goal != null) {
 //            System.out.print("\r");
             SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-            List<SearchDomain.Operator> path = new ArrayList<>();
-            List<SearchDomain.State> statesPath = new ArrayList<>();
+            List<Operator> path = new ArrayList<>();
+            List<SearchState> statesPath = new ArrayList<>();
             //System.out.println("[INFO] Solved - Generating output path.");
             double cost = 0;
 
-            SearchDomain.State currentPacked = domain.unpack(goal.packed);
-            SearchDomain.State currentParentPacked = null;
+            SearchState currentPacked = domain.unpack(goal.packed);
+            SearchState currentParentPacked = null;
             for (Node currentNode = goal;
                  currentNode != null;
                  currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -476,7 +479,7 @@ public class EES implements SearchAlgorithm {
         }
     }
 
-    public Node createNode(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, final SearchDomain.Operator pop){
+    public Node createNode(SearchState state, Node parent, SearchState parentState, Operator op, final Operator pop){
         return new Node(state, parent, parentState, op, pop);
     }
 
@@ -500,8 +503,8 @@ public class EES implements SearchAlgorithm {
         public double dHat;
 
         private int depth;
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
         private Node parent;
 
@@ -603,7 +606,7 @@ public class EES implements SearchAlgorithm {
          * @param op The operator which generated this node
          * @param pop The reverse operator (which will cause to generation of the parent node)
          */
-        private Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, final SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, SearchState parentState, Operator op, final Operator pop) {
             // The size of the key is 2
             super(2);
             this.packed = domain.pack(state);
@@ -643,8 +646,8 @@ public class EES implements SearchAlgorithm {
         }
 
         private void updateFromDuplicate(Node duplicateNode,
-                                         SearchDomain.State thisUnpackedState,
-                                         SearchDomain.State parentUnpackedState) {
+                                         SearchState thisUnpackedState,
+                                         SearchState parentUnpackedState) {
             this.g = duplicateNode.g;
             this.f = duplicateNode.f;
             this.op = duplicateNode.op;

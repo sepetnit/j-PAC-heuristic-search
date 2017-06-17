@@ -39,7 +39,7 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
          *
          * @return The number of obstacles
          */
-        public int countObstacles() {
+        private int countObstacles() {
             int toReturn = 0;
             for (int i = 0; i < this.mapSize; ++i) {
                 if (GridPathFindingGenerator.this.OBSTACLE_CHARACTERS.contains(this.map[i])) {
@@ -72,12 +72,14 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
          * @param mapHeight      The height of the map
          * @param countObstacles Whether to count the obstacles
          */
+        /*
         private GridMap(int mapWidth, int mapHeight, boolean countObstacles) {
             this(mapWidth, mapHeight);
             if (countObstacles) {
                 this.countObstacles();
             }
         }
+        */
 
         /**
          * Make the blocked state of the some location to be the given value : influences on whether an agent can
@@ -213,7 +215,7 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
      * @param in The reader to read from
      * @throws IOException In case the read operation failed
      */
-    public GridMap readMap(BufferedReader in) throws IOException {
+    private GridMap readMap(BufferedReader in) throws IOException {
         // Create the map
         // First, read the first line (should be ignored)
         String sz[] = in.readLine().trim().split(" ");
@@ -270,7 +272,7 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
      * @param requiredObstaclesCount The required number of obstacles on the grid
      * @param rand                   [OPTIONAL] A random generator to use (if null - will be created internally)
      */
-    public void fitObstaclesRandomly(GridMap map, int obstaclesCount, int requiredObstaclesCount, Random rand) {
+    private void fitObstaclesRandomly(GridMap map, int obstaclesCount, int requiredObstaclesCount, Random rand) {
         if (rand == null) {
             rand = new Random();
         }
@@ -289,10 +291,20 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
 
     }
 
-    private PairInt _generateLocationOnMap(GridMap map, Set<PairInt> existingLocations) {
+    private boolean _arrayOfSetsCountains(Set<PairInt>[] sets, PairInt value) {
+        for (Set<PairInt> set : sets) {
+            if (set.contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SafeVarargs
+    private final PairInt _generateLocationOnMap(GridMap map, Set<PairInt> ... existingLocations) {
         PairInt toReturn = null;
         while (toReturn == null ||
-                existingLocations.contains(toReturn) ||
+                this._arrayOfSetsCountains(existingLocations, toReturn) ||
                 map.isBlocked(toReturn)) {
             int x = this.rand.nextInt(map.mapWidth);
             int y = this.rand.nextInt(map.mapHeight);
@@ -301,7 +313,7 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
         return toReturn;
     }
 
-    public String generateInstance(String path, GridMap map) {
+    private String generateInstance(String path, GridMap map, int goalsCount) {
         int triesNumber = 0;
 
         StringBuilder sb = new StringBuilder();
@@ -321,31 +333,61 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
         sb.append(start.toStringNoParen());
         this._appendNewLine(sb);
 
-        PairInt goal;
-        while (true) {
-            goal = this._generateLocationOnMap(map, existing);
-            if (Utils.calcManhattanDistance(start, goal) < minDistance) {
-                ++triesNumber;
-            } else {
-                existing.add(goal);
-                break;
+        sb.append("goals:");
+
+        // Look in the map and create the relevant goals the goals
+        for (int i = 0; i < goalsCount; ++i) {
+            PairInt goal = null;
+            while (triesNumber < GridPathFindingGenerator.MAX_TRIES_TO_SINGLE_INSTANCE) {
+                goal = this._generateLocationOnMap(map, existing);
+                if (Utils.calcManhattanDistance(start, goal) < minDistance) {
+                    ++triesNumber;
+                } else {
+                    existing.add(goal);
+                    // Space between goals
+                    sb.append(" ");
+                    sb.append(goal.toStringNoParen());
+                    break;
+                }
+            }
+            // No goal was found
+            if (goal == null) {
+                this.logger.warn("Max Tries reached!");
+                return null;
             }
         }
-        if (triesNumber == GridPathFindingGenerator.MAX_TRIES_TO_SINGLE_INSTANCE) {
-            System.err.println("[ERROR] Max Tries reached for instance");
-            return null;
-        }
-        sb.append("goals: ");
-        sb.append(goal.toStringNoParen());
+
         this._appendNewLine(sb);
 
         return sb.toString();
     }
 
-    public GridPathFindingGenerator() {
+    private GridPathFindingGenerator() {
         this.OBSTACLE_CHARACTERS = new HashSet<>();
         this.OBSTACLE_CHARACTERS.add('@');
         this.OBSTACLE_CHARACTERS.add('#');
+    }
+
+    private boolean generateAndStoreInstance(int problemNumber,
+                                            String mapFile,
+                                            GridMap map,
+                                            int goalsCount,
+                                            File outputDirectory,
+                                            Set<String> generatedInstances) throws IOException {
+        this.logger.info("Generating instance # {} ...", problemNumber);
+        FileWriter fw = new FileWriter(new File(outputDirectory, problemNumber + ".in"));
+        String instance = null;
+        while (instance == null || generatedInstances.contains(instance)) {
+            instance = this.generateInstance(mapFile, map, goalsCount);
+            if (instance == null) {
+                logger.info("Trying generating again instance # {}", problemNumber);
+            }
+        }
+        generatedInstances.add(instance);
+        fw.write(instance);
+        fw.close();
+        this.logger.info("Done generating instance # {}", problemNumber);
+        return true;
     }
 
     /**
@@ -415,22 +457,22 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
      * @param goalY  The goal Y location
      * @return The created instance
      */
-    public static String _stringifyInstance(String path, String startX, String startY, String goalX, String goalY) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("map: ");
-        sb.append(path);
-        sb.append("\n");
-        sb.append("start: ");
-        sb.append(startX);
-        sb.append(",");
-        sb.append(startY);
-        sb.append("\n");
-        sb.append("goals: ");
-        sb.append(goalX);
-        sb.append(",");
-        sb.append(goalY);
-        sb.append("\n");
-        return sb.toString();
+    private static String _stringifyInstance(String path, String startX, String startY, String goalX, String goalY) {
+        String sb = "";
+        sb += "map: ";
+        sb += path;
+        sb += "\n";
+        sb += "start: ";
+        sb += startX;
+        sb += ",";
+        sb += startY;
+        sb += "\n";
+        sb += "goals: ";
+        sb += goalX;
+        sb += ",";
+        sb += goalY;
+        sb += "\n";
+        return sb;
     }
 
     /**
@@ -438,7 +480,7 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
      *
      * @throws IOException If something wrong occurred
      */
-    public static void mainGenerateInstancesFromMovingAISceneFiles() throws IOException {
+    private static void mainGenerateInstancesFromMovingAISceneFiles() throws IOException {
         Random rand = new Random();
         Map<String, String> inputOutput = new HashMap<>();
         inputOutput.put("input/gridpathfinding/moving-ai/maze512-1-6.map.scen",
@@ -529,13 +571,69 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
         }
     }
 
+    private static void generateSingleInstance(String inputPath,
+                                               int instancesCount,
+                                               int goalsCount,
+                                               String outputFolderPath) throws IOException {
+        // Read the map file
+        if (!(new File(inputPath).exists())) {
+            throw new IOException("Map file " + inputPath + " doesn't exist");
+        }
 
-    public static void mainGenerateInstaceFromPreparedMap(String args[]) throws IOException {
+        // Read the output directory
+        File outputDirectory = new File(outputFolderPath);
+        // Create the directory if not exists
+        if (!outputDirectory.isDirectory()) {
+            if (!outputDirectory.mkdirs()) {
+                throw new IOException("Invalid directory: " + outputDirectory);
+            }
+        }
+
+        GridPathFindingGenerator generator = new GridPathFindingGenerator();
+
+        // Read the map
+        GridMap map = generator.readMap(new BufferedReader(
+                new InputStreamReader(new
+                        FileInputStream(inputPath))));
+        // This set is used in order to avoid duplicates
+        Set<String> instances = new HashSet<>();
+
+        // Loop over the required number of instances
+        for (int j = 0; j < instancesCount; ++j) {
+            generator.generateAndStoreInstance(j+1,
+                    inputPath, map, goalsCount, outputDirectory, instances);
+        }
+        assert instances.size() == instancesCount;
+    }
+
+    private static void mainGenerateInstancesWithDifferentGoalsCount(String args[])
+            throws IOException {
+        String generalInputPath = "input/gridpathfinding/raw/maps/{map-name}.map";
+        String generalOutputPath = "input/gridpathfinding/k-goal/{map-name}.map/{goals-count}";
+        String[] mapsNames = new String[]{"brc202d", "den400d", "ost003d"};
+        int[] goalsCounts = new int[]{2, 3, 4, 5, 10, 15, 20, 30, 50, 100};
+
+        for (String mapName : mapsNames) {
+            for (int goalsCount : goalsCounts) {
+                // Input - raw map file
+                String inputMapPath = generalInputPath.replace("{map-name}", mapName);
+                // 100 instances
+                int instancesCount = 100;
+                // output folder
+                String outputFolderPath = generalOutputPath.replace("{goals-count}",
+                        goalsCount + "").replace("{map-name}", mapName);
+                generateSingleInstance(inputMapPath, instancesCount, goalsCount, outputFolderPath);
+            }
+        }
+    }
+
+
+    private static void mainGenerateInstanceFromPreparedMap(String args[]) throws IOException {
         String[] outputPaths =
                 new String[]{
-                        "input/gridpathfinding/generated/brc202d.map",
-                        "input/gridpathfinding/generated/den400d.map",
-                        "input/gridpathfinding/generated/ost003d.map"
+                        "input/gridpathfinding/k-goal/brc202d.map",
+                        "input/gridpathfinding/k-goal/den400d.map",
+                        "input/gridpathfinding/k-goal/ost003d.map"
                 };
         String[] mapFiles =
                 new String[]{
@@ -546,15 +644,21 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
 
         /*
         if (args.length != 3) {
-            System.out.println("Usage: <OutputPath> <MapFile> <Count>");
+            System.out.println("Usage: <OutputPath> <MapFile> <Count> <GoalsCount>");
             System.exit(-1);
         }
         */
 
+        if (args == null) {
+            args = new String[4];
+        }
+
         for (int i = 0; i < outputPaths.length; ++i) {
+
             args[0] = outputPaths[i];
             args[1] = mapFiles[i];
             args[2] = "100";
+            args[3] = "100";
 
             // Read the output directory
             File outputDirectory = new File(args[0]);
@@ -564,11 +668,13 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
             // Read the map file
             String mapFile = args[1];
             if (!(new File(mapFile).exists())) {
-                System.out.println("Map file " + mapFile + " doesn't exist");
+                throw new IOException("Map file " + mapFile + " doesn't exist");
             }
             // Read required count of instances
             // Required number of instances
             int instancesCount = GridPathFindingGenerator.readIntNumber(args[2], 1, -1, "# of instances");
+            // Required number of goals
+            int goalsCount = GridPathFindingGenerator.readIntNumber(args[3], 1, -1, "# of goals");
 
             GridPathFindingGenerator generator = new GridPathFindingGenerator();
 
@@ -579,17 +685,8 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
 
             // Loop over the required number of instances
             for (int j = 0; j < instancesCount; ++j) {
-                int problemNumber = j + 1;
-                System.out.println("[INFO] Generating instance # " + problemNumber + " ...");
-                FileWriter fw = new FileWriter(new File(outputDirectory, problemNumber + ".in"));
-                String instance = null;
-                while (instance == null || instances.contains(instance)) {
-                    instance = generator.generateInstance(mapFile, map);
-                }
-                instances.add(instance);
-                fw.write(instance);
-                fw.close();
-                System.out.println(" Done.");
+                generator.generateAndStoreInstance(j+1,
+                        mapFile, map, goalsCount, outputDirectory, instances);
             }
             assert instances.size() == instancesCount;
         }
@@ -598,7 +695,9 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
     public static void main(String[] args) {
         try {
             //GridPathFindingGenerator.mainGenerateInstancesFromMovingAISceneFiles();
-            GridPathFindingGenerator.mainGenerateMazesFromExistingMazesWithObstaclesTuning();
+            //GridPathFindingGenerator.mainGenerateMazesFromExistingMazesWithObstaclesTuning();
+            // GridPathFindingGenerator.mainGenerateInstanceFromPreparedMap(null);
+            GridPathFindingGenerator.mainGenerateInstancesWithDifferentGoalsCount(null);
         } catch (IOException e) {
             System.out.println("[ERROR] " + e.getMessage());
         }

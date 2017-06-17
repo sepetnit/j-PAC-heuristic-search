@@ -29,175 +29,343 @@ import org.cs4j.core.collections.BucketHeap.BucketHeapElement;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class BucketHeap<E extends BucketHeapElement> implements SearchQueue<E> {
-	
-  private int fill, size;
-  private int min = Integer.MAX_VALUE;
-  private Bucket[] buckets;
-  private int key;
-  
-  public BucketHeap(int size, int key) {
-  	this.size = size;
-    this.buckets = new Bucket[size];
-    this.key = key;
-  }
-  
-  @Override
-  public int getKey() {
-  	return key;
-  }
-  
-  @Override
-  public void add(E n) {
-    int p0 = (int)n.getRank(0);
-    if (p0 < min) {
-      min = p0;
-    }
-    Bucket<E> bucket = buckets[p0];
-    if (bucket == null) {
-      bucket = new Bucket<E>(buckets.length, key);
-      buckets[p0] = bucket;
-    }
-    n.setIndex(key, p0);
     
-    int p1 = (int)n.getRank(1);
-    bucket.push(n, p1);
-    n.setSecondaryIndex(key, p1);
+    // Number of elements in the heap
+    private int fill;
+    // Number of buckets in the heap
+    private int size;
+    private int min = Integer.MAX_VALUE;
+    private Bucket[] buckets;
+    private int key;
     
-    fill++;
-  }
-  
-  @Override
-  public E poll() {
-    for (; min < buckets.length; min++) {
-      Bucket minBucket = buckets[min];
-      if (minBucket != null && !minBucket.isEmpty()) break;
+    /**
+     * Constructor of the heap
+     *
+     * @param size Number of buckets to create
+     * @param key The index at the single heap element, that allows accessing a single element
+     */
+    public BucketHeap(int size, int key) {
+        this.size = size;
+        // Create an array of buckets
+        this.buckets = new Bucket[size];
+        this.key = key;
     }
-    fill--;
-    Bucket<E> minBucket = buckets[min];
-    E e = minBucket.pop();
-    e.setIndex(key, -1);
-    e.setSecondaryIndex(key, -1);
-    return e;
-  }
   
-  @Override
-  public E peek() {
-  	int min = this.min;
-    for (; min < buckets.length; min++) {
-      Bucket minBucket = buckets[min];
-      if (minBucket != null && !minBucket.isEmpty()) break;
+    @Override
+    public int getKey() {
+        return this.key;
     }
-    Bucket<E> minBucket = buckets[min];
-    return minBucket.peek();
-  }
   
+    /**
+     * The function inserts the given element to the heap and assures the heap property is still
+     * true after the insertion
+     *
+     * @param e The element to insert
+    */
+    @Override
+    public void add(E e) {
+        int p0 = (int)e.getRank(0);
+        // Update the minimal element of the heap
+        if (p0 < this.min) {
+            this.min = p0;
+        }
+        // Get the relevant bucket, according to the rank of the element
+        Bucket<E> bucket = this.buckets[p0];
+        // Create a new bucket if required
+        if (bucket == null) {
+            // The size of each bucket is equal to the number of elements in the bucket
+            bucket = new Bucket<>(this.buckets.length, this.key);
+            // Insert the bucket to the array
+            this.buckets[p0] = bucket;
+        }
+        // Update the index of the element to correspond to its rank
+        e.setIndex(this.key, p0);
+
+        // Get the rank of the element, at level 1
+        int p1 = (int)e.getRank(1);
+        // Insert the element to the bucket, according to the relevant rank
+        bucket.push(e, p1);
+        // Update the secondary index of the element according to its rank at the first level
+        e.setSecondaryIndex(this.key, p1);
+        // Increase the number of elements
+        ++this.fill;
+    }
+
+    /**
+     * The function removes the first element of the heap and returns it
+     *
+     * @return The first element of the heap
+     */
+    @Override
+    public E poll() {
+        // Find the first non-empty bucket
+        for (; this.min < this.buckets.length; ++this.min) {
+            // Find the first non-empty bucket
+            Bucket minBucket = this.buckets[this.min];
+            // Break if the bucket was found
+            if (minBucket != null && !minBucket.isEmpty()) {
+                break;
+            }
+        }
+        // Decrease the number of elements in the heap
+        --fill;
+
+        // Get the found bucket
+        Bucket<E> minBucket = this.buckets[this.min];
+        // Take the first element of the bucket
+        E e = minBucket.pop();
+        // Clean the indexes of the taken element (make the element un-aware of its
+        // place in the heap)
+        e.setIndex(key, -1);
+        e.setSecondaryIndex(key, -1);
+        return e;
+    }
+
+    /**
+     * The function takes the first element of the heap and returns it
+     * (without removing) the element
+     *
+     * @return The first element of the heap
+     */
+    @Override
+    public E peek() {
+  	    int min = this.min;
+  	    // Find the first non-empty bucket
+        for (; min < this.buckets.length; ++min) {
+            Bucket minBucket = this.buckets[min];
+            if (minBucket != null && !minBucket.isEmpty()) {
+                break;
+            }
+        }
+        // Take the bucket
+        Bucket<E> minBucket = this.buckets[min];
+        // Return the fist element of the bucket
+        return minBucket.peek();
+    }
+
+    /**
+     * The function updates the given element in the heap (replaces it)
+     *
+     * @param e The element to replace
+     */
 	@Override
+    // Update h
 	public void update(E e) {
-		int p0 = e.getIndex(key);
-		if (p0 > buckets.length-1 || p0 < 0)
-			throw new IllegalArgumentException();
-		Bucket<E> b = buckets[p0];
+	    // Get the location of the element (the relevant bucket)
+		int p0 = e.getIndex(this.key);
+		// Assure the returned bucket is valid
+		if (p0 > this.buckets.length - 1 || p0 < 0) {
+            throw new IllegalArgumentException();
+        }
+        // Take the bucket from the buckets list
+		Bucket<E> b = this.buckets[p0];
+		// Remove the element and add the updated one
 		b.remove(e);
-		add(e);
+		this.add(e);
 	}
-	
+
+    /**
+     * The function removes the given element from the heap and returns it
+     *
+     * @param e The element to remove
+     *
+     * @return The removed element
+     */
 	@Override
 	public E remove(E e) {
-		int p0 = e.getIndex(key);
-		if (p0 > buckets.length-1 || p0 < 0)
-			throw new IllegalArgumentException();
-		Bucket<E> b = buckets[p0];
+	    // Get the bucket in which the given element is located
+		int p0 = e.getIndex(this.key);
+		// Assure the bucket index is valid
+		if (p0 > this.buckets.length - 1 || p0 < 0) {
+            throw new IllegalArgumentException();
+        }
+        // Take the bucket
+		Bucket<E> b = this.buckets[p0];
+		// Remove the element from the bucket
 		b.remove(e);
+		// Return the element
 		return e;
 	}
 
+    /**
+     * The function clears the heap
+     */
 	@Override
 	public void clear() {
-		fill = 0;
-		min = Integer.MAX_VALUE;
-		buckets = new Bucket[size];
+		this.fill = 0;
+		this.min = Integer.MAX_VALUE;
+		// Re-create the buckets list
+		this.buckets = new Bucket[this.size];
 	}
-  
-  @Override
-  public boolean isEmpty() { 
-    return fill == 0; 
-  }
-  
-  @Override
-  public int size() {
-  	return fill;
-  }
 
-  private static final class Bucket<E extends BucketHeapElement> {
-    private int fill, max;
-    private ArrayList[] bins;
-    private int key;
-    
-    Bucket(int size, int key) {
-      bins = new ArrayList[size];
-      this.key = key;
+    /**
+     * @return Whether the heap is empty
+     */
+    @Override
+    public boolean isEmpty() {
+        return fill == 0;
     }
-        
-    private void push(E n, int p) {
-       if (p > max) {
-        max = p; 
-      }
-      ArrayList<E> binP = bins[p];
-      if (binP == null) {
-        binP = new ArrayList<E>(10000);
-        bins[p] = binP;
-      }
-      binP.add(n);
-      fill++;
-    }
-    
-    private E pop() {
-      for ( ; max > 0; max--) {
-        ArrayList<E> maxBin = bins[max];
-        if (maxBin != null && !maxBin.isEmpty()) break;
-      }
-      ArrayList<E> maxBin = bins[max];
-      int last = maxBin.size()-1;
-      E n = maxBin.get(last);
-      maxBin.remove(last);
-      fill--;
-      return n;
-    }
-    
-    private E peek() {
-    	int max = this.max;
-      for ( ; max > 0; max--) {
-        ArrayList<E> maxBin = bins[max];
-        if (maxBin != null && !maxBin.isEmpty()) break;
-      }
-      ArrayList<E> maxBin = bins[max];
-      int last = maxBin.size()-1;
-      return maxBin.get(last);
-    }
-    
-    private void remove(E e) {
-  		int p1 = e.getSecondaryIndex(key);
-  		if (p1 > bins.length-1 || p1 < 0)
-  			throw new IllegalArgumentException();
-  		List<E> list = bins[p1];
-  		if (!list.remove(e))
-  			throw new IllegalArgumentException();
-  		fill--;
-    }
-    
-    private boolean isEmpty() {
-      return fill == 0;
-    }
-  }
-  
-  public interface BucketHeapElement extends SearchQueueElement {
-  	
-  	public void setSecondaryIndex(int key, int index);
-  	
-  	public int getSecondaryIndex(int key);
-  	
-  	public double getRank(int level);
-  	
-  }
 
+    /**
+     * @return The number of elements in the heap
+     */
+    @Override
+    public int size() {
+      	return this.fill;
+    }
+
+    /**
+     * This class represents a single bucket of the heap, which stores the
+     * elements
+     *
+     * @param <E> The type of elements stored in the heap
+     */
+    private static final class Bucket<E extends BucketHeapElement> {
+        private int fill;
+        private int max;
+        // A single bucket contains an array of arrays
+        private ArrayList[] bins;
+        private int key;
+
+        /**
+         * The constructor of the class - creates a single bucket
+         *
+         * @param size The size of the bucket (corresponds to the size of the heap)
+         * @param key The key which allows accessing the rank of each element
+         */
+        private Bucket(int size, int key) {
+            this.bins = new ArrayList[size];
+            this.key = key;
+        }
+
+        /**
+         * Adds a single element to the bucket
+         *
+         * @param e The element to add
+         * @param er The rank of the element
+         */
+        private void push(E e, int er) {
+            // Update the maximum rank of elements stored in the heap
+            if (er > this.max) {
+                this.max = er;
+            }
+            // Get the relevant bin (according to the rank)
+            ArrayList<E> binEr = this.bins[er];
+            // If there is no list corresponding to the given rank, create it
+            if (binEr == null) {
+                binEr = new ArrayList<>(10000);
+                this.bins[er] = binEr;
+            }
+            // Add the element to the created list
+            binEr.add(e);
+            // Update the number of elements stored in the bucket
+            ++this.fill;
+        }
+
+        /**
+         * Remove the element with the maximum rank from the current bucket and
+         * return it
+         *
+         * @return The removed element
+         */
+        private E pop() {
+            // Find the bin the maximum rank
+            for ( ; max > 0; max--) {
+                ArrayList<E> maxBin = this.bins[this.max];
+                if (maxBin != null && !maxBin.isEmpty()) {
+                    break;
+                }
+            }
+            // Get the found bin
+            ArrayList<E> maxBin = this.bins[this.max];
+            // Find the last non-empty index of the bin
+            int last = maxBin.size() - 1;
+            // Take the last element and remove it from the bin
+            E n = maxBin.get(last);
+            maxBin.remove(last);
+            // Update the total number of elements in the bin
+            --fill;
+            // Return the found element
+            return n;
+        }
+
+        /**
+         * Return the element with the highest rank (without removing it)
+         *
+         * @return The found element
+         */
+        private E peek() {
+            int max = this.max;
+            // Take the maximum index of a bin, which contains at least one element
+            for ( ; max > 0; max--) {
+                ArrayList<E> maxBin = this.bins[max];
+                if (maxBin != null && !maxBin.isEmpty()) {
+                    break;
+                }
+            }
+            // Get the relevant bin
+            ArrayList<E> maxBin = this.bins[max];
+            // Get the last non-empty index of the bin
+            int last = maxBin.size() - 1;
+            // Return the element stored at the found index (without removing it!)
+            return maxBin.get(last);
+        }
+
+        /**
+         * Removes the given element from the heap
+         *
+         * @param e The element to remove
+         */
+        private void remove(E e) {
+            // Find the bin in which the element is stored
+            int p1 = e.getSecondaryIndex(key);
+            if (p1 > this.bins.length - 1 || p1 < 0) {
+                throw new IllegalArgumentException();
+            }
+            // Take the relevant list
+            List<E> list = this.bins[p1];
+            // Try to remove the element from the found list
+            if (!list.remove(e)) {
+                throw new IllegalArgumentException();
+            }
+            // Update the total number of elements in the bucket
+            --fill;
+        }
+
+        /**
+         * @return Whether the bucket contains at least a single element
+         */
+        private boolean isEmpty() {
+            return fill == 0;
+        }
+    }
+
+    /**
+     * The interface represents an element which can be added to the heap
+     */
+    public interface BucketHeapElement extends SearchQueueElement {
+
+        /**
+         * Set the secondary index of the element, which represents the bucket
+         * in which the element will be stored
+         *
+         * @param key The key in the map, in which the given index will be stored
+         * @param index The value to store
+         */
+        void setSecondaryIndex(int key, int index);
+
+        /**
+         * @param key The key in the map, in which the index is stored
+         *
+         * @return The found index
+         */
+        int getSecondaryIndex(int key);
+
+        /**
+         * @param level The level to return
+         *
+         * @return The found rank which is stored at the given level
+         */
+        double getRank(int level);
+    }
 }

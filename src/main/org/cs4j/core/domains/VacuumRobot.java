@@ -1,7 +1,10 @@
 package org.cs4j.core.domains;
 
 
+import org.cs4j.core.Operator;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.SingleGoalSearchDomain;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.PairInt;
 
@@ -11,7 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class VacuumRobot implements SearchDomain {
+public class VacuumRobot extends SingleGoalSearchDomain {
 
     public static final char ROBOT_START_MARKER = 'V';
     public static final char ROBOT_END_MARKER = 'E';
@@ -1116,7 +1119,7 @@ public class VacuumRobot implements SearchDomain {
         double h = computeHD_chris_fast(state)[0];
         // This is an alternative (no fast calculation)
         // double h = computeHD_chris(s)[0];
-        // For d, use the standard function for the unit cost domain (which estimates the cost of a
+        // For d, use the familiar function for the unit cost domain (which estimates the cost of a
         // greedy traversal of the the dirt piles)
         double d = computeHD_greedy(state)[1];
         return new double[]{h, d};
@@ -1275,13 +1278,13 @@ public class VacuumRobot implements SearchDomain {
     }
 
     @Override
-    public boolean isGoal(State state) {
+    public boolean isGoal(SearchState state) {
         VacuumRobotState drs = (VacuumRobotState)state;
         return drs.remainingDirtyLocationsCount == 0;
     }
 
     @Override
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         VacuumRobotState vrs = (VacuumRobotState) state;
         if (vrs.ops == null) {
             this.initOps(vrs);
@@ -1292,7 +1295,7 @@ public class VacuumRobot implements SearchDomain {
     }
 
     @Override
-    public Operator getOperator(State state, int index) {
+    public Operator getOperator(SearchState state, int index) {
         VacuumRobotState vrs = (VacuumRobotState)state;
         if (vrs.ops == null) {
             this.initOps(vrs);
@@ -1301,7 +1304,7 @@ public class VacuumRobot implements SearchDomain {
     }
 
     @Override
-    public State copy(State state) {
+    public SearchState copy(SearchState state) {
         return new VacuumRobotState((VacuumRobotState)state);
     }
 
@@ -1332,7 +1335,7 @@ public class VacuumRobot implements SearchDomain {
      * The next part stores a bit vector which indicated for each possible location, whether it is dirty
      */
     @Override
-    public PackedElement pack(State s) {
+    public PackedElement pack(SearchState s) {
         VacuumRobotState state = (VacuumRobotState)s;
 
         long packed = 0L;
@@ -1412,7 +1415,7 @@ public class VacuumRobot implements SearchDomain {
      * Unpacks the Vacuum Robot state from a long number
      */
     @Override
-    public State unpack(PackedElement packed) {
+    public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
         VacuumRobotState dst = new VacuumRobotState();
         this.unpack(packed.getFirst(), dst);
@@ -1428,7 +1431,7 @@ public class VacuumRobot implements SearchDomain {
      * @return The new generated state
      */
     @Override
-    public State applyOperator(State state, Operator op) {
+    public SearchState applyOperator(SearchState state, Operator op) {
         VacuumRobotState s = (VacuumRobotState)state;
         VacuumRobotState vrs = (VacuumRobotState)copy(s);
         VacuumRobotOperator o = (VacuumRobotOperator)op;
@@ -1479,7 +1482,7 @@ public class VacuumRobot implements SearchDomain {
     /**
      * A VacuumRobot Cleaner World state
      */
-    private final class VacuumRobotState implements State {
+    private final class VacuumRobotState extends SearchState {
         private double h;
         private double d;
 
@@ -1574,7 +1577,7 @@ public class VacuumRobot implements SearchDomain {
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -1646,7 +1649,7 @@ public class VacuumRobot implements SearchDomain {
         }
 
         @Override
-        public double getCost(State s, State parent) {
+        public double getCost(SearchState s, SearchState parent) {
             VacuumRobotState vrs = (VacuumRobotState) s;
             double cost = 1.0d;
             if (VacuumRobot.this.isNonUnitCost) {
@@ -1660,7 +1663,7 @@ public class VacuumRobot implements SearchDomain {
          * operator
          */
         @Override
-        public Operator reverse(State state) {
+        public Operator reverse(SearchState state) {
             return VacuumRobot.this.reverseOperators[this.type];
         }
     }
@@ -1676,7 +1679,7 @@ public class VacuumRobot implements SearchDomain {
      *
      * @return A string representation of the map (with all agents located on it)
      */
-    private String _dumpMap(State states[], boolean markAllDirty, int[] obstaclesAndDirtyCountArray) {
+    private String _dumpMap(SearchState states[], boolean markAllDirty, int[] obstaclesAndDirtyCountArray) {
         assert obstaclesAndDirtyCountArray == null || obstaclesAndDirtyCountArray.length == 2;
         StringBuilder sb = new StringBuilder();
         int obstaclesCount = 0;
@@ -1701,7 +1704,7 @@ public class VacuumRobot implements SearchDomain {
                             dirtyLocation = true;
                         } else if (states != null) {
                             int dirtyIndex = this.dirt[locationIndex];
-                            for (State state : states) {
+                            for (SearchState state : states) {
                                 if (((VacuumRobotState)state).isDirty(dirtyIndex)) {
                                     // Check not last state and robot there
                                     if (states != null &&
@@ -1785,7 +1788,7 @@ public class VacuumRobot implements SearchDomain {
         sb.append("\n");
 
         int obstaclesAndDirtyCountArray[] = new int[2];
-        sb.append(this._dumpMap(new State[]{state}, false, obstaclesAndDirtyCountArray));
+        sb.append(this._dumpMap(new SearchState[]{state}, false, obstaclesAndDirtyCountArray));
         obstaclesCount = obstaclesAndDirtyCountArray[0];
         sb.append("\n");
         sb.append(this.dumpStateShort(state));
@@ -1800,7 +1803,7 @@ public class VacuumRobot implements SearchDomain {
         return sb.toString();
     }
 
-    public String dumpStatesCollection(State[] states) {
+    public String dumpStatesCollection(SearchState[] states) {
         StringBuilder sb = new StringBuilder();
         // All the data regarding a single state refers to the last state of the collection
         VacuumRobotState lastState = (VacuumRobotState)states[states.length - 1];

@@ -3,10 +3,10 @@ package java.org.cs4j.core.test.algorithms;
 import org.cs4j.core.AnytimeSearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.AnytimePTS;
-import org.cs4j.core.algorithms.AnytimeWAStar;
-import org.cs4j.core.algorithms.SearchResultImpl;
-import org.cs4j.core.algorithms.WAStar;
+import org.cs4j.core.algorithms.anytime.AnytimePTS;
+import org.cs4j.core.algorithms.anytime.AnytimeWAStar;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.algorithms.weighted.WAStar;
 import org.junit.Assert;
 import org.junit.Test;
 

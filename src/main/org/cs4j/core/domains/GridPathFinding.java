@@ -1,11 +1,10 @@
 package org.cs4j.core.domains;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.Pair;
 import org.cs4j.core.collections.PairInt;
+import org.junit.Assert;
 
 import java.io.*;
 import java.util.*;
@@ -19,8 +18,7 @@ import java.util.*;
  * Note: The grid is 1-based
  * </p>
  */
-public class GridPathFinding implements SearchDomain {
-    private final static Logger logger = LogManager.getLogger(GridPathFinding.class);
+public class GridPathFinding extends MultipleGoalsSearchDomain {
     private static final int NUM_MOVES = 4;
 
     public static final char OBSTACLE_MARKER = '@';
@@ -45,6 +43,7 @@ public class GridPathFinding implements SearchDomain {
     // The start location of the agent
     private int startX = -1;
     private int startY = -1;
+    private PairInt start = null;
 
     public enum COST_FUNCTION {
         HEAVY,
@@ -58,6 +57,7 @@ public class GridPathFinding implements SearchDomain {
     private GridMap map;
     private List<Integer> goals;
     private List<PairInt> goalsPairs;
+    private List<PackedElement> goalsPacked;
 
     private enum HeuristicType {
         // Manhattan distance
@@ -321,7 +321,7 @@ public class GridPathFinding implements SearchDomain {
     /**
      * Completes the initialization steps of the domain
      */
-    private void _completeInit(boolean log) {
+    private void _completeInit() {
 
         // MD is used by default
         this.heuristicType = HeuristicType.MD;
@@ -340,26 +340,32 @@ public class GridPathFinding implements SearchDomain {
 
         // Assure there is no overflow : at most 64 bits can be used in order to store the state
         if (locationBits > 64) {
-            Utils.fatal("Too many bits required: " + locationBits);
+            this.logger.fatal("Too many bits required: {}", locationBits);
+            throw new IllegalArgumentException();
         }
-        if (log) {
-            logger.debug("[INFO] Initializes reverse operators");
-        }
+        this.logger.info("Initializes reverse operators");
         // Initialize the array of reverse operators
         this._initializeReverseOperatorsArray();
-        if (log) {
-            logger.debug("[INFO] Finished initializing reverse operators");
+        this.logger.info("Finished initializing reverse operators");
+
+        // Create packed element for each goal
+        this.goalsPacked = new ArrayList<>();
+        for (int goal : this.goals) {
+            long packed = goal & this.agentLocationBitMask;
+            this.goalsPacked.add(new PackedElement(packed));
         }
+        this._initializeMultipleGoalsEnvironment(this.totalGoalsCount());
     }
 
     /**
-     * This constructor is used in order to generate a simple instance of the domain - with a single agent and a
-     * single goal
+     * This constructor is used in order to generate a simple instance of the
+     * domain - with a single agent and a single goal
      *
-     * The constructor is used by some generators of instances, which want to check that the generated instance is
-     * valid
+     * The constructor is used by some generators of instances, which want to
+     * check that the generated instance is valid
      *
-     * Note: Either start1Dim or start can be given, and also, either goal1Dim or goal can be given
+     * Note: Either start1Dim or start can be given, and also, either goal1Dim
+     * or goal can be given
      *
      * @param width The width of the grid
      * @param height The height of the grid
@@ -383,29 +389,35 @@ public class GridPathFinding implements SearchDomain {
         if (start1Dim != -1) {
             start = this.map.getPosition(start1Dim);
         }
+
+        this.start = start;
         this.startX = start.first;
         this.startY = start.second;
+
         this.goals = new ArrayList<>();
+        this.goalsPairs = new ArrayList<>();
+
         if (goal1Dim != -1) {
             goal = this.map.getPosition(goal1Dim);
         } else {
             goal1Dim = this.map.getLocationIndex(goal);
         }
         this.goals.add(goal1Dim);
-        this.goalsPairs = new ArrayList<>();
         this.goalsPairs.add(goal);
+
         // System.out.println("[INFO] Start: " + start.toString());
         // System.out.println("[INFO] Goal: " + goal.toString());
         // Now, complete the initialization by initializing other parameters
-        this._completeInit(false);
+        this._completeInit();
     }
 
     /**
-     * This constructor is used in order to generate a simple instance of the domain - with a single agent and a
-     * single goal - start and goal positions are given in 1-dimensional format
+     * This constructor is used in order to generate a simple instance of the
+     * domain - with a single agent and a single goal - start and goal
+     * positions are given in 1-dimensional format
      *
-     * The constructor is used by some generators of instances, which want to check that the generated instance is
-     * valid
+     * The constructor is used by some generators of instances, which want to
+     * check that the generated instance is valid
      *
      * @param width The width of the grid
      * @param height The height of the grid
@@ -413,16 +425,21 @@ public class GridPathFinding implements SearchDomain {
      * @param start The start position on the grid (in a 1-dimensional format)
      * @param goal The SINGLE goal on the grid (in a 1-dimensional format)
      */
-    public GridPathFinding(int width, int height, char[] map, PairInt start, PairInt goal) {
+    public GridPathFinding(int width,
+                           int height,
+                           char[] map,
+                           PairInt start,
+                           PairInt goal) {
         this(width, height, map, -1, start, -1, goal);
     }
 
     /**
-     * This constructor is used in order to generate a simple instance of the domain - with a single agent and a
-     * single goal - start and goal positions are given in 1-dimensional format
+     * This constructor is used in order to generate a simple instance of the
+     * domain - with a single agent and a single goal - start and goal
+     * positions are given in 1-dimensional format
      *
-     * The constructor is used by some generators of instances, which want to check that the generated instance is
-     * valid
+     * The constructor is used by some generators of instances, which want to
+     * check that the generated instance is valid
      *
      * @param width The width of the grid
      * @param height The height of the grid
@@ -430,7 +447,11 @@ public class GridPathFinding implements SearchDomain {
      * @param start The start position on the grid (in a 1-dimensional format)
      * @param goal The SINGLE goal on the grid (in a 1-dimensional format)
      */
-    public GridPathFinding(int width, int height, char[] map, int start, int goal) {
+    public GridPathFinding(int width,
+                           int height,
+                           char[] map,
+                           int start,
+                           int goal) {
         this(width, height, map, start, null, goal, null);
     }
 
@@ -467,6 +488,7 @@ public class GridPathFinding implements SearchDomain {
                     case 'V': {
                         this.startX = x;
                         this.startY = y;
+                        this.start = new PairInt(x, y);
                         break;
                         // The end location
                     } case 'g':
@@ -485,7 +507,7 @@ public class GridPathFinding implements SearchDomain {
                         break;
                         // Something strange
                     } default: {
-                        Utils.fatal("Unknown character: " + c);
+                        this.logger.fatal("Unknown character: {}", c);
                     }
                 }
             }
@@ -546,12 +568,13 @@ public class GridPathFinding implements SearchDomain {
         assert start.length == 2;
         this.startX = Integer.parseInt(start[0]);
         this.startY = Integer.parseInt(start[1]);
+        this.start = new PairInt(startX, startY);
         // Read goal locations
         sz = problemReader.readLine().trim().split(" ");
         assert sz.length >= 2 && sz[0].equals("goals:");
         for (int i = 1; i < sz.length; ++i) {
             String goal[] = sz[i].split(",");
-            assert goal.length == 2;
+            Assert.assertTrue(goal.length == 2);
             int goalX = Integer.parseInt(goal[0]);
             int goalY = Integer.parseInt(goal[1]);
             this.goals.add(this.map.getLocationIndex(goalX, goalY));
@@ -577,11 +600,11 @@ public class GridPathFinding implements SearchDomain {
                                     new FileInputStream(mapFilePath)));
             // Read the map
             this._readMovingAIMap(mapReader);
-            System.out.println("[INFO] Map read from " + mapFilePath);
+            this.logger.info("Map read from " + mapFilePath);
             // Read start and goal locations
             this._readStartAndGoalsFromProblemFile(in);
         } catch (FileNotFoundException e) {
-            System.err.println("[ERROR] Can't find reference map file: " + mapFilePath);
+            this.logger.error("Can't find reference map file: " + mapFilePath);
             throw new IOException();
         }
     }
@@ -615,15 +638,15 @@ public class GridPathFinding implements SearchDomain {
             }
             // Assure there is a start location
             if (this.startX < 0 || this.startY < 0) {
-                Utils.fatal("No start location");
+                this.logger.fatal("No start location");
             }
         } catch(IOException e) {
+            this.logger.fatal("Error reading input file");
             e.printStackTrace();
-            Utils.fatal("Error reading input file");
         }
 
         // Now, complete the initialization by initializing other parameters
-        this._completeInit(true);
+        this._completeInit();
     }
 
     /**
@@ -650,9 +673,9 @@ public class GridPathFinding implements SearchDomain {
             // Read the map (without start and goal locations)
             this._readMovingAIMap(in);
             // Read start
-            PairInt startPair = this.map.getPosition(start);
-            this.startX = startPair.first;
-            this.startY = startPair.second;
+            this.start = this.map.getPosition(start);
+            this.startX = this.start.first;
+            this.startY = this.start.second;
             // Read goals
             this.goals = new ArrayList<>(1);
             this.goalsPairs = new ArrayList<>(1);
@@ -665,17 +688,18 @@ public class GridPathFinding implements SearchDomain {
             }
         } catch(IOException e) {
             e.printStackTrace();
-            Utils.fatal("[ERROR] Error reading input file ");
+            this.logger.fatal("Error reading input file ");
         }
 
         // Now, complete the initialization by initializing other parameters
-        this._completeInit(true);
+        this._completeInit();
 
     }
 
     /**
-     * This constructor initializes a GridPathFinding problem by copying all the parameters from other given problem
-     * and initializing start and goal locations from the given input stream
+     * This constructor initializes a GridPathFinding problem by copying all
+     * the parameters from other given problem and initializing start and goal
+     * locations from the given input stream
      *
      * @param other The GridPathFinding problem to copy from
      * @param stream The stream to read start and goal locations from
@@ -762,6 +786,23 @@ public class GridPathFinding implements SearchDomain {
     }
     */
 
+    @Override
+    protected int getNthValidGoalIndex(int validGoalIndex) {
+        try {
+            return super.getNthValidGoalIndex(validGoalIndex);
+        } catch (NullPointerException e) {
+            this.logger.warn("Valid goals not initialized - taking the first goal for heuristic");
+            return 0;
+        }
+    }
+
+    private PairInt getFirstValidGoalPair() {
+        if (this.startStateIsGoal()) {
+            return this.start;
+        }
+        return this.goalsPairs.get(this.getNthValidGoalIndex(0));
+    }
+
     /**
      * Compute the heuristic value of a given state
      *
@@ -769,13 +810,15 @@ public class GridPathFinding implements SearchDomain {
      * @return The computed value
      */
     private double[] computeHD(GridPathFindingState s) {
-        assert this.goalsPairs.size() == 1;
+        assert this.validGoalsCount() == 1;
+        // TODO: PROBLEMATICCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+        int currentGoal = this.goals.get(this.getNthValidGoalIndex(0));
         // Compute also the Manhattan Distance
         int md = Utils.calcManhattanDistance(
                 this.map.getPosition(s.agentLocation),
                 // TODO: Deals with a single goal only!
-                this.goalsPairs.get(0));
-        int currentGoal = this.goals.get(0);
+                this.getFirstValidGoalPair());
+
         double maxDistance;
 
         switch (this.heuristicType) {
@@ -905,9 +948,9 @@ public class GridPathFinding implements SearchDomain {
     /**
      * A GridPathFinding State
      */
-    private final class GridPathFindingState implements State {
-        private double h = -1;
-        private double d = -1;
+    public final class GridPathFindingState extends SearchState {
+        private double h;
+        private double d;
 
         //private double hHat;
         //private double dHat;
@@ -915,19 +958,25 @@ public class GridPathFinding implements SearchDomain {
         //private double sseH;
 
         // The location of the agent
-        private int agentLocation;
+        public int agentLocation;
         // The depth of the search
         private int depth;
 
         // All the possible operators
-        private GridPathFindingOperator[] ops = null;
+        private GridPathFindingOperator[] ops;
 
-        private GridPathFindingState parent = null;
+        private GridPathFindingState parent;
 
         /**
          * A default constructor of the class
          */
-        private GridPathFindingState() { }
+        private GridPathFindingState() {
+            this.h = this.d = -1;
+            this.depth = -1;
+            this.agentLocation = -1;
+            this.ops = null;
+            this.parent = null;
+        }
 
         /**
          * A copy constructor
@@ -944,19 +993,30 @@ public class GridPathFinding implements SearchDomain {
             this.parent = state.parent;
         }
 
+        public void resetStateMetaData() {
+            this.h = 0;
+            this.d = 0;
+            this.depth = 0;
+            this.parent = null;
+        }
+
+        public SearchState copy() {
+            return new GridPathFindingState(this);
+        }
+
         @Override
         public boolean equals(Object obj) {
             try {
                 GridPathFindingState o = (GridPathFindingState)obj;
                 // Assure the location of the agent is the same
-                return this.agentLocation != o.agentLocation;
+                return this.agentLocation == o.agentLocation;
             } catch (ClassCastException e) {
                 return false;
             }
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -975,6 +1035,14 @@ public class GridPathFinding implements SearchDomain {
                 this.computeHD();
             }
             return this.h;
+        }
+
+        @Override
+        public double setH(double hValue) {
+            //System.out.println("SETTTTTTTTTTTTTTTTTTTTTTTTTING");
+            double toReturn = this.getH();
+            this.h = hValue;
+            return toReturn;
         }
 
         @Override
@@ -1006,7 +1074,7 @@ public class GridPathFinding implements SearchDomain {
      *
      * @return A string representation of the map (with all agents located on it)
      */
-    private String _dumpMap(State states[], int[] obstaclesCountArray) {
+    private String _dumpMap(SearchState states[], int[] obstaclesCountArray) {
         StringBuilder sb = new StringBuilder();
         int obstaclesCount = 0;
         // Now, dump the Map with the location of the agent and the goals
@@ -1022,7 +1090,7 @@ public class GridPathFinding implements SearchDomain {
                 } else {
                     boolean agentLocation = false;
                     if (states != null) {
-                        // Check if the robot is at this location
+                        // Check if the agent is at this location
                         for (int k = 0; k < states.length; ++k) {
                             if (((GridPathFindingState)states[k]).agentLocation == locationIndex) {
                                 if (k == 0) {
@@ -1050,39 +1118,63 @@ public class GridPathFinding implements SearchDomain {
         return sb.toString();
     }
 
-    @Override
-    public String dumpStatesCollection(State[] states) {
+
+    /*
+    public String dumpStatesPath(SearchState[] states) {
         StringBuilder sb = new StringBuilder();
-        // All the data regarding a single state refers to the last state of the collection
-        GridPathFindingState lastState = (GridPathFindingState)states[states.length - 1];
+
+        GridPathFindingState lastState = (GridPathFindingState) states[states.length - 1];
+
+        if (states != null) {
+            lastState.
+
+        }
+    }*/
+
+
+    @Override
+    public String dumpStatesCollection(SearchState[] states) {
+        StringBuilder sb = new StringBuilder();
         sb.append("********************************\n");
-        // h
-        sb.append("h: ");
-        sb.append(lastState.getH());
-        sb.append("\n");
-        // d
-        sb.append("d: ");
-        sb.append(lastState.getD());
-        sb.append("\n");
+        sb.append('\n');
+
+        GridPathFindingState lastState = null;
+
+        if (states != null) {
+            // All the data regarding a single state refers to the last state of the collection
+            lastState = (GridPathFindingState) states[states.length - 1];
+            // h
+            sb.append("h: ");
+            sb.append(lastState.getH());
+            sb.append("\n");
+            // d
+            sb.append("d: ");
+            sb.append(lastState.getD());
+            sb.append("\n");
+        }
 
         // Output parameter of the _dumpMap function
         int[] obstaclesCountArray = new int[1];
         sb.append(this._dumpMap(states, obstaclesCountArray));
-
         // Additional newline
         sb.append('\n');
-        PairInt agentLocation = this.map.getPosition(lastState.agentLocation);
-        sb.append("Agent location: ");
-        sb.append(agentLocation.toString());
-        sb.append("\n");
-        sb.append("Goals:");
-        for (PairInt goal: this.goalsPairs) {
-            sb.append(" ");
-            sb.append(goal.toString());
+
+        if (states != null) {
+            PairInt agentLocation = this.map.getPosition(lastState.agentLocation);
+            sb.append("Agent location: ");
+            sb.append(agentLocation.toString());
+            sb.append("\n");
+            sb.append("Goals:");
+            for (PairInt goal : this.goalsPairs) {
+                sb.append(" ");
+                sb.append(goal.toString());
+            }
+            sb.append("\n");
         }
-        sb.append("\n");
+
         sb.append("obstacles count: ");
         sb.append(obstaclesCountArray[0]);
+
         sb.append("\n");
         sb.append("********************************\n\n");
         return sb.toString();
@@ -1109,7 +1201,8 @@ public class GridPathFinding implements SearchDomain {
      *
      * @throws IOException In something wrong occurred
      */
-    private Pair<int[], Map<Integer, Map<Integer, Double>>> _readPivotsDB(String pivotsPDBFile) throws IOException {
+    private Pair<int[], Map<Integer, Map<Integer, Double>>> _readPivotsDB(
+            String pivotsPDBFile) throws IOException {
         System.out.println("[INFO] Reading pivots DB from " + pivotsPDBFile);
         DataInputStream inputStream = new DataInputStream(new FileInputStream(pivotsPDBFile));
         // First, read count of pivots
@@ -1304,8 +1397,9 @@ public class GridPathFinding implements SearchDomain {
     }
 
     @Override
-    public GridPathFindingState initialState() {
+    protected SearchState createInitialState() {
         assert this.startX != -1 && this.startY != -1;
+        // TODO: Redundant here!
         // Assert settings are ok
         assert this._checkSettings();
         GridPathFindingState state = new GridPathFindingState();
@@ -1314,15 +1408,39 @@ public class GridPathFinding implements SearchDomain {
         double hd[] = this.computeHD(state);
         state.h = hd[0];
         state.d = hd[1];
+        state.depth = 0;
+        state.parent = null;
         // System.out.println(this.dumpState(state));
         // Return the created state
         return state;
     }
 
     @Override
-    public boolean isGoal(State state) {
-        GridPathFindingState grs = (GridPathFindingState)state;
-        return this.goals.contains(grs.agentLocation);
+    public boolean stateIsOneOfValidGoals(SearchState s) {
+        GridPathFindingState grs = (GridPathFindingState)s;
+        int goalIndex = this.goals.indexOf(grs.agentLocation);
+        return goalIndex > -1 && this.isValidGoal(goalIndex);
+    }
+
+
+    @Override
+    public int totalGoalsCount() {
+        return this.goals.size();
+    }
+
+    @Override
+    public boolean goalsAreExplicit() {
+        return true;
+    }
+
+    @Override
+    public PackedElement getNthGoalFromAllGoals(int goalIndex) {
+        return this.goalsPacked.get(goalIndex);
+    }
+
+    @Override
+    public List<PackedElement> getAllGoalsInternal() {
+        return this.goalsPacked;
     }
 
     /**
@@ -1333,7 +1451,7 @@ public class GridPathFinding implements SearchDomain {
     private void _initOps(GridPathFindingState state) {
         // An empty vector of operators
         Vector<GridPathFindingOperator> possibleOperators = new Vector<>();
-        // Go ovr all the possible moves
+        // Go over all the possible moves
         for (int i = 0; i < GridPathFinding.NUM_MOVES; ++i) {
             if (this._isValidMove(state.agentLocation, this.map.possibleMoves[i])) {
                 possibleOperators.add(new GridPathFindingOperator(i));
@@ -1344,7 +1462,7 @@ public class GridPathFinding implements SearchDomain {
     }
 
     @Override
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         GridPathFindingState grs = (GridPathFindingState) state;
         if (grs.ops == null) {
             this._initOps(grs);
@@ -1353,7 +1471,7 @@ public class GridPathFinding implements SearchDomain {
     }
 
     @Override
-    public Operator getOperator(State state, int index) {
+    public Operator getOperator(SearchState state, int index) {
         GridPathFindingState grs = (GridPathFindingState)state;
         if (grs.ops == null) {
             this._initOps(grs);
@@ -1362,32 +1480,28 @@ public class GridPathFinding implements SearchDomain {
     }
 
     @Override
-    public State copy(State state) {
+    public SearchState copy(SearchState state) {
         return new GridPathFindingState((GridPathFindingState)state);
     }
 
     /**
      * Packs a state into a long number
      *
-     * The packed state is a 64 bit (long) number which stores (currently) the location of the
-     * agent
+     * The packed state is a 64 bit (long) number which stores (currently) the
+     * location of the agent
      */
     @Override
-    public PackedElement pack(State s) {
+    public PackedElement pack(SearchState s) {
         GridPathFindingState state = (GridPathFindingState)s;
         long packed = 0L;
-        // pack the location of the robot
+        // pack the location of the agent
         packed |= state.agentLocation & this.agentLocationBitMask;
-        /*
-         * VacuumRobotState test = unpack(packed);
-         * assert(test.equals(state));
-         */
         return new PackedElement(packed);
     }
 
     /**
-     * An auxiliary function for unpacking Vacuum Robot state from a long number.
-     * This function performs the actual unpacking
+     * An auxiliary function for unpacking Vacuum Robot state from a long
+     * number. This function performs the actual unpacking
      *
      * @param packed The packed state
      * @param dst The destination state which is filled from the unpacked value
@@ -1410,9 +1524,10 @@ public class GridPathFinding implements SearchDomain {
         double hd[] = this.computeHD(dst);
         dst.h = hd[0];
         dst.d = hd[1];
+        dst.depth = 0;
     }
     /**
-     * Unpacks the Vacuum Robot state from a long number
+     * Unpacks a GridPathFinding state from a long number
      */
     @Override
     public GridPathFindingState unpack(PackedElement packed) {
@@ -1431,7 +1546,7 @@ public class GridPathFinding implements SearchDomain {
      * @return The new generated state
      */
     @Override
-    public State applyOperator(State state, Operator op) {
+    public SearchState applyOperator(SearchState state, Operator op) {
         GridPathFindingState s = (GridPathFindingState)state;
         GridPathFindingState grs = (GridPathFindingState)copy(s);
         GridPathFindingOperator o = (GridPathFindingOperator)op;
@@ -1487,7 +1602,7 @@ public class GridPathFinding implements SearchDomain {
         }
 
         @Override
-        public double getCost(State s, State parent) {
+        public double getCost(SearchState s, SearchState parent) {
             GridPathFindingState grs = (GridPathFindingState) s;
             double cost = 1.0d;
             // TODO: Heavy???
@@ -1499,7 +1614,7 @@ public class GridPathFinding implements SearchDomain {
          * operator
          */
         @Override
-        public SearchDomain.Operator reverse(State state) {
+        public Operator reverse(SearchState state) {
             return GridPathFinding.this.reverseOperators[this.type];
         }
     }

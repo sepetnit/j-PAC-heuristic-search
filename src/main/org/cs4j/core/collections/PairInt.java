@@ -41,8 +41,10 @@ public class PairInt {
         if (split.length != 2) {
             return null;
         }
-        int firstInt = -1;
-        int secondInt = -1;
+        
+        int firstInt;
+        int secondInt;
+
         try {
             String first = split[0];
             // Ignore the first paren
@@ -88,6 +90,4 @@ public class PairInt {
     public String toString() {
         return "(" + this.toStringNoParen() + ")";
     }
-
-
 }

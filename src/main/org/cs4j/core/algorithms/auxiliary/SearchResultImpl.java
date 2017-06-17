@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.auxiliary;
 
+import org.cs4j.core.Operator;
 import org.cs4j.core.SearchDomain;
 
 import java.lang.management.ManagementFactory;
@@ -24,6 +25,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import org.cs4j.core.SearchResult;
+import org.cs4j.core.SearchState;
 
 /**
  * The search result class.
@@ -55,6 +57,7 @@ public class SearchResultImpl implements SearchResult {
 
     public List<Iteration> iterations = new ArrayList<>();
     private List<Solution> solutions = new ArrayList<>();
+    private List<SearchResult> concreteResults = new ArrayList<>();
     private int minTimeOutInMs;
 
     public void setExtras(String key,Object val){
@@ -126,6 +129,19 @@ public class SearchResultImpl implements SearchResult {
     }
 
     @Override
+    public double getAverageExpanded() {
+        if (this.concreteResults.size() == 0) {
+            return this.getExpanded();
+        }
+        double toReturn = 0;
+        for (SearchResult result: this.concreteResults) {
+            toReturn += result.getExpanded();
+            System.out.println(toReturn);
+        }
+        return toReturn / (this.concreteResults.size());
+    }
+
+    @Override
     public long getReopened () {
         return this.reopened;
     }
@@ -150,6 +166,21 @@ public class SearchResultImpl implements SearchResult {
         return this.solutions;
     }
 
+    @Override
+    public List<SearchResult> getConcreteResults() {
+        return this.concreteResults;
+    }
+
+    @Override
+    public void addConcreteResult(SearchResult result) {
+        this.concreteResults.add(result);
+    }
+
+    @Override
+    public int solutionsCount() {
+        return this.solutions.size();
+    }
+
     /**
      * If multiple solutions were found, return the best one
      * (this is assumed to be the last one) #TODO: Is this assumption Ok?
@@ -165,6 +196,14 @@ public class SearchResultImpl implements SearchResult {
     @Override
     public long getCpuTimeMillis() {
         return (long)((stopCpuTimeMillis - startCpuTimeMillis) * 0.000001);
+    }
+
+    public void increaseCpuTimeMillis(long time) {
+        this.stopCpuTimeMillis += time;
+    }
+
+    public void increaseWallTimeMillis(long time) {
+        this.stopWallTimeMillis += time;
     }
 
     public void addSolution(Solution solution) {
@@ -189,11 +228,15 @@ public class SearchResultImpl implements SearchResult {
     }
 
     public void increase(SearchResult previous) {
+        this.stopTimer(); // To record the stop wall and stop cpu times
+        this.increaseStatesCounters(previous);
+    }
+
+    public void increaseStatesCounters(SearchResult previous) {
         this.expanded += previous.getExpanded();
         this.generated += previous.getGenerated();
         this.reopened += previous.getReopened();
         this.opupdated += previous.getUpdatedInOpen();
-        this.stopTimer(); // To record the stop wall and stop cpu times
     }
 
     public void startTimer() {
@@ -232,7 +275,7 @@ public class SearchResultImpl implements SearchResult {
     }
 
     public long getCpuTimePassedInMs(){
-        long ret = (long)((getCpuTime() - startCpuTimeMillis) * 0.000001);
+        long ret = (long)((getCpuTime() - this.startCpuTimeMillis) * 0.000001);
         return ret;
     }
 
@@ -302,15 +345,18 @@ public class SearchResultImpl implements SearchResult {
         sb.append("Nodes Expanded: ");sb.append(expanded);sb.append("\n");
         sb.append("Total Wall Time: "+this.getWallTimeMillis());sb.append("\n");
         sb.append("Total CPU Time: "+this.getCpuTimeMillis());sb.append("\n");
-        sb.append(solutions.get(0));
+        // TODO: Currently only first solution is taken
+        if (solutions.size() > 0) {
+            sb.append(solutions.get(0));
+        }
         return sb.toString();
     }
 
-    static class SolutionImpl implements Solution {
+    public static class SolutionImpl implements Solution {
         private SearchDomain domain;
         private double cost;
-        private List<SearchDomain.Operator> operators = new ArrayList<>();
-        private List<SearchDomain.State> states = new ArrayList<>();
+        private List<Operator> operators = new ArrayList<>();
+        private List<SearchState> states = new ArrayList<>();
 
         /**
          * A default constructor of the class
@@ -330,12 +376,12 @@ public class SearchResultImpl implements SearchResult {
 
 
         @Override
-        public List<SearchDomain.Operator> getOperators() {
+        public List<Operator> getOperators() {
             return this.operators;
         }
 
         @Override
-        public List<SearchDomain.State> getStates() {
+        public List<SearchState> getStates() {
             return this.states;
         }
 
@@ -366,14 +412,14 @@ public class SearchResultImpl implements SearchResult {
                 // First, let's try dump the states of the solution, using a specific function that may be provided
                 // by the domain
                 String domainStatesCollectionDump = this.domain.dumpStatesCollection(
-                        this.states.toArray(new SearchDomain.State[this.states.size()]));
+                        this.states.toArray(new SearchState[this.states.size()]));
                 if (domainStatesCollectionDump != null) {
                     return domainStatesCollectionDump;
                 }
             }
             // Otherwise, let's dump state by state
             StringBuffer sb = new StringBuffer();
-            for (SearchDomain.State state: this.states) {
+            for (SearchState state: this.states) {
                 sb.append(state.dumpState());
 //                sb.append(state.dumpStateShort());
 //                sb.append("\n");
@@ -381,22 +427,22 @@ public class SearchResultImpl implements SearchResult {
             return sb.toString();
         }
 
-        public void addOperator(SearchDomain.Operator operator) {
+        public void addOperator(Operator operator) {
             this.operators.add(operator);
         }
 
-        public void addOperators(List<SearchDomain.Operator> operators) {
-            for (SearchDomain.Operator o : operators) {
+        public void addOperators(List<Operator> operators) {
+            for (Operator o : operators) {
                 this.operators.add(o);
             }
         }
 
-        public void addState(SearchDomain.State state) {
+        public void addState(SearchState state) {
             this.states.add(state);
         }
 
-        public void addStates(List<SearchDomain.State> states) {
-            for (SearchDomain.State o : states) {
+        public void addStates(List<SearchState> states) {
+            for (SearchState o : states) {
                 this.states.add(o);
             }
         }

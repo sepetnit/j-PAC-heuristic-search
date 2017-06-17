@@ -38,85 +38,100 @@ public class OutputResult {
                         String reopenPolicyStr, boolean reopenPolicyBln,
                         boolean overwriteFile)
             throws IOException {
-        /**
-         * In case we don't have a string representation of the reopen policy - let's create it explicitly
-         */
+
+        // In case we don't have a string representation of the reopen policy -
+        // let's create it explicitly
         if (reopenPolicyStr == null) {
             reopenPolicyStr = this._getReopenPolicyToString(reopenPolicyBln);
         }
+
         if (pathPrefix == null) {
             while (pathPrefix == null || new File(pathPrefix).exists()) {
                 int rand = (int) (Math.random() * 100);
                 pathPrefix = "./results/{" + rand + "}_" + this.fname;
             }
         }
+
         if (filePrefix != null) {
             File f = new File(pathPrefix);
             String dirName = f.getParent();
             String baseName = filePrefix + f.getName();
             pathPrefix = dirName + "/" + baseName;
         }
+        
         this.basicResultsPath = pathPrefix;
-        String pathPostfix = ((wg == -1) || (wh == -1)) ? "" : (int) wg + "_" + (int) wh + "_" + reopenPolicyStr;
+        String pathPostfix = ((wg == -1) || (wh == -1)) ? "" : (int) wg + "_" +
+                (int) wh + "_" + reopenPolicyStr;
         this.fname = this.basicResultsPath + pathPostfix + ".csv";
         File f = new File(this.fname);
         boolean fileExists = f.exists();
         if (fileExists && !overwriteFile) {
             throw new FileAlreadyExistsException(this.fname);
         } else if (fileExists && !f.delete()) {
-            throw new IOException("File " + this.fname + " was marked for deletion, but failed!");
+            throw new IOException("File " + this.fname + " " +
+                    "was marked for deletion, but failed!");
         }
 
-        // If the file does not exist, create it and releveant subdirectories, if needed.
-        if(f.exists()==false)
-        {
-            f.getParentFile().mkdirs();
-            f.createNewFile();
+        // If the file does not exist, create it and relevant subdirectories,
+        // if needed.
+        if (!f.exists()) {
+            if (!f.getParentFile().mkdirs() || !f.createNewFile()) {
+                throw new IOException("File " + this.fname +
+                        " cannot be created for some reason");
+            }
         }
         this.writer = new FileWriter(f);
         this.currentResult = new StringBuilder();
     }
 
 
-    public OutputResult(String pathPrefix, double wg, double wh, boolean reopenPolicy) throws IOException {
-        this(pathPrefix, null, wg, wh, null, reopenPolicy, false);
+    public OutputResult(String pathPrefix,
+                        double wg,
+                        double wh,
+                        boolean reopenPolicy)
+            throws IOException {
+        this(pathPrefix, null, wg, wh, null,
+                reopenPolicy, false);
     }
 
     /**
-     * Create a general output result (without references of weight or reopening policy in the name)
+     * Creates a general output result (without references of weight or
+     * reopening policy in the name)
      *
      * @param pathPrefix The prefix of the output path
-     *
-     * @throws IOException
-     */
+=    */
     public OutputResult(String pathPrefix) throws IOException {
         this(pathPrefix, null, -1, -1, null, false, false);
     }
 
     /**
-     * Create a general output result (without references of weight or reopening policy in the name), and overwrites
-     * the file if it already exists
+     * Creates a general output result (without references of weight or
+     * reopening policy in the name), and overwrites the file if it already
+     * exists
      *
      * @param pathPrefix The prefix of the output path
-     *
-     * @throws IOException
      */
-    public OutputResult(String pathPrefix, boolean overwrite) throws IOException {
-        this(pathPrefix, null, -1, -1, null, false, overwrite);
+    public OutputResult(String pathPrefix,
+                        boolean overwrite)
+            throws IOException {
+        this(pathPrefix, null, -1, -1, null,
+                false, overwrite);
     }
 
     /**
-     * Create a general output result (without references of weight or reopening policy in the name), and overwrites
-     * the file if it already exists
+     * Creates a general output result (without references of weight or
+     * reopening policy in the name), and overwrites the file if it already
+     * exists
      *
      * @param pathPrefix The prefix of the output path
      * @param filePrefix The prefix to the specific file
      * @param overwrite Whether to overwrite the output file if it exists
-     *
-     * @throws IOException
      */
-    public OutputResult(String pathPrefix, String filePrefix, boolean overwrite) throws IOException {
-        this(pathPrefix, filePrefix, -1, -1, null, false, overwrite);
+    public OutputResult(String pathPrefix,
+                        String filePrefix,
+                        boolean overwrite) throws IOException {
+        this(pathPrefix, filePrefix, -1, -1, null,
+                false, overwrite);
     }
 
     /**
@@ -125,8 +140,6 @@ public class OutputResult {
      * @param wg The multiplier on g
      * @param wh The multiplier on h
      * @param reopen Reopening policy
-     *
-     * @throws IOException
      */
     public OutputResult(double wg, double wh, boolean reopen) throws IOException {
         this(null, wg, wh, reopen);
@@ -158,6 +171,7 @@ public class OutputResult {
             this.currentResult.append(",");
         }
     }
+
     /**
      * Appends a new result (of a single run) to the output
      *
@@ -169,6 +183,7 @@ public class OutputResult {
             this.currentResult.append(",");
         }
     }
+
     /**
      * Writes a String line into the result without a newline
      *

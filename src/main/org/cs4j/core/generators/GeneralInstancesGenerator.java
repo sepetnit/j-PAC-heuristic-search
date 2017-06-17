@@ -1,5 +1,9 @@
 package org.cs4j.core.generators;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cs4j.core.domains.GridPathFinding;
+
 import java.io.IOException;
 import java.util.Random;
 
@@ -10,7 +14,10 @@ import java.util.Random;
 public class GeneralInstancesGenerator {
     protected Random rand;
 
+    protected Logger logger;
+
     public GeneralInstancesGenerator() {
+        this.logger = LogManager.getLogger(this.getClass());
         this.rand = new Random();
     }
 

@@ -1,10 +1,13 @@
 package org.cs4j.core.collections;
 
+import java.util.Arrays;
+
 /**
- * Created by sepetnit on 11/8/2015.
+ * Created by Vitali Sepetnitsky on 11/8/2015.
  *
  */
 public class PackedElement implements Comparable{
+    
     private long[] internal;
 
     public PackedElement(long internal) {
@@ -13,7 +16,12 @@ public class PackedElement implements Comparable{
 
     public PackedElement(long[] internal) {
         this.internal = new long[internal.length];
-        System.arraycopy(internal, 0, this.internal, 0, internal.length);
+        System.arraycopy(internal, 0, this.internal, 0,
+                internal.length);
+    }
+
+    public PackedElement(PackedElement toCopy) {
+        this.internal = Arrays.copyOf(toCopy.getInternal(), toCopy.getLongsCount());
     }
 
     public long[] getInternal() {
@@ -58,6 +66,8 @@ public class PackedElement implements Comparable{
 
     @Override
     public boolean equals(Object object) {
+        // TODO: We can implement it efficiently in case the sum of the longs
+        // TODO: is stored at the creation of the element
         try {
             PackedElement other = (PackedElement)object;
             if (other.internal.length != this.internal.length) {

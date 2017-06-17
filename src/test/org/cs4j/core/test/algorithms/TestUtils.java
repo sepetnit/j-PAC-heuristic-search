@@ -3,7 +3,7 @@ package java.org.cs4j.core.test.algorithms;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.WAStar;
+import org.cs4j.core.algorithms.weighted.WAStar;
 import org.cs4j.core.domains.*;
 import org.junit.Assert;
 

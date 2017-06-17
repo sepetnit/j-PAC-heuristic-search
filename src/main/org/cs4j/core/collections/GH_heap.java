@@ -1,6 +1,6 @@
 package org.cs4j.core.collections;
 
-import org.cs4j.core.algorithms.SearchResultImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 
 import java.util.*;
 

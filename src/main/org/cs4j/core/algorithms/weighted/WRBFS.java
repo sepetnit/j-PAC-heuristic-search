@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.weighted;
 
+
+import org.cs4j.core.algorithms.familiar.RBFS;
 
 /**
  * Recursive Best-First Search
@@ -39,7 +41,7 @@ public class WRBFS extends RBFS {
 
 	@Override
 	protected double getRank(Node n, double weight) {
-		return n.g + (weight * (n.fPrime - n.g) );
+		return n.getG() + (weight * (n.getFPrime() - n.getG()) );
 	}
 
 }

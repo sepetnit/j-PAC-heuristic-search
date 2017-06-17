@@ -1,9 +1,9 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.familiar;
 
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.*;
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author Vitali Sepetnitsky
  */
-public class PTS implements SearchAlgorithm {
+public class PTS extends GenericSearchAlgorithm {
 
     // The domain to which the search problem belongs
     private SearchDomain domain;
@@ -157,7 +157,7 @@ public class PTS implements SearchAlgorithm {
         result.startTimer();
 
         // Extract the initial state from the domain
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
         // Initialize a search node using the state (contains data according to the current
         // algorithm)
         Node initialNode = new Node(currentState);
@@ -185,7 +185,7 @@ public class PTS implements SearchAlgorithm {
             // Go over all the successors of the state
             for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
                 // Get the current operator
-                SearchDomain.Operator op = domain.getOperator(currentState, i);
+                Operator op = domain.getOperator(currentState, i);
                 // Don't apply the previous operator on the state - in order not to enter a loop
                 if (op.equals(currentNode.pop)) {
                     continue;
@@ -193,7 +193,7 @@ public class PTS implements SearchAlgorithm {
                 // Otherwise, let's generate the child state
                 ++result.generated;
                 // Get it by applying the operator on the parent state
-                SearchDomain.State childState = domain.applyOperator(currentState, op);
+                SearchState childState = domain.applyOperator(currentState, op);
                 // Create a search node for this state
                 Node childNode = new Node(childState, currentNode, currentState, op, op.reverse(currentState));
 
@@ -262,13 +262,13 @@ public class PTS implements SearchAlgorithm {
         // If a goal was found: update the solution
         if (goal != null) {
             SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-            List<SearchDomain.Operator> path = new ArrayList<>();
-            List<SearchDomain.State> statesPath = new ArrayList<>();
+            List<Operator> path = new ArrayList<>();
+            List<SearchState> statesPath = new ArrayList<>();
             System.out.println("[INFO] Solved - Generating output path.");
             double cost = 0;
 
-            SearchDomain.State currentPacked = domain.unpack(goal.packed);
-            SearchDomain.State currentParentPacked = null;
+            SearchState currentPacked = domain.unpack(goal.packed);
+            SearchState currentParentPacked = null;
             for (Node currentNode = goal;
                  currentNode != null;
                  currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -356,8 +356,8 @@ public class PTS implements SearchAlgorithm {
         private double h;
         private double d;
 
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
         private Node parent;
 
@@ -377,7 +377,7 @@ public class PTS implements SearchAlgorithm {
          * @param pop The operator which will reverse the last applied operation which revealed the
          *            current state
          */
-        private Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, SearchState parentState, Operator op, Operator pop) {
             // The size of the key (for SearchQueueElementImpl) is 1
             super(1);
             this.secondaryIndex = new int[1];
@@ -440,7 +440,7 @@ public class PTS implements SearchAlgorithm {
          *
          * @param state The state from which the node should be created
          */
-        private Node(SearchDomain.State state) {
+        private Node(SearchState state) {
             this(state, null, null, null, null);
         }
 

@@ -1,6 +1,9 @@
 package org.cs4j.core.domains;
 
+import org.cs4j.core.Operator;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.SingleGoalSearchDomain;
 import org.cs4j.core.collections.PackedElement;
 
 import java.io.*;
@@ -13,7 +16,7 @@ import java.util.TreeMap;
  * The pancake problem is a famous search problem where the objective is to sort a sequence of
  * objects (pancakes) through a minimal number of prefix reversals (flips).
  */
-public class Pancakes implements SearchDomain {
+public class Pancakes extends SingleGoalSearchDomain {
 
     // The parameter k for GAP-k heuristic (means that k pancakes are ignored during heuristic calculation
     // [starting from 0])
@@ -89,7 +92,7 @@ public class Pancakes implements SearchDomain {
      *
      * @param state The state to set as initial state
      */
-    public void setInitialState(State state){
+    public void setInitialState(SearchState state){
         PancakeState s = (PancakeState) state;
         this.init = s.cakes;
     }
@@ -247,24 +250,24 @@ public class Pancakes implements SearchDomain {
     }
 
     @Override
-    public boolean isGoal(State s) {
+    public boolean isGoal(SearchState s) {
         PancakeState state = (PancakeState) s;
         return state.dNoGaps == 0;
     }
 
     @Override
     // Each operator can be applied on any state
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         return this.numCakes - 1;
     }
 
     @Override
-    public Operator getOperator(State state, int nth) {
+    public Operator getOperator(SearchState state, int nth) {
         return this.possibleOperators[nth];
     }
 
     @Override
-    public State applyOperator(State state, Operator op) {
+    public SearchState applyOperator(SearchState state, Operator op) {
         PancakeState pancakeState = (PancakeState)copy(state);
         int pancakeOperator = ((PancakeOperator)op).value;
         // Flip the top of the stack
@@ -281,7 +284,7 @@ public class Pancakes implements SearchDomain {
     }
 
     @Override
-    public State copy(State state) {
+    public SearchState copy(SearchState state) {
         return new PancakeState((PancakeState)state);
     }
 
@@ -293,7 +296,7 @@ public class Pancakes implements SearchDomain {
      * @param parent
      *@param op The operator whose cost should be calculated  @return The calculated cost of the operator
      */
-    private double computeCost(State state, State parent, int op) {
+    private double computeCost(SearchState state, SearchState parent, int op) {
         PancakeState ps = (PancakeState)state;
         int separated = ps.cakes[0];
         int bottom;
@@ -312,7 +315,7 @@ public class Pancakes implements SearchDomain {
     }
 
     @Override
-    public PackedElement pack(State s) {
+    public PackedElement pack(SearchState s) {
         PancakeState ps = (PancakeState)s;
         long[] packed = new long[this.packedLongsCount];
         int index = 0;
@@ -345,7 +348,7 @@ public class Pancakes implements SearchDomain {
     }
 
     @Override
-    public State unpack(PackedElement packed) {
+    public SearchState unpack(PackedElement packed) {
         PancakeState state = new PancakeState(this.numCakes);
         int index = this.numCakes - 1;
         for (int i = packed.getLongsCount() - 1; i >= 0; --i) {
@@ -377,7 +380,7 @@ public class Pancakes implements SearchDomain {
     /**
      * Pancake stat class
      */
-    public final class PancakeState implements State {
+    public final class PancakeState extends SearchState {
         public int numCakes;
         public int[] cakes;
         public double h;
@@ -392,7 +395,7 @@ public class Pancakes implements SearchDomain {
         private PancakeState() { }
 
         /**
-         * A standard constructor
+         * A familiar constructor
          *
          * @param numCakes The number of cakes in the state
          */
@@ -402,7 +405,7 @@ public class Pancakes implements SearchDomain {
         }
 
         /**
-         * A standard constructor
+         * A familiar constructor
          *
          * @param cakes The pancakes array
          */
@@ -467,7 +470,7 @@ public class Pancakes implements SearchDomain {
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -532,7 +535,7 @@ public class Pancakes implements SearchDomain {
         }
 
         @Override
-        public double getCost(State state, State parent) {
+        public double getCost(SearchState state, SearchState parent) {
             double cost = computeCost(state,parent,value);
             if(Math.abs(state.getH()-parent.getH()) > cost + 0.00000001){
                 System.out.println("[WARNING] Pancake Current Heuristic should be consistent but is not!");
@@ -548,14 +551,14 @@ public class Pancakes implements SearchDomain {
         }
 
         @Override
-        public Operator reverse(State state) {
+        public Operator reverse(SearchState state) {
             // In the Pancakes domain, reversing an operation can be performed easily by applying
             // the same operator on the state
             return this;
         }
     }
 
-    public String dumpStatesCollection(State[] states) {
+    public String dumpStatesCollection(SearchState[] states) {
         return null;
     }
 

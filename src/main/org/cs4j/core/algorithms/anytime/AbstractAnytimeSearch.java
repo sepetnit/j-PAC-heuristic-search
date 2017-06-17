@@ -1,18 +1,18 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.anytime;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cs4j.core.AnytimeSearchAlgorithm;
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.*;
-import org.cs4j.core.SearchResult;
 
 import java.util.*;
 
 /**
  * Created by Roni Stern on 23/02/2017.
  */
-public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
+public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm implements AnytimeSearchAlgorithm {
     private final static Logger logger = LogManager.getLogger(AbstractAnytimeSearch.class);
 
     // The domain to which the search problem belongs
@@ -96,9 +96,9 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         result.startTimer();
 
          // Loop while there is no solution and there are states in the OPEN list
-        SearchDomain.State childState,currentState;
+        SearchState childState,currentState;
         Node currentNode, childNode, dupChildNode;
-        SearchDomain.Operator op;
+        Operator op;
         double childf,dupChildf;
         while ((goal == null) && !this.open.isEmpty()) {
             // Take a node from the OPEN list (nodes are sorted according to the 'u' function)
@@ -266,13 +266,13 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
     private static SearchResult.Solution constructSolution(Node goal, SearchDomain domain) {
         Node currentNode;
         SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(domain);
-        List<SearchDomain.Operator> path = new ArrayList<>();
-        List<SearchDomain.State> statesPath = new ArrayList<>();
+        List<Operator> path = new ArrayList<>();
+        List<SearchState> statesPath = new ArrayList<>();
         System.out.print("[INFO] Solved - Generating output path. Cost=");
         double cost = 0;
 
-        SearchDomain.State currentPacked = domain.unpack(goal.packed);
-        SearchDomain.State currentParentPacked = null;
+        SearchState currentPacked = domain.unpack(goal.packed);
+        SearchState currentParentPacked = null;
         for (currentNode = goal;
              currentNode != null;
              currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -317,7 +317,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         this._initDataStructures(true, true);
 
         // Extract the initial state from the domain
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
         // Initialize a search node using the state (contains data according to the current
         // algorithm)
         Node initialNode = new Node(currentState);
@@ -395,8 +395,8 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
         public double h;
         public double d;
 
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
         private Node parent;
 
@@ -416,7 +416,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
          * @param pop The operator which will reverse the last applied operation which revealed the
          *            current state
          */
-        private Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, SearchState parentState, Operator op, Operator pop) {
             // The size of the key (for SearchQueueElementImpl) is 1
             super(1);
             this.secondaryIndex = new int[1];
@@ -479,7 +479,7 @@ public abstract class AbstractAnytimeSearch implements AnytimeSearchAlgorithm {
          *
          * @param state The state from which the node should be created
          */
-        private Node(SearchDomain.State state) {
+        private Node(SearchState state) {
             this(state, null, null, null, null);
         }
 

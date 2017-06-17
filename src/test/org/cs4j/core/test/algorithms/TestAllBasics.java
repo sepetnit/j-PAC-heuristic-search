@@ -20,11 +20,11 @@ import java.io.FileNotFoundException;
 
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
-import org.cs4j.core.algorithms.WAStar;
-import org.cs4j.core.algorithms.EES;
-import org.cs4j.core.algorithms.IDAstar;
-import org.cs4j.core.algorithms.RBFS;
-import org.cs4j.core.algorithms.WRBFS;
+import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.algorithms.familiar.EES;
+import org.cs4j.core.algorithms.basic.IDAstar;
+import org.cs4j.core.algorithms.familiar.RBFS;
+import org.cs4j.core.algorithms.weighted.WRBFS;
 import org.junit.Test;
 
 public class TestAllBasics {

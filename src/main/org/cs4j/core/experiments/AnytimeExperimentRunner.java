@@ -4,12 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.AnytimeSearchAlgorithm;
 import org.cs4j.core.SearchDomain;
-import org.cs4j.core.algorithms.AnytimePTS;
-import org.cs4j.core.algorithms.SearchResultImpl;
+import org.cs4j.core.algorithms.anytime.AnytimePTS;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.domains.*;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.mains.DomainExperimentData;
+import org.cs4j.core.domains.DomainExperimentData;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

@@ -1,7 +1,10 @@
 package org.cs4j.core.domains;
 
 import com.carrotsearch.hppc.LongByteHashMap;
+import org.cs4j.core.Operator;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.SingleGoalSearchDomain;
 import org.cs4j.core.collections.PackedElement;
 
 import java.io.BufferedReader;
@@ -19,7 +22,7 @@ import java.util.Map;
  * Created by user on 17/12/2015.
  *
  */
-public class TopSpin implements SearchDomain {
+public class TopSpin extends SingleGoalSearchDomain {
 
     private static final int INDEX_OF_PDB_INDEX = 0;
     private static final int INDEX_OF_PDB_ENTRIES_COUNT = 1;
@@ -234,7 +237,7 @@ public class TopSpin implements SearchDomain {
     }
 
     @Override
-    public State copy(State state) {
+    public SearchState copy(SearchState state) {
         return new TopSpinState(state);
     }
 
@@ -335,7 +338,7 @@ public class TopSpin implements SearchDomain {
     }
 
     @Override
-    public State initialState() {
+    public SearchState initialState() {
         TopSpinState s = this.initialStateNoHeuristic();
         // Let's calculate the heuristic values (h and d)
         double[] computedHD = this._computeHD(s);
@@ -371,7 +374,7 @@ public class TopSpin implements SearchDomain {
     }
 
     @Override
-    public boolean isGoal(State s) {
+    public boolean isGoal(SearchState s) {
         TopSpinState state = (TopSpinState) s;
         this._rotateArrayToZero(state.tokens, this.tokensForGoalCheck);
         for (int i = 0; i < this.tokensNumber - 1; ++i) {
@@ -384,17 +387,17 @@ public class TopSpin implements SearchDomain {
 
     @Override
     // Each operator can be applied on any state
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         return this.tokensNumber - 1;
     }
 
     @Override
-    public Operator getOperator(State state, int nth) {
+    public Operator getOperator(SearchState state, int nth) {
         return this.possibleOperators[nth];
     }
 
     @Override
-    public State applyOperator(State state, Operator op) {
+    public SearchState applyOperator(SearchState state, Operator op) {
         TopSpinState s = (TopSpinState) state;
         TopSpinState tss = (TopSpinState) copy(s);
 
@@ -426,7 +429,7 @@ public class TopSpin implements SearchDomain {
     }
 
     @Override
-    public PackedElement pack(State s) {
+    public PackedElement pack(SearchState s) {
         TopSpinState tss = (TopSpinState)s;
         long result = 0;
         // We need at most 4 bits in order to pack a single Token: (0b1001 is 9)
@@ -438,7 +441,7 @@ public class TopSpin implements SearchDomain {
     }
 
     @Override
-    public State unpack(PackedElement packed) {
+    public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
         long firstPacked = packed.getFirst();
         TopSpinState tss = new TopSpinState();
@@ -458,12 +461,12 @@ public class TopSpin implements SearchDomain {
     }
 
     @Override
-    public String dumpStatesCollection(State[] states) {
+    public String dumpStatesCollection(SearchState[] states) {
         return null;
     }
 
 
-    private class TopSpinState implements State {
+    private class TopSpinState extends SearchState {
         private int tokens[] = new int[TopSpin.this.tokensNumber];
         public double h;
         public double d;
@@ -480,7 +483,7 @@ public class TopSpin implements SearchDomain {
          *
          * @param state The state to copy (must be of TopSpinState type)
          */
-        private TopSpinState(State state) {
+        private TopSpinState(SearchState state) {
             TopSpinState tss = (TopSpinState)state;
             this.h = tss.h;
             this.d = tss.d;
@@ -491,7 +494,7 @@ public class TopSpin implements SearchDomain {
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -547,12 +550,12 @@ public class TopSpin implements SearchDomain {
         }
 
         @Override
-        public double getCost(State state, State parent) {
+        public double getCost(SearchState state, SearchState parent) {
             return 1.0;
         }
 
         @Override
-        public Operator reverse(State state) {
+        public Operator reverse(SearchState state) {
             return null;
         }
     }

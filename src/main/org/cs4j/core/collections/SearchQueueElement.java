@@ -24,49 +24,50 @@ package org.cs4j.core.collections;
 public interface SearchQueueElement {
 
     /**
-    * Sets the indexes of this object in the data structure.
-    *
-    * @param key
-    * @param index
-    */
-    public void setIndex(int key, int index);
+     * Sets the indexes of this object in the data structure.
+     *
+     * @param key The key in the map, whose place should be filled with the
+     *            given value
+     * @param index The value to set
+     */
+    void setIndex(int key, int index);
 
     /**
-    * Returns the index of this object in the data structure.
-    *
-    * @return
-    */
-    public int getIndex(int key);
-
-    /**
-    *
-    * @return Elements F value;
-    */
-    public double getF();
-
-    /**
-    *
-    * @return Elements G value;
-    */
-    public double getG();
+     * Returns the index of this object in the data structure.
+     *
+     * @return The found index
+     */
+    int getIndex(int key);
 
     /**
      *
-     * @return Elements Depth value;
+     * @return Element's F value;
      */
-    public double getDepth();
+    double getF();
 
     /**
-    *
-    * @return Elements H value;
-    */
-    public double getH();
+     *
+     * @return Element's G value;
+     */
+    double getG();
 
     /**
-    *
-    * @return Elements D value;
-    */
-    public double getD();
+     *
+     * @return Element's Depth value;
+     */
+    double getDepth();
+
+    /**
+     *
+     * @return Element's H (heuristic) value;
+     */
+    double getH();
+
+    /**
+     *
+     * @return Elements D value;
+     */
+    double getD();
 
     /**
      *
@@ -81,8 +82,7 @@ public interface SearchQueueElement {
     public double getDhat();
 
     /**
-     *
-     * @return Elements parent;
+     * @return Element's parent element;
      */
     SearchQueueElement getParent();
 }

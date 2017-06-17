@@ -1,7 +1,6 @@
-package org.cs4j.core.algorithms;
-import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
+package org.cs4j.core.algorithms.basic;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.Map;
  *
  * @author Matthew Hatem
  */
-public class IDAstar implements SearchAlgorithm {
+public class IDAstar extends GenericSearchAlgorithm {
     // The domain for the search
     private SearchDomain domain;
 
@@ -67,7 +66,7 @@ public class IDAstar implements SearchAlgorithm {
     public SearchResult search(SearchDomain domain) {
         this.result = new SearchResultImpl();
         this.solution = new SearchResultImpl.SolutionImpl();
-        SearchDomain.State root = domain.initialState();
+        SearchState root = domain.initialState();
         this.result.startTimer();
         this.bound = this.weight * root.getH();
         int i = 0;
@@ -85,8 +84,8 @@ public class IDAstar implements SearchAlgorithm {
         this.result.stopTimer();
 
         SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-        List<SearchDomain.Operator> path = this.solution.getOperators();
-        List<SearchDomain.State> statesPath = this.solution.getStates();
+        List<Operator> path = this.solution.getOperators();
+        List<SearchState> statesPath = this.solution.getStates();
 
         path.remove(0);
         Collections.reverse(path);
@@ -112,7 +111,7 @@ public class IDAstar implements SearchAlgorithm {
      *
      * @return Whether a solution was found
      */
-    private boolean dfs(SearchDomain domain, SearchDomain.State parent, double cost, SearchDomain.Operator pop) {
+    private boolean dfs(SearchDomain domain, SearchState parent, double cost, Operator pop) {
         double f = cost + this.weight * parent.getH();
     
         if (f <= this.bound && domain.isGoal(parent)) {
@@ -132,13 +131,13 @@ public class IDAstar implements SearchAlgorithm {
         ++result.expanded;
         int numOps = domain.getNumOperators(parent);
         for (int i = 0; i < numOps; ++i) {
-    	    SearchDomain.Operator op = domain.getOperator(parent, i);
+    	    Operator op = domain.getOperator(parent, i);
             // Bypass reverse operators
             if (op.equals(pop)) {
                 continue;
             }
             ++result.generated;
-            SearchDomain.State child = domain.applyOperator(parent, op);
+            SearchState child = domain.applyOperator(parent, op);
             boolean goal = this.dfs(domain, child, op.getCost(child, parent) + cost, op.reverse(parent));
             if (goal) {
                 this.solution.addOperator(op);

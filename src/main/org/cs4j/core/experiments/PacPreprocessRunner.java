@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.domains.*;
-import org.cs4j.core.mains.DomainExperimentData;
+import org.cs4j.core.domains.DomainExperimentData;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.WAStar;
+import org.cs4j.core.algorithms.weighted.WAStar;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

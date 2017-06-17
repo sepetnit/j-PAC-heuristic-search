@@ -1,10 +1,12 @@
+import org.cs4j.core.Operator;
+import org.cs4j.core.SearchState;
 import org.cs4j.core.domains.*;
 import org.junit.Assert;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.SearchResultImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.algorithms.pac.PACCondition;
 import org.cs4j.core.algorithms.pac.PACUtils;
 import org.cs4j.core.algorithms.pac.RatioBasedPACCondition;
@@ -91,12 +93,12 @@ public class TestThresholdPACConditions {
         }
 
         @Override
-        public List<SearchDomain.Operator> getOperators() {
+        public List<Operator> getOperators() {
             return null;
         }
 
         @Override
-        public List<SearchDomain.State> getStates() {
+        public List<SearchState> getStates() {
             return null;
         }
 

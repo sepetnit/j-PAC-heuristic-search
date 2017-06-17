@@ -1,6 +1,8 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.familiar;
 
-import org.cs4j.core.SearchDomain;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
 
@@ -11,8 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.collections.BinHeap;
 
 
@@ -21,7 +21,7 @@ import org.cs4j.core.collections.BinHeap;
  *
  * According to the following paper: Faster Bounded-Cost Search Using Inadmissible Estimates
  */
-public class BEES implements SearchAlgorithm {
+public class BEES extends GenericSearchAlgorithm {
     private static final int OPEN_ID = 0;
     private static final int CLEANUP_ID = 1;
 
@@ -147,7 +147,7 @@ public class BEES implements SearchAlgorithm {
         result.startTimer();
 
         // Extract the initial state from the domain
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
         // Initialize a search node using the state (contains data according to the current
         // algorithm)
         Node initialNode = new Node(currentState, null, null, null, null);
@@ -178,7 +178,7 @@ public class BEES implements SearchAlgorithm {
             // Go over all the successors of the state
             for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
                 // Get the current operator
-                SearchDomain.Operator op = domain.getOperator(currentState, i);
+                Operator op = domain.getOperator(currentState, i);
                 // Don't apply the previous operator on the state - in order not to enter a loop
                 if (op.equals(currentNode.pop)) {
                     continue;
@@ -186,7 +186,7 @@ public class BEES implements SearchAlgorithm {
                 // Otherwise, let's generate the child state
                 ++result.generated;
                 // Get it by applying the operator on the parent state
-                SearchDomain.State childState = domain.applyOperator(currentState, op);
+                SearchState childState = domain.applyOperator(currentState, op);
                 // Create a search node for this state
                 Node childNode = new Node(childState, currentNode, currentState, op, op.reverse(currentState));
 
@@ -252,13 +252,13 @@ public class BEES implements SearchAlgorithm {
         // If a goal was found: update the solution
         if (goal != null) {
             SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-            List<SearchDomain.Operator> path = new ArrayList<>();
-            List<SearchDomain.State> statesPath = new ArrayList<>();
+            List<Operator> path = new ArrayList<>();
+            List<SearchState> statesPath = new ArrayList<>();
 //            System.out.println("[INFO] Solved - Generating output path.");
             double cost = 0;
 
-            SearchDomain.State currentPacked = domain.unpack(goal.packed);
-            SearchDomain.State currentParentPacked = null;
+            SearchState currentPacked = domain.unpack(goal.packed);
+            SearchState currentParentPacked = null;
             for (Node currentNode = goal;
                  currentNode != null;
                  currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -377,8 +377,8 @@ public class BEES implements SearchAlgorithm {
         private double dHat;
 
         private int depth;
-        private SearchDomain.Operator op;
-        private SearchDomain.Operator pop;
+        private Operator op;
+        private Operator pop;
 
         private Node parent;
 
@@ -468,7 +468,7 @@ public class BEES implements SearchAlgorithm {
          * @param op The operator which generated this node
          * @param pop The reverse operator (which will cause to generation of the parent node)
          */
-        private Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, final SearchDomain.Operator pop) {
+        private Node(SearchState state, Node parent, SearchState parentState, Operator op, final Operator pop) {
             // The size of the key is 2
             super(2);
             this.packed = domain.pack(state);
@@ -507,8 +507,8 @@ public class BEES implements SearchAlgorithm {
         }
 
         private void updateFromDuplicate(Node duplicateNode,
-                                         SearchDomain.State thisUnpackedState,
-                                         SearchDomain.State parentUnpackedState) {
+                                         SearchState thisUnpackedState,
+                                         SearchState parentUnpackedState) {
             this.g = duplicateNode.g;
             this.f = duplicateNode.f;
             this.op = duplicateNode.op;

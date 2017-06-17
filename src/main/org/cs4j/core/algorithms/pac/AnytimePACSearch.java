@@ -2,9 +2,9 @@ package org.cs4j.core.algorithms.pac;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cs4j.core.algorithms.SearchResultImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.domains.GridPathFinding;
-import org.cs4j.core.algorithms.AbstractAnytimeSearch;
+import org.cs4j.core.algorithms.anytime.AbstractAnytimeSearch;
 
 /**
  * Created by user on 26/02/2017.

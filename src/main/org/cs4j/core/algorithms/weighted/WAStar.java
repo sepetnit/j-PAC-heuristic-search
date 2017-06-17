@@ -14,13 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.weighted;
 
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchResult;
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 import org.cs4j.core.collections.*;
-import org.cs4j.core.SearchDomain.State;
+import org.cs4j.core.domains.GridPathFinding;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,11 +36,12 @@ import java.util.*;
  *
  * (Edited by Vitali Sepetnitsky)
  */
-public class WAStar implements SearchAlgorithm {
+public class WAStar extends GenericSearchAlgorithm {
 
-	protected static final int QID = 0;
+    private final Logger logger = LogManager.getLogger(WAStar.class);
 
-	protected static final Map<String, Class> WAStarPossibleParameters;
+
+    protected static final Map<String, Class> WAStarPossibleParameters;
 
     // Declare the parameters that can be tuned before running the search
     static
@@ -47,16 +51,24 @@ public class WAStar implements SearchAlgorithm {
         WAStar.WAStarPossibleParameters.put("reopen", Boolean.class);
         WAStar.WAStarPossibleParameters.put("max-cost", Double.class);
         WAStar.WAStarPossibleParameters.put("bpmx", Boolean.class);
+        WAStar.WAStarPossibleParameters.put("store-best-costs", Boolean.class);
+        WAStar.WAStarPossibleParameters.put("use-best-costs", Boolean.class);
     }
 
     // The domain for the search
     protected SearchDomain domain;
     // Open list (frontier)
     protected SearchQueue<Node> open;
-//    private BinHeapF<Node> openF;
+    // private BinHeapF<Node> openF;
     // Closed list (seen states)
-    protected TreeMap<PackedElement, Node> closed;
-//    private Map<PackedElement, Node> closed;
+    protected Map<PackedElement, Node> closed;
+
+    // Used for K-Goal Search:
+    // Shortest path between two states - recorded between searches:
+    // Each state, s, is mapped to state, s' iff the shortest path between
+    // s and s' was already found
+    // TODO:
+    public Map<PackedElement, Map<PackedElement, Double>> bestCosts;
 
     // TODO ...
     protected HeapType heapType;
@@ -72,6 +84,10 @@ public class WAStar implements SearchAlgorithm {
 
     protected boolean useBPMX;
 
+    // TODO : BestCosts ...
+    private boolean storeBestCosts;
+    private boolean useBestCosts;
+
     protected int FR;
 
     protected SearchResultImpl result;
@@ -79,13 +95,16 @@ public class WAStar implements SearchAlgorithm {
     /**
      * Sets the default values for the relevant fields of the algorithm
      */
-    protected void _initDefaultValues() {
+    private void _initDefaultValues() {
         // Default values
         this.weight = 1.0;
         this.reopen = true;
         this.maxCost = Double.MAX_VALUE;
         this.useBPMX = false;
         this.FR = Integer.MAX_VALUE;
+        this.storeBestCosts = false;
+        this.useBestCosts = false;
+        this.bestCosts = null;
     }
 
 
@@ -126,7 +145,7 @@ public class WAStar implements SearchAlgorithm {
         SearchQueue<Node> heap = null;
         switch (heapType) {
             case BUCKET:
-//                heap = new BucketHeap<>(size, QID);
+                // heap = new BucketHeap<>(size, QID);
                 break;
             case BIN:
                 heap = new BinHeap<>(new NodeComparator(), 0);
@@ -138,35 +157,118 @@ public class WAStar implements SearchAlgorithm {
     protected void _initDataStructures(SearchDomain domain) {
         this.domain = domain;
         this.open = new BinHeap<>(new NodeComparator(), 0);
-//        this.openF = new BinHeapF<>(1,domain);
-//        this.open = buildHeap(heapType, 100);
+        // this.openF = new BinHeapF<>(1,domain);
+        // this.open = buildHeap(heapType, 100);
         this.closed = new TreeMap<>();
-//        this.closed = new HashMap<>();
+        // this.closed = new HashMap<>();
+    }
+
+    private boolean assureCorrectInitialization() {
+        if ((this.useBestCosts || this.storeBestCosts) && this.bestCosts == null) {
+            // When we want calculating best costs using previous perfect heuristic calculation we
+            // need the relevant data structure to be initialized
+            this.logger.warn("Can't use best costs since their data structure is not " +
+                    "initialized");
+            // We don't want to fail here
+        }
+        return true;
+    }
+
+    @Override
+    public boolean concreteImproveStateHValue(SearchState s,
+                                              MultipleGoalsSearchDomain d) {
+        // get the single goal
+        // check the perfect heuristic between the state and the goal
+        // we should take the state, CHECK IF THE DOMAIN HAS A SINGLE GOAL AND
+        // RETRIEVE IT
+
+        if (d.validGoalsCount() == 1) { // TODO: May be different!
+            PackedElement goalElement = d.getFirstValidGoal();
+            //System.out.println("GOOOOOOOOOOOOOOOOAL: " + domain.unpack(goalElement).dumpStateShort());
+            Map<PackedElement, Double> currentElementCosts =
+                    this.bestCosts.get(domain.pack(s));
+            if (currentElementCosts != null) {
+                Double perfectH = currentElementCosts.get(goalElement);
+                if (perfectH != null) {
+
+                    if (perfectH != s.getH()) {
+                        //System.out.println("WIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIN");
+                        //System.out.println("Perfect: " + perfectH + " Real: " + s.getH());
+                    }
+                    if (perfectH < s.getH()) {
+                        System.out.println("PERFECT :" + perfectH + " REAL: " + s.getH());
+                        System.out.println("eeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrror");
+                    }
+
+
+                    // Update the h value with the found one
+                    s.setH(perfectH);
+
+                    return true;
+                } else {
+                   // this.logger.info("Perfect H wasn't found");
+                }
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public SearchResult concreteSearch(MultipleGoalsSearchDomain domain) {
+        return this.search(domain);
     }
 
     @Override
     public SearchResult search(SearchDomain domain) {
         // Initialize all the data structures required for the search
         this._initDataStructures(domain);
+        this.assureCorrectInitialization();
+        System.out.println("store: " + this.storeBestCosts + "; use: " + this.useBestCosts);
+
+
         Node goal = null;
 
-        result = new SearchResultImpl();
+        this.result = new SearchResultImpl();
 
-        result.startTimer();
+        this.result.startTimer();
 
         // Let's instantiate the initial state
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
+
+        System.out.println("Initial state : " + currentState.dumpStateShort());
         // Create a graph node from this state
         Node initNode = new Node(currentState);
+        PackedElement initialPacked = initNode.packed;
 
         // And add it to the frontier
-        _addNode(initNode);
+        this._addNode(initNode);
+
         try {
             // Loop over the frontier
-            while (!this.open.isEmpty() && result.getGenerated() < this.domain.maxGeneratedSize() && result.checkMinTimeOut()) {
+            while (!this.open.isEmpty() &&
+                    result.getGenerated() < this.domain.maxGeneratedSize() &&
+                    result.checkMinTimeOut()) {
                 // Take the first state (still don't remove it)
-    //            Node currentNode = this.open.poll();
+                // Node currentNode = this.open.poll();
                 Node currentNode = _selectNode();
+
+                ///////////////////////////////////////////////////////////////
+
+                if (this.storeBestCosts) {
+                    // Store best cost if required
+                    Map<PackedElement, Double> found =
+                            this.bestCosts.computeIfAbsent(currentNode.packed, k -> new TreeMap<>());
+                    // Store the perfect heuristic (even if a previous value is
+                    // stored)
+                    //System.out.println("Stored: " +
+                    //        this.domain.unpack(currentNode.packed).dumpStateShort() + " " +
+                    //        this.domain.unpack(initialPacked).dumpStateShort());
+                    found.put(initialPacked, currentNode.getG());
+                }
+
+                ///////////////////////////////////////////////////////////////
+
                 // Prune
                 if (currentNode.getRf() >= this.maxCost) {
                     continue;
@@ -175,6 +277,10 @@ public class WAStar implements SearchAlgorithm {
                 // Extract the state from the packed value of the node
                 currentState = domain.unpack(currentNode.packed);
 
+                if (((GridPathFinding.GridPathFindingState)currentState).agentLocation == 33967) {
+                    System.out.println("dddddddddddd");
+                }
+
                 //System.out.println(currentState.dumpStateShort());
                 // Check for goal condition
                 if (domain.isGoal(currentState)) {
@@ -182,7 +288,7 @@ public class WAStar implements SearchAlgorithm {
                     break;
                 }
 
-                List<Pair<State, Node>> children = new ArrayList<>();
+                List<Pair<SearchState, Node>> children = new ArrayList<>();
 
                 // Expand the current node
                 ++result.expanded;
@@ -191,13 +297,43 @@ public class WAStar implements SearchAlgorithm {
                 // First, let's generate all the children
                 // Go over all the possible operators and apply them
                 for (int i = 0; i < domain.getNumOperators(currentState); ++i) {
-                    SearchDomain.Operator op = domain.getOperator(currentState, i);
-                    // Try to avoid loops
+                    Operator op = domain.getOperator(currentState, i);
+                    // Try to avoid loops - no need to generate parent
                     if (op.equals(currentNode.pop)) {
                         continue;
                     }
-                    SearchDomain.State childState = domain.applyOperator(currentState, op);
-                    Node childNode = new Node(childState, currentNode, currentState, op, op.reverse(currentState));
+                    SearchState childState =
+                            domain.applyOperator(currentState, op);
+
+                    ////////////////////////////////////////////////////////////
+                    // Update the H value of the state if required
+                    ////////////////////////////////////////////////////////////
+
+                    // First we need to check if there is a single goal that
+                    // should be found during the current search
+
+                    // domain.countValidStates(). getFirstValidState()
+                    // check(currentstate, goal).cost == perfect heuristic
+                    // hImprovable
+                    Node childNode = new Node(childState, currentNode,
+                            currentState, op, op.reverse(currentState));
+
+                    if (this.useBestCosts) {
+                        if (this.bestCosts.get(childNode.packed) != null) {
+                            double previous = childNode.getH();
+                            if (this.domain.improveStateHValue(childState,
+                                    this)) {
+                                childNode.setH(childState.getH());
+                                /*
+                                logger.info("Value improved: was {}, now {}",
+                                        previous, childNode.getH());
+                                        */
+                            }
+                        }
+                    }
+
+                    ////////////////////////////////////////////////////////////
+
                     // Here we actually generated a new state
                     ++result.generated;
 /*                    if(result.getGenerated() % 1000 == 0){
@@ -223,8 +359,8 @@ public class WAStar implements SearchAlgorithm {
                 }
 
                 // Go over all the possible operators and apply them
-                for (Pair<SearchDomain.State, Node> currentChild : children) {
-                    SearchDomain.State childState = currentChild.getKey();
+                for (Pair<SearchState, Node> currentChild : children) {
+                    SearchState childState = currentChild.getKey();
                     Node childNode = currentChild.getValue();
                     double edgeCost = childNode.op.getCost(childState, currentState);
 
@@ -234,17 +370,19 @@ public class WAStar implements SearchAlgorithm {
                     }
                     // Treat duplicates
                     boolean contains = true;
-                    PackedElement p = childNode.packed;
-                    Node testNode = this.closed.get(p);
-                    if(testNode == null){
+                    // Get the previous copy of this node (and extract it)
+                    Node dupChildNode = this.closed.get(childNode.packed);
+                    if (dupChildNode == null){
                         contains = false;
                     }
-//                    contains = this.closed.containsKey(childNode.packed);
+                    // contains = this.closed.containsKey(childNode.packed);
                     if (contains) {
                         // Count the duplicates
                         ++result.duplicates;
-                        // Get the previous copy of this node (and extract it)
-                        Node dupChildNode = this.closed.get(childNode.packed);
+
+                        if (this.useBestCosts) {
+                            dupChildNode.setH(childNode.getH());
+                        }
 
                         // Propagate the H value to child (in case of BPMX)
                         if (this.useBPMX) {
@@ -263,7 +401,6 @@ public class WAStar implements SearchAlgorithm {
                                 continue;
                             }
                             // In any case update the duplicate with the new values - we reached it via a shorter path
-                            double dupF = dupChildNode.getF();
                             dupChildNode.g = childNode.g;
                             dupChildNode.op = childNode.op;
                             dupChildNode.pop = childNode.pop;
@@ -273,19 +410,18 @@ public class WAStar implements SearchAlgorithm {
                             if (dupChildNode.getIndex(this.open.getKey()) != -1) {
                                 ++result.opupdated;
                                 this.open.update(dupChildNode);
-//            this.openF.updateF(dupChildNode, dupF);
+                                // this.openF.updateF(dupChildNode, dupF);
                             }
                             // Otherwise, consider to reopen dupChildNode
                             else {
                                 // Return to OPEN list only if reopening is allowed
                                 if (this.reopen) {
                                     ++result.reopened;
-                                    _addNode(dupChildNode);
+                                    this._addNode(dupChildNode);
                                 }
                             }
                             // in any case, update closed to be bestChild
                             this.closed.put(dupChildNode.packed, dupChildNode);
-
                         } else {
                             // A shorter path has not been found, but let's update the node in open if its h increased
                             if (this.useBPMX) {
@@ -300,14 +436,15 @@ public class WAStar implements SearchAlgorithm {
                         if (this.useBPMX) {
                             childNode.h = Math.max(childNode.h, currentNode.h - edgeCost);
                         }
-                        _addNode(childNode);
+                        this._addNode(childNode);
                     }
                 }
             }
         }
         catch(OutOfMemoryError e){
-            System.out.println("[INFO] WAstar OutOfMemory :-( "+e);
-            System.out.println("[INFO] OutOfMemory WAstar on:"+this.domain.getClass().getSimpleName()+" generated:"+result.getGenerated());
+            this.logger.error("WAstar OutOfMemory :-( {}", e);
+            this.logger.error("OutOfMemory WAstar on: {}, generated: {}",
+                    this.domain.getClass().getSimpleName(), result.getGenerated());
         }
 
         result.stopTimer();
@@ -315,19 +452,18 @@ public class WAStar implements SearchAlgorithm {
 //        System.out.println("closed Size:\t"+this.closed.size());
 //        result.printArrCpuTimeMillis();
 
-
-
         // If a goal was found: update the solution
         if (goal != null) {
             System.out.print("\r");
-            SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
-            List<SearchDomain.Operator> path = new ArrayList<>();
-            List<SearchDomain.State> statesPath = new ArrayList<>();
+            SearchResultImpl.SolutionImpl solution =
+                    new SearchResultImpl.SolutionImpl(this.domain);
+            List<Operator> path = new ArrayList<>();
+            List<SearchState> statesPath = new ArrayList<>();
             // System.out.println("[INFO] Solved - Generating output path.");
             double cost = 0;
 
-            SearchDomain.State currentPacked = domain.unpack(goal.packed);
-            SearchDomain.State currentParentPacked = null;
+            SearchState currentPacked = domain.unpack(goal.packed);
+            SearchState currentParentPacked = null;
             for (Node currentNode = goal;
                  currentNode != null;
                  currentNode = currentNode.parent, currentPacked = currentParentPacked) {
@@ -345,8 +481,8 @@ public class WAStar implements SearchAlgorithm {
             double roundedCost = new BigDecimal(cost).setScale(4, RoundingMode.HALF_DOWN).doubleValue();
             double roundedG = new BigDecimal(goal.g).setScale(4, RoundingMode.HALF_DOWN).doubleValue();
             if (roundedCost - roundedG < 0) {
-                System.out.println("[INFO] Goal G is higher that the actual cost " +
-                        "(G: " + goal.g +  ", Actual: " + cost + ")");
+                this.logger.info("Goal G is higher that the actual cost " +
+                        "(G: {} Actual: {})", goal.g, cost);
             }
 
             Collections.reverse(path);
@@ -379,7 +515,7 @@ public class WAStar implements SearchAlgorithm {
 
     /**
      *
-     * @param toAdd is the new node toAdd to open
+     * @param toAdd is the new node that should be added to open
      */
     protected void _addNode(Node toAdd) {
         this.open.add(toAdd);
@@ -399,10 +535,10 @@ public class WAStar implements SearchAlgorithm {
             case "weight": {
                 this.weight = Double.parseDouble(value);
                 if (this.weight < 1.0d) {
-                    System.out.println("[ERROR] The weight must be >= 1.0");
+                    this.logger.error("The weight must be >= 1.0");
                     throw new IllegalArgumentException();
                 } else if (this.weight == 1.0d) {
-                    System.out.println("[WARNING] Weight of 1.0 is equivalent to A*");
+                    this.logger.warn("Weight of 1.0 is equivalent to A*");
                 }
                 break;
             }
@@ -413,15 +549,38 @@ public class WAStar implements SearchAlgorithm {
             case "bpmx": {
                 this.useBPMX = Boolean.parseBoolean(value);
                 if (this.useBPMX) {
-                    System.out.println("[INFO] WAStar will be ran with BPMX");
+                    this.logger.info("WAStar will be ran with BPMX");
                 }
                 break;
             }
             case "max-cost": {
                 this.maxCost = Double.parseDouble(value);
                 if (this.maxCost <= 0) {
-                    System.out.println("[ERROR] The maximum possible cost must be >= 0");
+                    this.logger.error("The maximum possible cost must be >= 0");
                     throw new IllegalArgumentException();
+                }
+                break;
+            }
+            case "store-best-costs": {
+                this.storeBestCosts = Boolean.parseBoolean(value);
+                if (this.storeBestCosts) {
+                    // Initialize the list if required
+                    if (this.bestCosts == null) {
+                        this.bestCosts = new TreeMap<>();
+                    }
+                    this.logger.info("WAStar will store the cost of shortest paths between states");
+                }
+                break;
+            }
+            case "use-best-costs": {
+                this.useBestCosts = Boolean.parseBoolean(value);
+                if (this.useBestCosts) {
+                    // Initialize the list if required
+                    if (this.bestCosts == null) {
+                        this.bestCosts = new TreeMap<>();
+                    }
+                    this.logger.info("WAStar will try to extract perfect heuristic values from " +
+                            "previous searches");
                 }
                 break;
             }
@@ -435,21 +594,28 @@ public class WAStar implements SearchAlgorithm {
         }
     }
 
+    // TODO: Implement reset function
+
     /**
      * The node class
      */
-    protected final class Node extends SearchQueueElementImpl{
+    protected final class Node extends SearchQueueElementImpl {
     	protected double g;
         protected double h;
 
-        protected SearchDomain.Operator op;
-        protected SearchDomain.Operator pop;
+        protected Operator op;
+        protected Operator pop;
 
         protected Node parent;
         protected PackedElement packed;
-//        private int[] secondaryIndex;
 
-        protected Node(SearchDomain.State state, Node parent, SearchDomain.State parentState, SearchDomain.Operator op, SearchDomain.Operator pop) {
+//      private int[] secondaryIndex;
+
+        protected Node(SearchState state,
+                       Node parent,
+                       SearchState parentState,
+                       Operator op,
+                       Operator pop) {
             // Size of key
             super(2);
             // TODO: Why?
@@ -485,7 +651,7 @@ public class WAStar implements SearchAlgorithm {
          *
          * @param state The state which this node represents
          */
-        protected Node(SearchDomain.State state) {
+        protected Node(SearchState state) {
             this(state, null, null, null, null);
         }
 
@@ -507,6 +673,12 @@ public class WAStar implements SearchAlgorithm {
         @Override
         public double getH() {
             return this.h;
+        }
+
+        public double setH(double hValue) {
+            double previousH = this.getH();
+            this.h = hValue;
+            return previousH;
         }
 
         @Override
@@ -538,8 +710,8 @@ public class WAStar implements SearchAlgorithm {
             // First compare by wF (smaller is preferred), then by g (bigger is preferred)
             if (a.getWf() < b.getWf()) return -1;
             if (a.getWf() > b.getWf()) return 1;
-            if (a.g > b.g) return -1;
-            if (a.g < b.g) return 1;
+            if (a.getG() > b.getG()) return -1;
+            if (a.getG() < b.getG()) return 1;
             return 0;
         }
     }

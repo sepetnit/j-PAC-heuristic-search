@@ -17,7 +17,10 @@
 package org.cs4j.core.domains;
 
 import com.carrotsearch.hppc.LongByteHashMap;
+import org.cs4j.core.Operator;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.SingleGoalSearchDomain;
 import org.cs4j.core.collections.PackedElement;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -36,7 +39,7 @@ import java.util.TreeMap;
  *
  * @author Matthew Hatem
  */
-public final class FifteenPuzzle implements SearchDomain {
+public final class FifteenPuzzle extends SingleGoalSearchDomain {
 
     private final int width = 4;
     private final int height = 4;
@@ -564,7 +567,7 @@ public final class FifteenPuzzle implements SearchDomain {
     }
 
     @Override
-    public State initialState() {
+    public SearchState initialState() {
         TileState s = this.initialStateNoHeuristic();
         // Let's calculate the heuristic values (h and d)
         double[] computedHD = this.computeHD(s);
@@ -574,17 +577,16 @@ public final class FifteenPuzzle implements SearchDomain {
         return s;
     }
 
-    public void setInitialState(State tiles){
+    public void setInitialState(SearchState tiles){
         TileState s = (TileState) tiles;
         this.init = s.tiles;
     }
 
-    @Override
-    public boolean isGoal(State state) {
+    public boolean isGoal(SearchState state) {
         // The state is a goal if the estimated number of tile shifts, between it and the goal, is 0
         boolean ret = false;
         if(((TileState) state).d == 0){
-            for(int i=0;i<tilesNumber;i++){
+            for(int i = 0; i < tilesNumber; i++){
                 if(((TileState) state).tiles[i] != i){
                     System.out.println("[WARNING] Wrong goal state found");
                 }
@@ -613,13 +615,13 @@ public final class FifteenPuzzle implements SearchDomain {
     */
 
     @Override
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         // The number of the operators depends only on the position of the blank
         return this.operatorsCount[((TileState) state).blank];
     }
 
     @Override
-    public Operator getOperator(State s, int index) {
+    public Operator getOperator(SearchState s, int index) {
         TileState ts = (TileState) s;
         // Return the operator according to the position of the blank after applying the operator
         // whose index equals to the given one
@@ -627,7 +629,7 @@ public final class FifteenPuzzle implements SearchDomain {
     }
 
     @Override
-    public State copy(State s) {
+    public SearchState copy(SearchState s) {
         TileState ts = (TileState) s;
         TileState copy = new TileState();
         // Copy the tiles
@@ -665,7 +667,7 @@ public final class FifteenPuzzle implements SearchDomain {
 
 
     @Override
-    public State applyOperator(State s, Operator op) {
+    public SearchState applyOperator(SearchState s, Operator op) {
         TileState ts = (TileState) copy(s);
         FifteenPuzzleOperator fop = (FifteenPuzzleOperator) op;
         // Get the updated position of the blank
@@ -694,7 +696,7 @@ public final class FifteenPuzzle implements SearchDomain {
     }
 
     @Override
-    public PackedElement pack(State s) {
+    public PackedElement pack(SearchState s) {
         TileState ts = (TileState) s;
         long result = 0;
         // TODO: Sounds that the value of blank is unnecessary
@@ -715,7 +717,7 @@ public final class FifteenPuzzle implements SearchDomain {
      *
      * @return The unpacked state
      */
-    public State unpackNoHeuristic(PackedElement packed) {
+    public SearchState unpackNoHeuristic(PackedElement packed) {
         assert packed.getLongsCount() == 1;
         long firstPacked = packed.getFirst();
         TileState ts = new TileState();
@@ -739,7 +741,7 @@ public final class FifteenPuzzle implements SearchDomain {
     }
 
     @Override
-    public State unpack(PackedElement packed) {
+    public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
         long firstPacked = packed.getFirst();
         TileState ts = new TileState();
@@ -773,7 +775,7 @@ public final class FifteenPuzzle implements SearchDomain {
     /**
      * The tile state class
      */
-    private final class TileState implements State {
+    private final class TileState extends SearchState {
 
         private int tiles[] = new int[FifteenPuzzle.this.tilesNumber];
         private int positionsOfTiles[] = new int[FifteenPuzzle.this.tilesNumber];
@@ -905,7 +907,7 @@ public final class FifteenPuzzle implements SearchDomain {
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -975,7 +977,7 @@ public final class FifteenPuzzle implements SearchDomain {
     }
 
     @Override
-    public String dumpStatesCollection(State[] states) {
+    public String dumpStatesCollection(SearchState[] states) {
         return null;
     }
 
@@ -1232,7 +1234,7 @@ public final class FifteenPuzzle implements SearchDomain {
         }
 
         @Override
-        public double getCost(State s, State parent) {
+        public double getCost(SearchState s, SearchState parent) {
             // All the operators have the same cost
             TileState pts = (TileState) parent;
             int tile = pts.tiles[value];
@@ -1240,7 +1242,7 @@ public final class FifteenPuzzle implements SearchDomain {
         }
 
         @Override
-        public Operator reverse(State s) {
+        public Operator reverse(SearchState s) {
             TileState ts = (TileState) s;
             // Get the reverse operator - it must be operator that cause the blank to be located at
             // its location on the given state

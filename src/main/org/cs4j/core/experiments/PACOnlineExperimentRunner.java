@@ -6,12 +6,12 @@ import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.DP;
+import org.cs4j.core.algorithms.familiar.DP;
 import org.cs4j.core.algorithms.pac.*;
 import org.cs4j.core.domains.GridPathFinding;
 import org.cs4j.core.domains.Pancakes;
 import org.cs4j.core.domains.VacuumRobot;
-import org.cs4j.core.mains.DomainExperimentData;
+import org.cs4j.core.domains.DomainExperimentData;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

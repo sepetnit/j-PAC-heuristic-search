@@ -3,7 +3,7 @@ package org.cs4j.core.generators;
 import org.cs4j.core.collections.Pair;
 import org.cs4j.core.domains.Pancakes;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.EES;
+import org.cs4j.core.algorithms.familiar.EES;
 import org.cs4j.core.domains.Utils;
 //import java.org.cs4j.core.domains.PancakesWithDontCares;
 

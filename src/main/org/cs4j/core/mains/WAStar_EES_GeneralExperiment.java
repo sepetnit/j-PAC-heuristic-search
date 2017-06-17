@@ -6,7 +6,7 @@ import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchResult;
 import org.cs4j.core.SearchResult.Solution;
-import org.cs4j.core.algorithms.WAStar;
+import org.cs4j.core.algorithms.weighted.WAStar;
 import org.cs4j.core.data.Weights;
 import org.cs4j.core.data.Weights.SingleWeight;
 

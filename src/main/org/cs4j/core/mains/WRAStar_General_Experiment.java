@@ -4,7 +4,7 @@ import org.cs4j.core.SearchDomain;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.WRAStar;
+import org.cs4j.core.algorithms.weighted.WRAStar;
 import org.cs4j.core.data.Weights;
 
 import java.io.BufferedReader;

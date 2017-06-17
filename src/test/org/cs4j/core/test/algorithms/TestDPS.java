@@ -3,7 +3,7 @@ package java.org.cs4j.core.test.algorithms;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.DP;
+import org.cs4j.core.algorithms.familiar.DP;
 import org.junit.Assert;
 import org.junit.Test;
 

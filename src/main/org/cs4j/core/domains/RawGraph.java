@@ -1,6 +1,9 @@
 package org.cs4j.core.domains;
 
+import org.cs4j.core.Operator;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.SingleGoalSearchDomain;
 import org.cs4j.core.collections.PackedElement;
 
 import java.util.HashMap;
@@ -12,7 +15,7 @@ import java.util.Map;
  * TODO: Should implement all the methods and check!!!
  *
  */
-public class RawGraph implements SearchDomain {
+public class RawGraph extends SingleGoalSearchDomain {
 
     /*
     RawGraphNode a = new RawGraphNode('A', 105);
@@ -109,31 +112,31 @@ public class RawGraph implements SearchDomain {
 
 
     @Override
-    public State initialState() {
+    public SearchState initialState() {
         //return a;
         return a5;
     }
 
     @Override
-    public boolean isGoal(State state) {
+    public boolean isGoal(SearchState state) {
         RawGraphNode n = (RawGraphNode)state;
         return n.name == 'A';
     }
 
     @Override
-    public int getNumOperators(State state) {
+    public int getNumOperators(SearchState state) {
         RawGraphNode n = (RawGraphNode)state;
         return transitions.get(n).length;
     }
 
     @Override
-    public Operator getOperator(State state, int index) {
+    public Operator getOperator(SearchState state, int index) {
         RawGraphNode n = (RawGraphNode)state;
         return transitions.get(n)[index];
     }
 
     @Override
-    public State applyOperator(State state, Operator op) {
+    public SearchState applyOperator(SearchState state, Operator op) {
         RawGraphEdge edge = (RawGraphEdge)op;
         RawGraphNode node = (RawGraphNode)state;
         if (node.equals(edge.a)) {
@@ -148,25 +151,25 @@ public class RawGraph implements SearchDomain {
     }
 
     @Override
-    public State copy(State state) {
+    public SearchState copy(SearchState state) {
         RawGraphNode node = (RawGraphNode)state;
         return new RawGraphNode(node.name, node.h, node.parent);
     }
 
     @Override
-    public PackedElement pack(State state) {
+    public PackedElement pack(SearchState state) {
         RawGraphNode node = (RawGraphNode)state;
         return new PackedElement(node.hashCode());
     }
 
     @Override
-    public State unpack(PackedElement packed) {
+    public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
         return this.nodes.get((int)packed.getFirst());
     }
 
     @Override
-    public String dumpStatesCollection(State[] states) {
+    public String dumpStatesCollection(SearchState[] states) {
         return null;
     }
 
@@ -200,7 +203,7 @@ public class RawGraph implements SearchDomain {
 
     }
 
-    private class RawGraphNode implements SearchDomain.State {
+    private class RawGraphNode extends SearchState {
         private char name;
         private double h;
         RawGraphNode parent;
@@ -226,7 +229,7 @@ public class RawGraph implements SearchDomain {
         }
 
         @Override
-        public State getParent() {
+        public SearchState getParent() {
             return this.parent;
         }
 
@@ -262,7 +265,7 @@ public class RawGraph implements SearchDomain {
         }
 
         @Override
-        public double getCost(State state, State parent) {
+        public double getCost(SearchState state, SearchState parent) {
             RawGraphNode a = (RawGraphNode)state;
             RawGraphNode b = (RawGraphNode)parent;
             assert (a.equals(this.a) && b.equals(this.b)) || (a.equals(this.b) && b.equals(this.a));
@@ -270,7 +273,7 @@ public class RawGraph implements SearchDomain {
         }
 
         @Override
-        public Operator reverse(State state) {
+        public Operator reverse(SearchState state) {
             RawGraphNode s = (RawGraphNode)state;
             assert s.equals(this.a) || s.equals(this.b);
             return this;

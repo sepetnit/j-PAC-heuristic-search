@@ -1,14 +1,16 @@
-package org.cs4j.core.algorithms;
+package org.cs4j.core.algorithms.weighted;
 
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchResult;
+import org.cs4j.core.SearchState;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 
 
 /**
  * Created by user on 29/11/2015.
  *
- * The algorithm is equivalent to the standard WA* suboptimal search, but, this algorithms runs NR by default and
+ * The algorithm is equivalent to the familiar WA* suboptimal search, but, this algorithms runs NR by default and
  * only if the predicted suboptimality of the solution is higher than the suboptimality bound, the algorithm runs AR
  * and stops, otherwise, the solution of NR is returned
  */
@@ -34,7 +36,7 @@ public class WNARAStar extends WRAStar {
         // Initialize all the data structures required for the search
         this._initDataStructures();
         // Let's instantiate the initial state
-        SearchDomain.State currentState = domain.initialState();
+        SearchState currentState = domain.initialState();
         // Create a graph node from this state
         Node initNode = new Node(currentState);
 

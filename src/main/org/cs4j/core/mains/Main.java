@@ -1,11 +1,13 @@
 package org.cs4j.core.mains;
 
-import org.cs4j.core.SearchDomain;
-import org.cs4j.core.algorithms.*;
+import org.cs4j.core.*;
+import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.algorithms.familiar.EES;
+import org.cs4j.core.algorithms.familiar.PTS;
+import org.cs4j.core.algorithms.familiar.RBFS;
+import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.algorithms.weighted.WRAStar;
 import org.cs4j.core.domains.*;
-import org.cs4j.core.OutputResult;
-import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.data.Weights;
 
 import java.io.*;
@@ -599,20 +601,20 @@ public class Main {
         String fileExt = "Heavy";
 
         System.out.println(fileExt);
-        SearchDomain.State goalState = domain.initialState();
+        SearchState goalState = domain.initialState();
         OutputResult  output = new OutputResult("C:/Users/Daniel/Documents/gilond/Master/ResearchData/results/randomWalk"+fileExt, null, -1, -1, null, false, true);
         String headers = "Instance,d,h,d*,h*";
         output.writeln(headers);
 
-        SearchDomain.Operator randOperator;
-        SearchDomain.Operator reversedOperator = null;
+        Operator randOperator;
+        Operator reversedOperator = null;
         int randOperatorNum;
 
         for(int i=0; i<iterations*stepNum; i++){
             //randomizing
             int currentStep = i/iterations + 1;
             System.out.print("\ri:"+i);
-            SearchDomain.State randomState = goalState;
+            SearchState randomState = goalState;
             for(int j=0; j<iterationStep*currentStep; j++){
                 int numOperators = domain.getNumOperators(randomState);
                 randOperatorNum = (int) (Math.random() * numOperators);
