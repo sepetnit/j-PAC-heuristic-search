@@ -77,7 +77,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
     // Each state, s, is mapped to state, s' iff the shortest path between
     // s and s' was already found
     // TODO:
-    public Map<PackedElement, Map<PackedElement, Double>> bestCosts;
+    //public Map<PackedElement, Map<PackedElement, Double>> bestCosts;
 
     // TODO ...
     protected HeapType heapType;
@@ -94,8 +94,8 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
     protected boolean useBPMX;
 
     // TODO : BestCosts ...
-    private boolean storeBestCosts;
-    private boolean useBestCosts;
+    //private boolean storeBestCosts;
+    //private boolean useBestCosts;
 
     protected int FR;
 
@@ -115,9 +115,10 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
         this.maxCost = Double.MAX_VALUE;
         this.useBPMX = false;
         this.FR = Integer.MAX_VALUE;
-        this.storeBestCosts = false;
-        this.useBestCosts = false;
-        this.bestCosts = null;
+
+        //this.storeBestCosts = false;
+        //this.useBestCosts = false;
+        //this.bestCosts = null;
     }
 
 
@@ -174,19 +175,21 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
     }
 
     private boolean assureCorrectInitialization() {
+        /*
         if ((this.useBestCosts || this.storeBestCosts) && this.bestCosts == null) {
             // When we want calculating best costs using previous perfect heuristic calculation we
             // need the relevant data structure to be initialized
             this.logger.warn("Can't use best costs since their data structure is not " +
                     "initialized");
             // We don't want to fail here
-        }
+        }*/
         return true;
     }
 
     @Override
     public boolean concreteImproveStateHValue(SearchState s,
                                               MultipleGoalsSearchDomain d) {
+        /*
         // get the single goal
         // check the perfect heuristic between the state and the goal
         // we should take the state, CHECK IF THE DOMAIN HAS A SINGLE GOAL AND
@@ -210,7 +213,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
                 }
             }
 
-        }
+        }*/
 
         return false;
     }
@@ -223,7 +226,6 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
 
     // By default, reverse the paths
     protected SearchResultImpl.SolutionImpl getSolution(SearchDomain domain, N goal) {
-        System.out.println("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
         return this.getSolution(domain, goal, true);
     }
 
@@ -307,7 +309,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
         // Initialize all the data structures required for the search
         this._initDataStructures(domain);
         this.assureCorrectInitialization();
-        System.out.println("store: " + this.storeBestCosts + "; use: " + this.useBestCosts);
+        //System.out.println("store: " + this.storeBestCosts + "; use: " + this.useBestCosts);
 
         SearchResultImpl result = new SearchResultImpl();
 
@@ -328,6 +330,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
 
                 ///////////////////////////////////////////////////////////////
 
+                /*
                 if (this.storeBestCosts) {
                     // Store best cost if required
                     Map<PackedElement, Double> found =
@@ -340,6 +343,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
                     //        domain.unpack(initialPacked).dumpStateShort());
                     found.put(initialPacked, currentNode.getG());
                 }
+                */
 
                 ///////////////////////////////////////////////////////////////
 
@@ -395,19 +399,19 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
                     N childNode = this.getNode(childState, currentNode,
                             currentState, op, op.reverse(currentState));
 
+                    /*
                     if (this.useBestCosts) {
                         if (this.bestCosts.get(childNode.getPacked()) != null) {
                             //double previous = childNode.getH();
                             if (domain.improveStateHValue(childState,
                                     this)) {
                                 childNode.setH(childState.getH());
-                                /*
                                 logger.info("Value improved: was {}, now {}",
                                         previous, childNode.getH());
-                                        */
                             }
                         }
                     }
+                    */
 
                     ////////////////////////////////////////////////////////////
 
@@ -460,9 +464,11 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
                         // Count the duplicates
                         ++result.duplicates;
 
+                        /*
                         if (this.useBestCosts) {
                             dupChildNode.setH(childNode.getH());
                         }
+                        */
 
                         // Propagate the H value to child (in case of BPMX)
                         if (this.useBPMX) {
@@ -595,6 +601,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
                 }
                 break;
             }
+            /*
             case "store-best-costs": {
                 this.storeBestCosts = Boolean.parseBoolean(value);
                 if (this.storeBestCosts) {
@@ -619,7 +626,7 @@ public abstract class GenericWAstar<N extends GenericNode<N>, C extends Comparat
                             "previous searches");
                 }
                 break;
-            }
+            }*/
             case "FR": {
                 this.FR = Integer.parseInt(value);
                 break;
