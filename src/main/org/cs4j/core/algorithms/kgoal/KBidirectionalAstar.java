@@ -226,6 +226,8 @@ public class KBidirectionalAstar extends GenericSearchAlgorithm {
 
     @Override
     public SearchResultImpl concreteSearch(MultipleGoalsSearchDomain domain) {
+        // We need to clear the perfectHs collection - it is relevant only for a single search
+        this.basicAlgorithm.perfectHs = new TreeMap<>();
         this.searchDomain = domain;
         this.result = new SearchResultImpl();
 
@@ -310,8 +312,10 @@ public class KBidirectionalAstar extends GenericSearchAlgorithm {
             }
             if (singleResult.solutionsCount() == 0) {
                 KBidirectionalAstar.logger.warn("Error occurred - no result");
+                System.exit(-1);
             } else if (singleResult.solutionsCount() == 0) {
                 KBidirectionalAstar.logger.warn("No solution for goal {}", i + 1);
+                System.exit(-1);
             } else {
                 this.result.addSolution(singleResult.getSolutions().get(0));
                 this.result.setExpanded(this.result.getExpanded() + singleResult.getExpanded());
