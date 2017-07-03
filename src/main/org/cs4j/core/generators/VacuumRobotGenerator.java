@@ -1,10 +1,10 @@
 package org.cs4j.core.generators;
 
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.domains.GridPathFinding;
 import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.PairInt;
 
 import java.io.*;
@@ -180,8 +180,8 @@ public class VacuumRobotGenerator extends GeneralInstancesGenerator {
         mapCopy[this.index(robotLocationPair, w)] = GridPathFinding.START_MARKER;
         mapCopy[dirtyLocation] = GridPathFinding.GOAL_MARKER;
         SearchDomain domain = new GridPathFinding(w, h, mapCopy, robotLocationPair, dirtyLocationPair);
-        SearchAlgorithm searchAlgorithm = new WAStar();
-        SearchResult result = searchAlgorithm.search(domain);
+        SearchAlgorithm searchAlgorithm = new WAstar();
+        SearchResultImpl result = searchAlgorithm.search(domain);
         // System.out.println("[INFO] Partial Search - Found: " + (result.getSolutions().size() > 0));
         return result.hasSolution();
     }

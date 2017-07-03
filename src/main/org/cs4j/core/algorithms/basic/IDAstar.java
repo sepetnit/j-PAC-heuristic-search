@@ -1,6 +1,6 @@
 package org.cs4j.core.algorithms.basic;
 import org.cs4j.core.*;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +63,7 @@ public class IDAstar extends GenericSearchAlgorithm {
     }
 
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         this.result = new SearchResultImpl();
         this.solution = new SearchResultImpl.SolutionImpl();
         SearchState root = domain.initialState();

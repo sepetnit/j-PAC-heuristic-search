@@ -11,7 +11,7 @@ public abstract class SingleGoalSearchDomain implements SearchDomain {
     }
 
     @Override
-    public final SearchResult searchBy(SearchAlgorithm alg) {
+    public final SearchResultImpl searchBy(SearchAlgorithm alg) {
         return alg.concreteSearch(this);
     }
 }

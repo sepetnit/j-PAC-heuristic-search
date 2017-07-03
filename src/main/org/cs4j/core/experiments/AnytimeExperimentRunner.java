@@ -3,12 +3,12 @@ package org.cs4j.core.experiments;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.AnytimeSearchAlgorithm;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.algorithms.anytime.AnytimePTS;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.domains.*;
 import org.cs4j.core.OutputResult;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.domains.DomainExperimentData;
 
 import java.io.FileNotFoundException;
@@ -29,7 +29,7 @@ public class AnytimeExperimentRunner {
      * @param resultsData the results data object to update with data from the SearchResults
      * @param result the SearchResults object to extract from
      */
-    protected void setResultsData(double[] resultsData, SearchResult result) {
+    protected void setResultsData(double[] resultsData, SearchResultImpl result) {
         resultsData[2] = 1;
         resultsData[3] = result.getBestSolution().getLength();
         resultsData[4] = result.getBestSolution().getCost();
@@ -50,7 +50,7 @@ public class AnytimeExperimentRunner {
         SearchDomain domain;
         int anytimeIteration;
         SearchResultImpl totalResult;
-        SearchResult iterationResult;
+        SearchResultImpl iterationResult;
         int solvableNum = stopInstance - startInstance + 1;
         boolean[] solvableInstances = new boolean[solvableNum];
         Arrays.fill(solvableInstances, true);
@@ -125,9 +125,9 @@ public class AnytimeExperimentRunner {
         AnytimeExperimentRunner runner = new AnytimeExperimentRunner();
         AnytimeSearchAlgorithm algorithm = new AnytimePTS(){
             @Override
-            public SearchResult search(SearchDomain domain) {
+            public SearchResultImpl search(SearchDomain domain) {
                 double initialH = domain.initialState().getH();
-                SearchResult results = super.search(domain);
+                SearchResultImpl results = super.search(domain);
                 results.getExtras().put("initial-h",initialH);
                 return results;
             }};

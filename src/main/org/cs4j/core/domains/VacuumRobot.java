@@ -61,6 +61,11 @@ public class VacuumRobot extends SingleGoalSearchDomain {
         VacuumPossibleParameters.put("cost-function", COST_FUNCTION.class);
     }
 
+    // TODO
+    public String getInputFileName() {
+        return "";
+    }
+
     /**
      * Whether the i'th location (among all the dirty initials) is dirty
      *
@@ -1397,6 +1402,10 @@ public class VacuumRobot extends SingleGoalSearchDomain {
         dst.robotLocation = (int) (packed & this.robotLocationBitMask);
     }
 
+    public SearchState unpackLite(PackedElement packed) {
+        return this.unpack(packed);
+    }
+
     /**
      * An auxiliary function for unpacking Vacuum Robot state from a long number
      *
@@ -1509,6 +1518,7 @@ public class VacuumRobot extends SingleGoalSearchDomain {
          * A default constructor of the class
          */
         private VacuumRobotState() {
+            super(VacuumRobot.this);
             this.h = -1;
             this.d = -1;
             this.ops = null;
@@ -1523,6 +1533,7 @@ public class VacuumRobot extends SingleGoalSearchDomain {
          * @param state The state to copy
          */
         private VacuumRobotState(VacuumRobotState state) {
+            super(VacuumRobot.this);
             this.h = state.h;
             this.d = state.d;
             this.depth = state.depth;

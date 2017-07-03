@@ -2,10 +2,10 @@ package org.cs4j.core.algorithms.pac;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.domains.GridPathFinding;
 import org.cs4j.core.domains.DomainExperimentData;
-import org.cs4j.core.SearchResult;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -48,7 +48,7 @@ public abstract class ThresholdPACCondition extends AbstractPACCondition {
     }
 
     @Override
-    public boolean shouldStop(SearchResult incumbentSolution) {
+    public boolean shouldStop(SearchResultImpl incumbentSolution) {
         // Check if fmin is high enough to stop
         if(incumbentSolution.hasSolution()==false)
             return false;

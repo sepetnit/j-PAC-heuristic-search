@@ -1,6 +1,5 @@
 package org.cs4j.core;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.collections.PackedElement;
@@ -62,13 +61,9 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
     private void makeStartStateEqualToNthGoal(int goalIndex) {
         this.logger.warn("Start state is now the single goal of the domain");
         PackedElement goal = this.getGoalFromAllGoals(goalIndex);
-        System.out.println("tttttttttttttttttttttttttttttttttttttttttttttttttttt");
         this.packedInitialState = new PackedElement(goal);
         this.initialState = this.unpack(goal);
         System.out.println("Updated initial: " + initialState.dumpStateShort());
-        if (goalIndex == 99) {
-            System.out.println("sssss");
-        }
     }
 
     private void resetInitialStateToDefaultValue() {
@@ -80,14 +75,6 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
     private void setValidityOfAllGoals(boolean validity) {
         for (int i = 0; i < this.validGoals.length; ++i) {
             this.validGoals[i] = validity;
-        }
-    }
-
-    public boolean isValidGoal(int goal) {
-        try {
-            return this.validGoals[goal];
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Invalid goal");
         }
     }
 
@@ -142,17 +129,17 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
     }
 
     protected void _initializeMultipleGoalsEnvironment(int goalsCount) {
-        // Create the basic initial state
-        this.basicInitialState = createInitialState();
-        this.packedBasicInitialState = this.pack(this.basicInitialState);
-
-        // Copy basic initial state values
-        this.resetInitialStateToDefaultValue();
-
         // Initialize the valid goals array
         this.validGoals = new boolean[goalsCount];
         this.validGoalsIndexes = new int[goalsCount];
         this.setAllGoalsValid();
+        // Create the basic initial state
+        // (all goals are valid, thus the basic heuristic value will be
+        // based on the first valid goal)
+        this.basicInitialState = createInitialState();
+        this.packedBasicInitialState = this.pack(this.basicInitialState);
+        // Copy basic initial state values
+        this.resetInitialStateToDefaultValue();
     }
 
     /**
@@ -228,7 +215,6 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
         }
 
         if (this.startStateIsGoal()) {
-            System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
             return this.packedBasicInitialState;
         }
 
@@ -346,8 +332,20 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
         return this.totalGoalsCount() - this.validGoalsCount();
     }
 
+    public boolean isValidGoalIndex(int goal) {
+        try {
+            return this.validGoals[goal];
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Invalid goal");
+        }
+    }
+
     protected abstract boolean stateIsOneOfValidGoals(SearchState s);
 
+    // In case s is goal & is valid - return its index, otherwise, return -1!
+    public abstract int getGoalIndexForStateIfValid(SearchState s);
+
+    // In multiple goals search domain, the meaning of isGoal() is - isValidGoal()!
     @Override
     public final boolean isGoal(SearchState state) {
        if (this.startStateIsGoal()) {
@@ -357,7 +355,26 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
     }
 
     @Override
-    public final SearchResult searchBy(SearchAlgorithm alg) {
+    public final SearchResultImpl searchBy(SearchAlgorithm alg) {
         return alg.concreteSearch(this);
+    }
+
+    protected double[] getDefaultHeuristicValuesToAllGoals() {
+        double[] toReturn = new double[this.validGoals.length];
+        // Default values
+        Arrays.fill(toReturn, Double.MAX_VALUE);
+        return toReturn;
+    }
+
+    /**
+     * Given a state that represents specific status of search in the domain, the function returns
+     * an array of heuristic values to ALL the goals defined for the search.
+     *
+     * @param s The state for which the heuristic values should be calculated
+     * @return An array of the heuristic values. Double.MAX_VALUE will be returned for each goal
+     *         that is unreachable from the current state.
+     */
+    public double[] getHeuristicValuesToAllGoals(SearchState s) {
+        return s.getHToAllGoals();
     }
 }

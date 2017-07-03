@@ -30,18 +30,17 @@ public abstract class GenericSearchAlgorithm
         return false;
     }
 
-
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         return domain.searchBy(this);
     }
 
     @Override
-    public SearchResult concreteSearch(MultipleGoalsSearchDomain domain) {
+    public SearchResultImpl concreteSearch(MultipleGoalsSearchDomain domain) {
         throw new NotImplementedException();
     }
 
     @Override
-    public SearchResult concreteSearch(SingleGoalSearchDomain domain) {
+    public SearchResultImpl concreteSearch(SingleGoalSearchDomain domain) {
         throw new NotImplementedException();
     }
 

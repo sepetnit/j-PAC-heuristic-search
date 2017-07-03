@@ -2,7 +2,7 @@ package org.cs4j.core.generators;
 
 import org.cs4j.core.collections.Pair;
 import org.cs4j.core.domains.Pancakes;
-import org.cs4j.core.SearchResult;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.algorithms.familiar.EES;
 import org.cs4j.core.domains.Utils;
 //import java.org.cs4j.core.domains.PancakesWithDontCares;
@@ -241,7 +241,7 @@ public class PancakesPDBGenerator extends GeneralInstancesGenerator {
             System.out.println("[INFO] Solving: (" + (count + 1) + "/" + allSubProblems.length + ") " +
                     Arrays.toString(subProblem));
             Pancakes instance = new Pancakes(subProblem);
-            SearchResult result = ees.search(instance);
+            SearchResultImpl result = ees.search(instance);
             assert result != null;
             long cost = (long)result.getSolutions().get(0).getCost();
             this._store(subProblem, cost);

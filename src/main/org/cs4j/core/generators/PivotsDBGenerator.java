@@ -1,11 +1,11 @@
 package org.cs4j.core.generators;
 
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.collections.Pair;
 import org.cs4j.core.domains.GridPathFinding;
 import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.PairInt;
 import org.cs4j.core.domains.Utils;
 
@@ -222,14 +222,14 @@ public class PivotsDBGenerator {
      * @return The found distance
      */
     private double _minDistance(GridMap grid, int startLocation, int goalLocation) {
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         SearchDomain domain =
                 new GridPathFinding(
                         grid.mapWidth,
                         grid.mapHeight,
                         grid.map,
                         startLocation, goalLocation);
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         if (result.hasSolution()) {
             return result.getSolutions().get(0).getCost();
         }

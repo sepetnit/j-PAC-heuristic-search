@@ -1,12 +1,12 @@
 package org.cs4j.core.mains;
 
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.domains.Utils;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.SearchResult.Solution;
-import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.SearchResultImpl.Solution;
 import org.cs4j.core.data.Weights;
 import org.cs4j.core.data.Weights.SingleWeight;
 
@@ -83,7 +83,7 @@ public class WAStar_EES_GeneralExperiment {
      *
      * @return A double array which contains default values to write in case no solution was found
      */
-    private double[] _getNoSolutionResult(SearchResult result) {
+    private double[] _getNoSolutionResult(SearchResultImpl result) {
         return new double[]{
                 // solution-not-found
                 0,
@@ -106,7 +106,7 @@ public class WAStar_EES_GeneralExperiment {
      *
      * @return A new double array which contains all the fields for the solution
      */
-    private double[] _getSolutionResult(SearchResult result) {
+    private double[] _getSolutionResult(SearchResultImpl result) {
         Solution solution = result.getSolutions().get(0);
         return new double[]{
                 1,
@@ -231,7 +231,7 @@ public class WAStar_EES_GeneralExperiment {
             }
             // Otherwise, run
             try {
-                SearchResult result = this.algorithm.search(this.domain);
+                SearchResultImpl result = this.algorithm.search(this.domain);
                 System.out.println("[INFO] Thread " + this.threadID + " is Done");
                 // No solution
                 if (!result.hasSolution()) {
@@ -258,7 +258,7 @@ public class WAStar_EES_GeneralExperiment {
      ******************************************************************************************************************/
 
     /**
-     * Runs an experiment with TopSpin instances using the WAStar and EES algorithms in a SINGLE THREAD!
+     * Runs an experiment with TopSpin instances using the GenericWAstar and EES algorithms in a SINGLE THREAD!
      *
      * @param firstInstance The id of the first instance to solve
      * @param instancesCount The number of instances to solve
@@ -293,7 +293,7 @@ public class WAStar_EES_GeneralExperiment {
                 output.write(i + "," + w.wg + "," + w.wh + "," + weight + ",");
                 for (boolean reopen : this._avoidUnnecessaryReopens(weights, this.reopenPossibilities)) {
                     //SearchAlgorithm alg = new WNARAStar();
-                    SearchAlgorithm alg = new WAStar();
+                    SearchAlgorithm alg = new WAstar();
                     alg.setAdditionalParameter("weight", weight + "");
                     alg.setAdditionalParameter("reopen", reopen + "");
                     //alg.setAdditionalParameter("bpmx", true + "");
@@ -304,7 +304,7 @@ public class WAStar_EES_GeneralExperiment {
                                     ", Weight: " + weight +
                                     ", Reopen: " + reopen);
                     try {
-                        SearchResult result = alg.search(domain);
+                        SearchResultImpl result = alg.search(domain);
                         // No solution
                         if (!result.hasSolution()) {
                             output.appendNewResult(this._getNoSolutionResult(result));
@@ -327,7 +327,7 @@ public class WAStar_EES_GeneralExperiment {
     }
 
     /**
-     * Runs an experiment using the WAStar and EES algorithms in a SINGLE THREAD!
+     * Runs an experiment using the GenericWAstar and EES algorithms in a SINGLE THREAD!
      *
      * @param firstInstance The id of the first instance to solve
      * @param instancesCount The number of instances to solve
@@ -371,7 +371,7 @@ public class WAStar_EES_GeneralExperiment {
                     output.write(i + "," + w.wg + "," + w.wh + "," + weight + ",");
                     for (boolean reopen : this._avoidUnnecessaryReopens(weights, this.reopenPossibilities)) {
                         //SearchAlgorithm alg = new WNARAStar();
-                        SearchAlgorithm alg = new WAStar();
+                        SearchAlgorithm alg = new WAstar();
                         alg.setAdditionalParameter("weight", weight + "");
                         alg.setAdditionalParameter("reopen", reopen + "");
                         //alg.setAdditionalParameter("bpmx", true + "");
@@ -382,7 +382,7 @@ public class WAStar_EES_GeneralExperiment {
                                         ", Weight: " + weight +
                                         ", Reopen: " + reopen);
                         try {
-                            SearchResult result = alg.search(domain);
+                            SearchResultImpl result = alg.search(domain);
                             // No solution
                             if (!result.hasSolution()) {
                                 output.appendNewResult(this._getNoSolutionResult(result));
@@ -407,7 +407,7 @@ public class WAStar_EES_GeneralExperiment {
     }
 
     /**
-     * Runs an experiment using the WAStar and EES algorithms in a SINGLE THREAD!
+     * Runs an experiment using the GenericWAstar and EES algorithms in a SINGLE THREAD!
      *
      * @param firstInstance The id of the first instance to solve
      * @param instancesCount The number of instances to solve
@@ -441,14 +441,14 @@ public class WAStar_EES_GeneralExperiment {
                 double weight = w.getWeight();
                 output.write(i + "," + w.wg + "," + w.wh + "," + weight + ",");
                 for (boolean reopen : this._avoidUnnecessaryReopens(weights, this.reopenPossibilities)) {
-                    SearchAlgorithm alg = new WAStar();
+                    SearchAlgorithm alg = new WAstar();
                     alg.setAdditionalParameter("weight", weight + "");
                     alg.setAdditionalParameter("reopen", reopen + "");
                     alg.setAdditionalParameter("bpmx", true + "");
                     //SearchAlgorithm alg = new EES(weight, reopen);
                     System.out.println("[INFO] Instance: " + i + ", Weight: " + weight + ", Reopen: " + reopen);
                     try {
-                        SearchResult result = alg.search(domain);
+                        SearchResultImpl result = alg.search(domain);
                         // No solution
                         if (!result.hasSolution()) {
                             output.appendNewResult(this._getNoSolutionResult(result));
@@ -471,7 +471,7 @@ public class WAStar_EES_GeneralExperiment {
     }
 
     /**
-     * Runs an experiment using the WAStar and EES algorithms using MULTIPLE THREADS!
+     * Runs an experiment using the GenericWAstar and EES algorithms using MULTIPLE THREADS!
      *
      * @param firstInstance The id of the first instance to solve
      * @param instancesCount The number of instances to solve
@@ -509,7 +509,7 @@ public class WAStar_EES_GeneralExperiment {
                         if (domain == null) {
                             continue;
                         }
-                        SearchAlgorithm alg = new WAStar();
+                        SearchAlgorithm alg = new WAstar();
                         alg.setAdditionalParameter("weight", weight + "");
                         alg.setAdditionalParameter("reopen", reopen + "");
                         Runnable worker = new WorkerThread(

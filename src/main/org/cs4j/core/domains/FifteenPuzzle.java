@@ -131,6 +131,11 @@ public final class FifteenPuzzle extends SingleGoalSearchDomain {
     // the actual parameters that have been set
     private TreeMap<String,String> parameters = new TreeMap<>();
 
+    // TODO
+    public String getInputFileName() {
+        return "";
+    }
+
     /**
      * The function calculates Manhattan distance between two given tiles
      *
@@ -740,6 +745,10 @@ public final class FifteenPuzzle extends SingleGoalSearchDomain {
         return ts;
     }
 
+    public SearchState unpackLite(PackedElement packed) {
+        return this.unpack(packed);
+    }
+
     @Override
     public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
@@ -789,7 +798,9 @@ public final class FifteenPuzzle extends SingleGoalSearchDomain {
         /**
          * A default constructor (required for the {@see initialState()} function
          */
-        private TileState() { }
+        private TileState() {
+            super(FifteenPuzzle.this);
+        }
 
         /**
          * A copy constructor
@@ -797,6 +808,7 @@ public final class FifteenPuzzle extends SingleGoalSearchDomain {
          * @param state The state to copy
          */
         private TileState(TileState state) {
+            super(FifteenPuzzle.this);
             this.h = state.h;
             this.d = state.d;
             // Copy the tiles

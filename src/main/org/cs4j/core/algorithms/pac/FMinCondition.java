@@ -1,6 +1,6 @@
 package org.cs4j.core.algorithms.pac;
 
-import org.cs4j.core.SearchResult;
+import org.cs4j.core.SearchResultImpl;
 
 /**
  * Created by Roni Stern on 24/02/2017.
@@ -11,7 +11,7 @@ import org.cs4j.core.SearchResult;
  */
 public class FMinCondition extends AbstractPACCondition {
     @Override
-    public boolean shouldStop(SearchResult incumbentSolution) {
+    public boolean shouldStop(SearchResultImpl incumbentSolution) {
         if(incumbentSolution.hasSolution()==false)
             return false;
 

@@ -2,12 +2,13 @@ package org.cs4j.core.experiments;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.algorithms.weighted.GenericWAstar;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.domains.*;
 import org.cs4j.core.domains.DomainExperimentData;
 import org.cs4j.core.OutputResult;
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.weighted.WAStar;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -25,15 +26,15 @@ public class PacPreprocessRunner {
 
 		double[] resultsData;
 		SearchDomain domain;
-		SearchResult result;
+		SearchResultImpl result;
 		OutputResult output = null;
 
 		// Construct a variant of A* that records also the h value of the start state
-		WAStar astar = new WAStar() {
+		GenericWAstar astar = new WAstar() {
 			@Override
-			public SearchResult search(SearchDomain domain) {
+			public SearchResultImpl search(SearchDomain domain) {
 				double initialH = domain.initialState().getH();
-				SearchResult results = super.search(domain);
+				SearchResultImpl results = super.search(domain);
 				results.getExtras().put("initial-h",initialH);
 				return results;
 			}};
@@ -76,7 +77,7 @@ public class PacPreprocessRunner {
 		return null;
 	}
 
-	private void setResultsData(SearchResult result, double[] resultsData, int i) {
+	private void setResultsData(SearchResultImpl result, double[] resultsData, int i) {
 		int instanceId = i;
 		double cost=-1;
 		// RONI: I hate these unreadable one-liners

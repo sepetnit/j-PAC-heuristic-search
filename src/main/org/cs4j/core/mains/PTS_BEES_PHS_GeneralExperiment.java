@@ -1,8 +1,8 @@
 package org.cs4j.core.mains;
 
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.familiar.PTS;
 import org.cs4j.core.domains.Utils;
 import org.cs4j.core.SearchAlgorithm;
@@ -65,7 +65,7 @@ public class PTS_BEES_PHS_GeneralExperiment {
      *
      * @return A double array which contains default values to write in case no solution was found
      */
-    private double[] _getNoSolutionResult(SearchResult result) {
+    private double[] _getNoSolutionResult(SearchResultImpl result) {
         return new double[]{
                 // solution-not-found
                 0,
@@ -88,8 +88,8 @@ public class PTS_BEES_PHS_GeneralExperiment {
      *
      * @return A new double array which contains all the fields for the solution
      */
-    private double[] _getSolutionResult(SearchResult result) {
-        SearchResult.Solution solution = result.getSolutions().get(0);
+    private double[] _getSolutionResult(SearchResultImpl result) {
+        SearchResultImpl.Solution solution = result.getSolutions().get(0);
         return new double[]{
                 1,
                 solution.getLength(),
@@ -235,7 +235,7 @@ public class PTS_BEES_PHS_GeneralExperiment {
             }
             // Otherwise, run
             try {
-                SearchResult result = this.algorithm.search(this.domain);
+                SearchResultImpl result = this.algorithm.search(this.domain);
                 System.out.println("[INFO] Thread " + this.threadID + " is Done");
                 // No solution
                 if (!result.hasSolution()) {
@@ -317,7 +317,7 @@ public class PTS_BEES_PHS_GeneralExperiment {
                         alg.setAdditionalParameter("reopen", reopen + "");
                         System.out.println("[INFO] Instance: " + i + ", MaxCost: " + maxCost + ", Reopen: " + reopen);
                         try {
-                            SearchResult result = alg.search(domain);
+                            SearchResultImpl result = alg.search(domain);
                             // No solution
                             if (!result.hasSolution()) {
                                 output.appendNewResult(this._getNoSolutionResult(result));
@@ -409,7 +409,7 @@ public class PTS_BEES_PHS_GeneralExperiment {
                     alg.setAdditionalParameter("rerun-type-if-not-found", "continue-ar");
                     System.out.println("[INFO] Instance: " + i + ", MaxCost: " + maxCost);
                     try {
-                        SearchResult result = alg.search(domain);
+                        SearchResultImpl result = alg.search(domain);
                         // No solution
                         if (!result.hasSolution()) {
                             output.appendNewResult(this._getNoSolutionResult(result));
@@ -433,7 +433,7 @@ public class PTS_BEES_PHS_GeneralExperiment {
     }
 
     /**
-     * Runs an experiment using the WAStar and EES algorithms using MULTIPLE THREADS!
+     * Runs an experiment using the GenericWAstar and EES algorithms using MULTIPLE THREADS!
      *
      * @param firstInstance The id of the first instance to solve
      * @param instancesCount The number of instances to solve

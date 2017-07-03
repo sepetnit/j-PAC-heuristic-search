@@ -18,7 +18,7 @@ package org.cs4j.core.algorithms.weighted;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.*;
 
 
@@ -169,7 +169,7 @@ public class WRAStar extends GenericSearchAlgorithm {
         }
     }
 
-    private SearchResult.Solution createSolution(Node goal) {
+    private SearchResultImpl.Solution createSolution(Node goal) {
         SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(this.domain);
         List<Operator> path = new ArrayList<>();
         List<SearchState> statesPath = new ArrayList<>();
@@ -311,7 +311,7 @@ public class WRAStar extends GenericSearchAlgorithm {
                             continue;
                         }
 
-                        // Node in closed but we get duplicate
+                        // LazyAstarNode in closed but we get duplicate
                         if (this.weight == 1.0 && dupChildNode.getIndex(this.open.getKey()) == -1 && this.domain.isCurrentHeuristicConsistent()) {
                             System.out.println(dupChildNode.getWf() + " " + childNode.getWf());
                             System.out.println(dupChildNode.g + " " + childNode.g);
@@ -396,7 +396,7 @@ public class WRAStar extends GenericSearchAlgorithm {
     }
 
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
 
         this.domain = domain;
 
@@ -445,7 +445,7 @@ public class WRAStar extends GenericSearchAlgorithm {
             if (result.hasSolution()) {
                 lastGoal = foundGoal;
                 // Get current solution
-                SearchResult.Solution currentSolution = result.getSolutions().get(0);
+                SearchResultImpl.Solution currentSolution = result.getSolutions().get(0);
                 // In any case, update the previous result solution values
                 double prevExp = result.getExpanded();
                 if (previousResult != null) {
@@ -508,7 +508,7 @@ public class WRAStar extends GenericSearchAlgorithm {
                 }
                 assert this.cleanup.isEmpty();
                 System.out.println("[INFO] Last search didn't reveal to solution - returns the previous search");
-                SearchResult.Solution sol = this.createSolution(previousGoal);
+                SearchResultImpl.Solution sol = this.createSolution(previousGoal);
                 if (sol.getCost() < previousResult.getSolutions().get(0).getCost()) {
                     System.out.println("Win : prev cost " + previousResult.getSolutions().get(0).getCost() + " current cost " + sol.getCost() );
                     System.exit(-1);
@@ -625,8 +625,6 @@ public class WRAStar extends GenericSearchAlgorithm {
             return 0;
         }
 
-        @Override
-        public SearchQueueElement getParent() {return this.parent;}
     }
 
     /**

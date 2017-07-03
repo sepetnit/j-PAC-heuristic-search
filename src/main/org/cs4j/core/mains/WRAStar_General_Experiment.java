@@ -1,9 +1,9 @@
 package org.cs4j.core.mains;
 
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.weighted.WRAStar;
 import org.cs4j.core.data.Weights;
 
@@ -64,7 +64,7 @@ public class WRAStar_General_Experiment {
      *
      * @return A double array which contains default values to write in case no solution was found
      */
-    private double[] _getNoSolutionResult(SearchResult result) {
+    private double[] _getNoSolutionResult(SearchResultImpl result) {
         return new double[]{
                 // solution-not-found
                 0,
@@ -88,8 +88,8 @@ public class WRAStar_General_Experiment {
      *
      * @return A new double array which contains all the fields for the solution
      */
-    private double[] _getSolutionResult(SearchResult result) {
-        SearchResult.Solution solution = result.getSolutions().get(0);
+    private double[] _getSolutionResult(SearchResultImpl result) {
+        SearchResultImpl.Solution solution = result.getSolutions().get(0);
         return new double[]{
                 1,
                 solution.getLength(),
@@ -207,7 +207,7 @@ public class WRAStar_General_Experiment {
                     alg.setAdditionalParameter("restart-closed-list", false + "");
                     System.out.println("[INFO] Algorithm: " + alg.getName() + ", Instance: " + i + ", Weight: " + weight);
                     try {
-                        SearchResult result = alg.search(domain);
+                        SearchResultImpl result = alg.search(domain);
                         // No solution
                         if (!result.hasSolution()) {
                             output.appendNewResult(this._getNoSolutionResult(result));

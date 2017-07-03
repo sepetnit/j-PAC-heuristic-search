@@ -56,6 +56,11 @@ public class Pancakes extends SingleGoalSearchDomain {
     // This can be set only according to the number of pancakes
     private int maxPancakeForPDB;
 
+    // TODO
+    public String getInputFileName() {
+        return "";
+    }
+
     /**
      * Initialize all the data structures relevant to the domain
      */
@@ -347,6 +352,10 @@ public class Pancakes extends SingleGoalSearchDomain {
         return toReturn;
     }
 
+    public SearchState unpackLite(PackedElement packed) {
+        return this.unpack(packed);
+    }
+
     @Override
     public SearchState unpack(PackedElement packed) {
         PancakeState state = new PancakeState(this.numCakes);
@@ -392,7 +401,9 @@ public class Pancakes extends SingleGoalSearchDomain {
         /**
          * A default constructor of the class
          */
-        private PancakeState() { }
+        private PancakeState() {
+            super(Pancakes.this);
+        }
 
         /**
          * A familiar constructor
@@ -400,6 +411,7 @@ public class Pancakes extends SingleGoalSearchDomain {
          * @param numCakes The number of cakes in the state
          */
         public PancakeState(int numCakes) {
+            super(Pancakes.this);
             this.numCakes = numCakes;
             this.cakes = new int[numCakes];
         }
@@ -410,6 +422,7 @@ public class Pancakes extends SingleGoalSearchDomain {
          * @param cakes The pancakes array
          */
         public PancakeState(int[] cakes) {
+            super(Pancakes.this);
             this.numCakes = cakes.length;
             this.cakes = new int[numCakes];
             System.arraycopy(this.cakes, 0, cakes, 0, cakes.length);
@@ -421,6 +434,7 @@ public class Pancakes extends SingleGoalSearchDomain {
          * @param pancake Another pancake state to copy
          */
         public PancakeState(PancakeState pancake) {
+            super(Pancakes.this);
             this.numCakes = pancake.numCakes;
             this.cakes = new int[numCakes];
             this.h = pancake.h;

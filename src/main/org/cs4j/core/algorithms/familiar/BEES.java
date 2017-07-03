@@ -2,7 +2,7 @@ package org.cs4j.core.algorithms.familiar;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
 
@@ -136,7 +136,7 @@ public class BEES extends GenericSearchAlgorithm {
         }
     }
 
-    public SearchResult _search(SearchDomain domain) {
+    public SearchResultImpl _search(SearchDomain domain) {
         this.domain = domain;
         // The result will be stored here
         Node goal = null;
@@ -291,12 +291,12 @@ public class BEES extends GenericSearchAlgorithm {
 
     }
 
-    public SearchResult search(SearchDomain domain) {
-        SearchResult toReturn = this._search(domain);
+    public SearchResultImpl search(SearchDomain domain) {
+        SearchResultImpl toReturn = this._search(domain);
         if (!toReturn.hasSolution() && (!this.reopen && this.rerun)) {
             System.out.println("[INFO] BEES Failed with NR, tries again with AR");
             this.reopen = true;
-            SearchResult toReturnAR = this._search(domain);
+            SearchResultImpl toReturnAR = this._search(domain);
             toReturnAR.increase(toReturn);
             // Revert to base state
             this.reopen = false;
@@ -552,7 +552,7 @@ public class BEES extends GenericSearchAlgorithm {
             return 0;
         }
 
-        @Override
-        public SearchQueueElement getParent() {return this.parent;}
+        //@Override
+        //public SearchQueueElement getParent() {return this.parent;}
     }
 }

@@ -1,10 +1,9 @@
 package org.cs4j.core.algorithms.weighted;
 
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.SearchDomain;
 import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.SearchState;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
 
 
 /**
@@ -29,7 +28,7 @@ public class WNARAStar extends WRAStar {
     }
 
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         this.domain = domain;
         // TODO ...
         double maxPreviousCost = Double.MAX_VALUE;
@@ -55,7 +54,7 @@ public class WNARAStar extends WRAStar {
         if (nrResult.hasSolution()) {
             double bestF = this.cleanup.peek().getRf();
             // Get current solution
-            SearchResult.Solution currentSolution = nrResult.getSolutions().get(0);
+            SearchResultImpl.Solution currentSolution = nrResult.getSolutions().get(0);
             // Update the maximum cost (if the search continues with AR, all the nodes with g+h > maxCost will be pruned)
             maxCost = currentSolution.getCost();
             double suboptimalBoundSup = maxCost / bestF;
@@ -72,13 +71,13 @@ public class WNARAStar extends WRAStar {
             System.out.println("[WARNING] Running with NR doesn't reveal to solution - trying with AR");
         }
         // Otherwise, fallback to AR
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         alg.setAdditionalParameter("weight", this.weight + "");
         alg.setAdditionalParameter("reopen", true + "");
         alg.setAdditionalParameter("bpmx", this.useBPMX + "");
         // Now, the cost is bounded to the previous cost
         alg.setAdditionalParameter("max-cost", maxCost + "");
-        SearchResult arResult = alg.search(domain);
+        SearchResultImpl arResult = alg.search(domain);
         if (arResult.hasSolution()) {
             arResult.increase(nrResult);
             return arResult;

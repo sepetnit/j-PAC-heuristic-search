@@ -2,7 +2,7 @@ package org.cs4j.core.algorithms.familiar;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
 import org.cs4j.core.collections.GH_heap;
@@ -35,12 +35,12 @@ public class DP  extends GenericSearchAlgorithm {
     // The domain for the search
     private SearchDomain domain;
     // Open list (frontier)
-//    private BinHeapF<Node> open;
+//    private BinHeapF<LazyAstarNode> open;
     private GH_heap<Node> open;//gh_heap
-    //    private BinHeapF<Node> openF;
+    //    private BinHeapF<LazyAstarNode> openF;
     // Closed list (seen states)
     private TreeMap<PackedElement, Node> closed;
-    //    private Map<PackedElement, Node> closed;
+    //    private Map<PackedElement, LazyAstarNode> closed;
     //the result to return
     private SearchResultImpl result;
 
@@ -115,7 +115,7 @@ public class DP  extends GenericSearchAlgorithm {
     }
 
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         // Initialize all the data structures required for the search
         this._initDataStructures(domain);
 
@@ -353,7 +353,7 @@ public class DP  extends GenericSearchAlgorithm {
 
     /**
      *
-     * @return chosen Node for expansion
+     * @return chosen LazyAstarNode for expansion
      */
     private Node _selectNode() {
         Node toReturn;
@@ -411,8 +411,8 @@ public class DP  extends GenericSearchAlgorithm {
 
     /**
      *
-     * @param oldNode is the old Node, last time visited
-     * @param newNode is the new Node, with better path
+     * @param oldNode is the old LazyAstarNode, last time visited
+     * @param newNode is the new LazyAstarNode, with better path
      */
     private void _updateNode(Node oldNode,Node newNode) {
 //        double oldF = oldNode.getF();
@@ -642,7 +642,7 @@ public class DP  extends GenericSearchAlgorithm {
             return sb.toString();
         }
 
-/*        void printNode(Node node){
+/*        void printNode(LazyAstarNode node){
             SearchDomain.State state = domain.unpack(node.packed);
             StringBuilder sb = new StringBuilder();
             sb.append("State:"+state.dumpStateShort());
@@ -740,10 +740,10 @@ public class DP  extends GenericSearchAlgorithm {
         @Override
         public double getDhat() {return this.dHat;}
 
-        @Override
-        public SearchQueueElement getParent() {
+        //@Override
+        /*public SearchQueueElement getParent() {
             return this.parent;
-        }
+        }*/
 
     }
 

@@ -12,7 +12,7 @@ public interface SearchDomain extends SearchConfigurable {
     /**
      * Returns the initial state for an instance of Domain.
      *
-     *  @return the initial state
+     * @return the initial state
      */
     SearchState initialState();
 
@@ -46,7 +46,7 @@ public interface SearchDomain extends SearchConfigurable {
      * a new edge.
      *
      * @param state the state
-     * @param op the operator
+     * @param op    the operator
      * @return the new edge
      */
     SearchState applyOperator(SearchState state, Operator op);
@@ -75,40 +75,41 @@ public interface SearchDomain extends SearchConfigurable {
      */
     SearchState unpack(PackedElement packed);
 
+    /**
+     * Unpacks a GridPathFinding state from a long number without calculating h values
+     * Caution : Be careful - H is not calculated!
+     */
+    SearchState unpackLite(PackedElement packed);
 
     /**
-     * This function allows to dump a collection of states based on the domain (e.g. dump all the states of a
+     * This function allows to dump a collection of states based on the domain (e.g. dump all
+     * the states of a
      * path-finding problem)
-     *
+     * <p>
      * NOTE: The implementation of this function is optional and not required for the search
      *
      * @param states The states to dump
-     *
      * @return A unified string representation of all the states
      */
     String dumpStatesCollection(SearchState[] states);
 
     /**
-     *
      * @return Whether the currently used heuristic is consistent
      */
     boolean isCurrentHeuristicConsistent();
 
     /**
      * For tests with oracles, set the optimal cost of the solution
-     *
      */
     void setOptimalSolutionCost(double cost);
 
     /**
-     *
      * @return The cost of the optimal solution if defined (or -1 if the cost
      * hasn't been set)
      */
     double getOptimalSolutionCost();
 
     /**
-     *
      * @return the number of instances to generate of this domain before
      * OutOfMemory
      */
@@ -119,7 +120,6 @@ public interface SearchDomain extends SearchConfigurable {
      * specific parameters of the domain
      *
      * @param s The state whose heuristic value should be improved
-     *
      * @return Whether the h value was changed
      */
     boolean improveStateHValue(SearchState s, SearchAlgorithm alg);
@@ -128,8 +128,15 @@ public interface SearchDomain extends SearchConfigurable {
      * The function performs a search on the domain, using the given algorithm
      *
      * @param alg The algorithm to search with
-     *
      * @return The found result of the search
      */
-    SearchResult searchBy(SearchAlgorithm alg);
+    SearchResultImpl searchBy(SearchAlgorithm alg);
+
+    /**
+     * The function returns the name of the file from which the domain was read or "" if there is
+     * no file
+     *
+     * @return The pre-defined name
+     */
+    String getInputFileName();
 }

@@ -14,25 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cs4j.core.algorithms.auxiliary;
-
-import org.cs4j.core.Operator;
-import org.cs4j.core.SearchDomain;
+package org.cs4j.core;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.text.DecimalFormat;
 import java.util.*;
 
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.SearchState;
-
 /**
  * The search result class.
  *
  * @author Matthew Hatem
  */
-public class SearchResultImpl implements SearchResult {
+public class SearchResultImpl /*implements SearchResultImpl*/ {
 
     // Number of expanded states
     public long expanded;
@@ -44,6 +38,8 @@ public class SearchResultImpl implements SearchResult {
     public long opupdated;
     // Number of states that were actually re-opened
     public long reopened;
+
+    private boolean problemSolved;
 
     private long startWallTimeMillis;
     private long startCpuTimeMillis;
@@ -57,7 +53,7 @@ public class SearchResultImpl implements SearchResult {
 
     public List<Iteration> iterations = new ArrayList<>();
     private List<Solution> solutions = new ArrayList<>();
-    private List<SearchResult> concreteResults = new ArrayList<>();
+    private List<SearchResultImpl> concreteResults = new ArrayList<>();
     private int minTimeOutInMs;
 
     public void setExtras(String key,Object val){
@@ -66,6 +62,15 @@ public class SearchResultImpl implements SearchResult {
 
     public TreeMap<String,Object> getExtras(){
         return extras;
+    }
+
+    public SearchResultImpl() {}
+
+    // TODO: Copy time
+    public SearchResultImpl(SearchResultImpl result) {
+        this.startWallTimeMillis = result.startWallTimeMillis;
+        this.startCpuTimeMillis = result.startCpuTimeMillis;
+        this.minTimeOutInMs = result.minTimeOutInMs;
     }
 
     public void startArrCpuTimeMillis(String name){
@@ -109,12 +114,12 @@ public class SearchResultImpl implements SearchResult {
         }
     }
 
-    @Override
+    //@Override
     public long getExpanded() {
         return this.expanded;
     }
 
-    @Override
+    //@Override
     public long getFirstIterationExpanded() {
         if (this.iterations.size() > 0) {
             Iteration current = this.iterations.get(0);
@@ -123,60 +128,70 @@ public class SearchResultImpl implements SearchResult {
         return this.expanded;
     }
 
-    @Override
+    //@Override
     public long getGenerated () {
         return this.generated;
     }
 
-    @Override
+    //@Override
     public double getAverageExpanded() {
         if (this.concreteResults.size() == 0) {
             return this.getExpanded();
         }
         double toReturn = 0;
-        for (SearchResult result: this.concreteResults) {
+        for (SearchResultImpl result: this.concreteResults) {
             toReturn += result.getExpanded();
             System.out.println(toReturn);
         }
         return toReturn / (this.concreteResults.size());
     }
 
-    @Override
+    //@Override
     public long getReopened () {
         return this.reopened;
     }
 
-    @Override
+    //@Override
     public long getDuplicates() {
         return this.duplicates;
     }
 
-    @Override
+    //@Override
     public long getUpdatedInOpen() {
         return this.opupdated;
     }
 
-    @Override
+    //@Override
     public boolean hasSolution() {
         return this.solutions != null && this.solutions.size() > 0;
     }
 
-    @Override
+    //@Override
+    public boolean problemSolved() {
+        return this.problemSolved;
+    }
+
+    //@Override
+    public void setProblemSolved() {
+        this.problemSolved = true;
+    }
+
+    //@Override
     public List<Solution> getSolutions() {
         return this.solutions;
     }
 
-    @Override
-    public List<SearchResult> getConcreteResults() {
+    //@Override
+    public List<SearchResultImpl> getConcreteResults() {
         return this.concreteResults;
     }
 
-    @Override
-    public void addConcreteResult(SearchResult result) {
+    //@Override
+    public void addConcreteResult(SearchResultImpl result) {
         this.concreteResults.add(result);
     }
 
-    @Override
+    //@Override
     public int solutionsCount() {
         return this.solutions.size();
     }
@@ -188,12 +203,12 @@ public class SearchResultImpl implements SearchResult {
      */
     public Solution getBestSolution() {return this.solutions.get(this.solutions.size()-1);}
 
-    @Override
+    //@Override
     public long getWallTimeMillis() {
         return stopWallTimeMillis - startWallTimeMillis;
     }
 
-    @Override
+    //@Override
     public long getCpuTimeMillis() {
         return (long)((stopCpuTimeMillis - startCpuTimeMillis) * 0.000001);
     }
@@ -227,12 +242,12 @@ public class SearchResultImpl implements SearchResult {
         this.generated = generated;
     }
 
-    public void increase(SearchResult previous) {
+    public void increase(SearchResultImpl previous) {
         this.stopTimer(); // To record the stop wall and stop cpu times
         this.increaseStatesCounters(previous);
     }
 
-    public void increaseStatesCounters(SearchResult previous) {
+    public void increaseStatesCounters(SearchResultImpl previous) {
         this.expanded += previous.getExpanded();
         this.generated += previous.getGenerated();
         this.reopened += previous.getReopened();
@@ -313,7 +328,7 @@ public class SearchResultImpl implements SearchResult {
     /*
      * The iteration class.
      */
-    private static class Iteration implements SearchResult.Iteration {
+    private static class Iteration {//implements SearchResultImpl.Iteration {
         private double b;
         private long e;
         private long g;
@@ -324,15 +339,15 @@ public class SearchResultImpl implements SearchResult {
             this.g = g;
         }
 
-        @Override
+        //@Override
         public double getBound() {
             return this.b;
         }
-        @Override
+        //@Override
         public long getExpanded() {
             return this.e;
         }
-        @Override
+        //@Override
         public long getGenerated() {
             return this.g;
         }
@@ -437,8 +452,26 @@ public class SearchResultImpl implements SearchResult {
             }
         }
 
+        public Operator removeLastOperator() {
+            Operator toReturn = null;
+            if (this.operators.size() > 0) {
+                toReturn = this.operators.get(this.operators.size() - 1);
+                this.operators.remove(this.operators.size() - 1);
+            }
+            return toReturn;
+        }
+
         public void addState(SearchState state) {
             this.states.add(state);
+        }
+
+        public SearchState removeLastState() {
+            SearchState toReturn = null;
+            if (this.states.size() > 0) {
+                toReturn = this.states.get(this.states.size() - 1);
+                this.states.remove(this.states.size() - 1);
+            }
+            return toReturn;
         }
 
         public void addStates(List<SearchState> states) {
@@ -447,10 +480,66 @@ public class SearchResultImpl implements SearchResult {
             }
         }
 
+        public void reverseAll() {
+            Collections.reverse(this.states);
+            Collections.reverse(this.operators);
+        }
+
+        public SearchState getGoal() {
+            return this.states.get(this.states.size() - 1);
+        }
+
         public void setCost(double cost) {
             this.cost = cost;
         }
 
     }
+
+    /**
+     * The Solution interface.
+     */
+    public interface Solution {
+
+        /**
+         * Returns a list of operators used to construct this solution.
+         *
+         * @return list of operators
+         */
+        List<Operator> getOperators();
+
+        /**
+         * Returns a list of states used to construct this solution
+         *
+         * @return list of states
+         */
+        List<SearchState> getStates();
+
+        /**
+         * Returns a string representation of the solution
+         *
+         * @return A string that represents the solution
+         */
+        String dumpSolution();
+
+        /**
+         * Returns the cost of the solution.
+         *
+         * @return the cost of the solution
+         */
+        double getCost();
+
+        /**
+         * Returns the length of the solution.
+         */
+        int getLength();
+
+        /**
+         *
+         * @return The goal of the solution
+         */
+        SearchState getGoal();
+
+    }
+
 
 }

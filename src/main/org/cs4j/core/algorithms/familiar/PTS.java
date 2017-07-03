@@ -2,7 +2,7 @@ package org.cs4j.core.algorithms.familiar;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.*;
 
 import java.util.ArrayList;
@@ -146,7 +146,7 @@ public class PTS extends GenericSearchAlgorithm {
      *
      * @return The search result filled by all the results of the search
      */
-    private SearchResult _search(SearchDomain domain, boolean clearOpenList) {
+    private SearchResultImpl _search(SearchDomain domain, boolean clearOpenList) {
         this.domain = domain;
         // The result will be stored here
         Node goal = null;
@@ -300,9 +300,9 @@ public class PTS extends GenericSearchAlgorithm {
         return result;
     }
 
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         // Initially all the data structures are cleaned
-        SearchResult toReturn = this._search(domain, true);
+        SearchResultImpl toReturn = this._search(domain, true);
         if (!toReturn.hasSolution()) {
             switch (this.rerun) {
                 case NO_RERUN:
@@ -310,7 +310,7 @@ public class PTS extends GenericSearchAlgorithm {
                 case NEW_AR:
                     System.out.println("[INFO] PTS Failed with NR, tries again with AR from scratch");
                     this.reopen = true;
-                    SearchResult toReturnARNew = this._search(domain, true);
+                    SearchResultImpl toReturnARNew = this._search(domain, true);
                     toReturnARNew.increase(toReturn);
                     // Revert to base state
                     this.reopen = false;
@@ -330,7 +330,7 @@ public class PTS extends GenericSearchAlgorithm {
                     System.out.println("[INFO] All states moved from incons to open, open now contains " +
                             open.size() + " states, runs again");
                     this.reopen = true;
-                    SearchResult toReturnARContinued = this._search(domain, false);
+                    SearchResultImpl toReturnARContinued = this._search(domain, false);
                     toReturnARContinued.increase(toReturn);
                     // Add the number of locally inconsistent states from the previous search
                     toReturnARContinued.increase(localSearchResult);
@@ -348,7 +348,7 @@ public class PTS extends GenericSearchAlgorithm {
     }
 
     /**
-     * The Node is the basic data structure which is used by the algorithm during the search -
+     * The LazyAstarNode is the basic data structure which is used by the algorithm during the search -
      * OPEN and CLOSED lists contain nodes which are created from the domain states
      */
     private final class Node extends SearchQueueElementImpl implements BucketHeap.BucketHeapElement {
@@ -430,13 +430,15 @@ public class PTS extends GenericSearchAlgorithm {
             return 0;
         }
 
+        /*
         @Override
         public SearchQueueElement getParent() {return this.parent;}
+        */
 
         /**
          * Default constructor which creates the node from some given state
          *
-         * {see Node(State, Node, State, Operator, Operator)}
+         * {see LazyAstarNode(State, LazyAstarNode, State, Operator, Operator)}
          *
          * @param state The state from which the node should be created
          */

@@ -1,11 +1,11 @@
 package org.cs4j.core.algorithms.kgoal;
 
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.*;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
-import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.SearchResultImpl;
+import org.cs4j.core.algorithms.weighted.GenericWAstar;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.domains.GridPathFinding;
 
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class KxAstar extends GenericSearchAlgorithm {
     // The domain for the search
     protected MultipleGoalsSearchDomain searchDomain;
     protected SearchResultImpl result;
-    protected WAStar basicAlgorithm;
+    protected GenericWAstar basicAlgorithm;
 
     protected static final Map<String, Class> KxAStarPossibleParameters;
 
@@ -44,7 +44,7 @@ public class KxAstar extends GenericSearchAlgorithm {
      * The constructor of the class
      */
     public KxAstar() {
-        this.basicAlgorithm = new WAStar();
+        this.basicAlgorithm = new WAstar();
     }
 
     @Override
@@ -53,14 +53,14 @@ public class KxAstar extends GenericSearchAlgorithm {
     }
 
     @Override
-    public  SearchResult concreteSearch(MultipleGoalsSearchDomain domain) {
+    public SearchResultImpl concreteSearch(MultipleGoalsSearchDomain domain) {
         // TODO
         this.searchDomain = domain;
         this.result = new SearchResultImpl();
         long totalTime = 0;
 
         for (int i = 0; i < this.searchDomain.totalGoalsCount(); ++i) {
-            SearchResult singleResult = null;
+            SearchResultImpl singleResult = null;
             KxAstar.logger.info("Solving goal {} of {}", i+1,
                     this.searchDomain.totalGoalsCount());
             // Only the i'th goal is relevant
@@ -70,6 +70,8 @@ public class KxAstar extends GenericSearchAlgorithm {
             if (singleResult.solutionsCount() == 0) {
                 KxAstar.logger.warn("No solution for goal {}", i+1);
             } else {
+                logger.error("EXPANDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEED: " + singleResult.getExpanded());
+                logger.error("LENNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN: " + singleResult.getBestSolution().getLength());
                 this.result.addSolution(singleResult.getSolutions().get(0));
                 this.result.setExpanded(this.result.getExpanded() + singleResult.getExpanded());
                 this.result.addConcreteResult(singleResult);

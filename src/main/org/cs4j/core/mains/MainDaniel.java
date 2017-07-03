@@ -6,9 +6,9 @@ import jxl.write.*;
 import jxl.write.Number;
 import jxl.write.biff.RowsExceededException;
 import org.cs4j.core.*;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.algorithms.familiar.EES;
-import org.cs4j.core.algorithms.weighted.WAStar;
 import org.cs4j.core.data.Weights;
 
 import java.io.*;
@@ -147,7 +147,7 @@ public class MainDaniel {
                     }
                     else {
                         System.out.print("\rSolving " + domainName + " instance " + (found+1) +"/"+ i +" ("+solvableNum+")\tAlg: " + alg.getName() + "_" + fileEnd + "\tweight: wg : " + w.wg + " wh: " + w.wh);
-                        SearchResult result = null;
+                        SearchResultImpl result = null;
                         if(solvableInstances[i-startInstance])
                             result = alg.search(domain);
                         if (result != null && result.hasSolution()) {
@@ -328,7 +328,7 @@ public class MainDaniel {
         return resultSummary;
     }
 
-    private static void saveOptimalSolution(SearchResult result, int instance, SearchDomain domain){
+    private static void saveOptimalSolution(SearchResultImpl result, int instance, SearchDomain domain){
 //        InputStream is = new FileInputStream(new File(inputPath + "/" + i + ".in"));
         String alpha = domainParams.get("cost-function");
         String optimalSolutionParam = "FIF"+alpha;
@@ -415,7 +415,7 @@ public class MainDaniel {
         }
     }
 
-    private static void saveSolutionPathAsInstances(SearchResult result, int instance){
+    private static void saveSolutionPathAsInstances(SearchResultImpl result, int instance){
 /*           String gridName = "brc202d.map";
             String path = relPath + "input/GridPathFinding/"+gridName;
         for(int i=1;i<=100;i++){
@@ -497,8 +497,8 @@ public class MainDaniel {
             }
         }
         if(dirExist) {
-            List<SearchResult.Solution> solutions = result.getSolutions();
-            SearchResult.Solution solution = solutions.get(0);
+            List<SearchResultImpl.Solution> solutions = result.getSolutions();
+            SearchResultImpl.Solution solution = solutions.get(0);
             List<SearchState> states = solution.getStates();
             List<Operator> operators = solution.getOperators();
 
@@ -863,7 +863,7 @@ public class MainDaniel {
         SearchAlgorithm[] AlgoArr = {
 //                new IDAstar(),
 //                new BEES(),
-                new WAStar(),
+                new WAstar(),
 //                new DP("RDPSU",true,true,false),
 //                new DP("DPSU",true,false,false),
 //                new DP("DPS",false,false,false),

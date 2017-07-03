@@ -2,10 +2,10 @@ package org.cs4j.core.experiments;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchResult;
 import org.cs4j.core.algorithms.familiar.DP;
 import org.cs4j.core.algorithms.pac.*;
 import org.cs4j.core.domains.GridPathFinding;
@@ -32,7 +32,7 @@ public class PACOnlineExperimentRunner{
 	 * @param resultsData the results data object to update with data from the SearchResults
 	 * @param result the SearchResults object to extract from
 	 */
-	protected void setResultsData(List resultsData, SearchResult result) {
+	protected void setResultsData(List resultsData, SearchResultImpl result) {
 
 		resultsData.add(result.hasSolution()? 1 : 0);
 		resultsData.add(result.getBestSolution().getLength());
@@ -50,7 +50,7 @@ public class PACOnlineExperimentRunner{
                     int stopInstance, SortedMap<String, String> domainParams,
                     SortedMap<String,Object> runParams) {
 		SearchDomain domain;
-		SearchResult result;
+		SearchResultImpl result;
 		List resultsData;
 
 		Constructor<?> cons = ExperimentUtils.getSearchDomainConstructor(domainClass);

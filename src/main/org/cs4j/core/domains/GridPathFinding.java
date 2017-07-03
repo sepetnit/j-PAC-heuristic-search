@@ -1,10 +1,13 @@
 package org.cs4j.core.domains;
 
-import org.cs4j.core.*;
+import org.cs4j.core.MultipleGoalsSearchDomain;
+import org.cs4j.core.Operator;
+import org.cs4j.core.SearchState;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.Pair;
 import org.cs4j.core.collections.PairInt;
 import org.junit.Assert;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.*;
 import java.util.*;
@@ -29,10 +32,13 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
 
     private static final int RANDOM_PIVOTS_INDEXES_COUNT = 5000000;
 
+    private String inputFileName;
+
     // Declare the parameters that can be tunes before running the search
     static
     {
         GridPathFindingPossibleParameters = new HashMap<>();
+
         GridPathFinding.GridPathFindingPossibleParameters.put("heuristic", String.class);
         // If the type of the heuristic is RANDOM_PIVOTS (note the S!), the number of random pivots to take over total
         GridPathFinding.GridPathFindingPossibleParameters.put("random-pivots-count", String.class);
@@ -90,6 +96,10 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
 
     // The cost of the optimal solution
     private double optimalSolutionCost;
+
+    public String getInputFileName() {
+        return this.inputFileName;
+    }
 
     /**
      * A specific Move performed on the grid
@@ -378,6 +388,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
     private GridPathFinding(int width, int height, char[] map,
                             int start1Dim, PairInt start,
                             int goal1Dim, PairInt goal) {
+        this.inputFileName = "";
         this.optimalSolutionCost = -1;
         // Either 1-dimensional or 2-dimensional input can be given for start and goal locations
         assert (((start1Dim == -1) ^ (start == null)) && ((goal1Dim == -1) ^ (start == null)));
@@ -616,6 +627,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
      * @param costFunction The type of the cost function
      */
     public GridPathFinding(InputStream stream, COST_FUNCTION costFunction) {
+        this.inputFileName = "";
         this.optimalSolutionCost = -1;
         // TODO:
         // this.heavy = (cost == COST.HEAVY);
@@ -664,6 +676,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
      * @param goal The goal location
      */
     public GridPathFinding(InputStream stream, int start, int goal) {
+        this.inputFileName = "";
         this.optimalSolutionCost = -1;
         // TODO:
         // this.heavy = (cost == COST.HEAVY);
@@ -710,6 +723,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
         // this.heavy = (cost == COST.HEAVY);
         // Initialize the input-reader to allow parsing the state
         BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+        this.inputFileName = other.inputFileName;
         // We need the map in order to read start and goals
         this.map = other.map;
         try {
@@ -742,6 +756,16 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
         this.distancesFromPivots = other.distancesFromPivots;
         this.randomPivotsCount = other.randomPivotsCount;
         this.randomPivotsIndexes = other.randomPivotsIndexes;
+    }
+
+    /**
+     * The constructor of the general GridPathFinding domain (with the UNIT cost function)
+     *
+     * @param inputFileName The name of the file to read
+     */
+    public GridPathFinding(String inputFileName) throws FileNotFoundException {
+        this(new FileInputStream(new File(inputFileName)), COST_FUNCTION.UNIT);
+        this.inputFileName = inputFileName;
     }
 
     /**
@@ -790,9 +814,9 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
     protected int getNthValidGoalIndex(int validGoalIndex) {
         try {
             return super.getNthValidGoalIndex(validGoalIndex);
-        } catch (NullPointerException e) {
-            this.logger.warn("Valid goals not initialized - taking the first goal for heuristic");
-            return 0;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            this.logger.warn("Invalid index for looking the goal : {}", validGoalIndex);
+            throw e;
         }
     }
 
@@ -803,6 +827,29 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
         return this.goalsPairs.get(this.getNthValidGoalIndex(0));
     }
 
+    private int getMD(GridPathFindingState s, PairInt goal) {
+        return Utils.calcManhattanDistance(this.map.getPosition(s.agentLocation), goal);
+    }
+
+
+    private int getMD(GridPathFindingState s) {
+        return this.getMD(s, this.getFirstValidGoalPair());
+    }
+
+    private double[] getHeuristicValuesToAllGoals(GridPathFindingState s) {
+        // TODO: Can run the computeHD for each goal ...
+        double[] toReturn = this.getDefaultHeuristicValuesToAllGoals();
+        switch (this.heuristicType) {
+            // A simple Manhattan distance
+            case MD: {
+                for (int i = 0; i < this.goalsPairs.size(); ++i) {
+                    toReturn[i] = this.getMD(s, this.goalsPairs.get(i));
+                }
+            }
+        }
+        return toReturn;
+    }
+
     /**
      * Compute the heuristic value of a given state
      *
@@ -811,13 +858,13 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
      */
     private double[] computeHD(GridPathFindingState s) {
         assert this.validGoalsCount() == 1;
-        // TODO: PROBLEMATICCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+        if (this.validGoalsCount() > 1) {
+            //this.logger.error("PROBLEMATICCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+            return new double[] {Double.MAX_VALUE, Double.MAX_VALUE};
+        }
         int currentGoal = this.goals.get(this.getNthValidGoalIndex(0));
         // Compute also the Manhattan Distance
-        int md = Utils.calcManhattanDistance(
-                this.map.getPosition(s.agentLocation),
-                // TODO: Deals with a single goal only!
-                this.getFirstValidGoalPair());
+        int md = this.getMD(s);
 
         double maxDistance;
 
@@ -950,6 +997,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
      */
     public final class GridPathFindingState extends SearchState {
         private double h;
+        private double allHs[];
         private double d;
 
         //private double hHat;
@@ -967,11 +1015,22 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
 
         private GridPathFindingState parent;
 
+        @Override
+        public double[] getHToAllGoals() {
+            if (this.allHs == null) {
+                this.allHs = GridPathFinding.this.getHeuristicValuesToAllGoals(this);
+            }
+            return this.allHs;
+        }
+
+
         /**
          * A default constructor of the class
          */
         private GridPathFindingState() {
+            super(GridPathFinding.this);
             this.h = this.d = -1;
+            this.allHs = null;
             this.depth = -1;
             this.agentLocation = -1;
             this.ops = null;
@@ -984,6 +1043,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
          * @param state The state to copy
          */
         private GridPathFindingState(GridPathFindingState state) {
+            super(GridPathFinding.this);
             this.h = state.h;
             this.d = state.d;
             this.depth = state.depth;
@@ -1031,15 +1091,22 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
 
         @Override
         public double getH() {
-            if (this.h < 0) {
+            if (this.h < 0 ||
+                    ((GridPathFinding.this.validGoalsCount() == 1) &&
+                            (this.h == Double.MAX_VALUE))) {
                 this.computeHD();
             }
             return this.h;
         }
 
+        /*
+        @Override
+        public double getAllHs() {
+            if (this.allHs )
+        }*/
+
         @Override
         public double setH(double hValue) {
-            //System.out.println("SETTTTTTTTTTTTTTTTTTTTTTTTTING");
             double toReturn = this.getH();
             this.h = hValue;
             return toReturn;
@@ -1416,10 +1483,19 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
     }
 
     @Override
+    public int getGoalIndexForStateIfValid(SearchState s) {
+        if (this.stateIsOneOfValidGoals(s)) {
+            GridPathFindingState grs = (GridPathFindingState)s;
+            return this.goals.indexOf(grs.agentLocation);
+        }
+        return -1;
+    }
+
+    @Override
     public boolean stateIsOneOfValidGoals(SearchState s) {
         GridPathFindingState grs = (GridPathFindingState)s;
         int goalIndex = this.goals.indexOf(grs.agentLocation);
-        return goalIndex > -1 && this.isValidGoal(goalIndex);
+        return goalIndex > -1 && this.isValidGoalIndex(goalIndex);
     }
 
 
@@ -1506,7 +1582,7 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
      * @param packed The packed state
      * @param dst The destination state which is filled from the unpacked value
      */
-    private void _unpackLite(long packed, GridPathFindingState dst) {
+    private void _unpack(long packed, GridPathFindingState dst) {
         dst.ops = null;
         // Finally, unpack the location of the robot
         dst.agentLocation = (int) (packed & this.agentLocationBitMask);
@@ -1518,14 +1594,17 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
      * @param packed The packed state
      * @param dst The destination state which is filled from the unpacked value
      */
-    private void unpack(long packed, GridPathFindingState dst) {
-        this._unpackLite(packed, dst);
-        // Compute the heuristic values
-        double hd[] = this.computeHD(dst);
-        dst.h = hd[0];
-        dst.d = hd[1];
-        dst.depth = 0;
+    private void unpack(long packed, GridPathFindingState dst, boolean calculate) {
+        this._unpack(packed, dst);
+        if (calculate) {
+            // Compute the heuristic values
+            double hd[] = this.computeHD(dst);
+            dst.h = hd[0];
+            dst.d = hd[1];
+            dst.depth = 0;
+        }
     }
+
     /**
      * Unpacks a GridPathFinding state from a long number
      */
@@ -1533,9 +1612,18 @@ public class GridPathFinding extends MultipleGoalsSearchDomain {
     public GridPathFindingState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
         GridPathFindingState dst = new GridPathFindingState();
-        this.unpack(packed.getFirst(), dst);
+        this.unpack(packed.getFirst(), dst, true);
         return dst;
     }
+
+    @Override
+    public GridPathFindingState unpackLite(PackedElement packed) {
+        assert packed.getLongsCount() == 1;
+        GridPathFindingState dst = new GridPathFindingState();
+        this.unpack(packed.getFirst(), dst, false);
+        return dst;
+    }
+
 
     /**
      * Apply the given operator on the given state and generate a new state

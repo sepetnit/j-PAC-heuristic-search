@@ -2,7 +2,7 @@ package org.cs4j.core.algorithms.basic;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.*;
 
 import java.util.ArrayList;
@@ -123,7 +123,7 @@ public class PHS extends GenericSearchAlgorithm {
         }
     }
 
-    public SearchResult _search(SearchDomain domain) {
+    public SearchResultImpl _search(SearchDomain domain) {
         this.domain = domain;
         Node goal = null;
         // Initialize all the data structures required for the search
@@ -268,12 +268,12 @@ public class PHS extends GenericSearchAlgorithm {
         return result;
     }
 
-    public SearchResult search(SearchDomain domain) {
-        SearchResult toReturn = this._search(domain);
+    public SearchResultImpl search(SearchDomain domain) {
+        SearchResultImpl toReturn = this._search(domain);
         if (!toReturn.hasSolution() && (!this.reopen && this.rerun)) {
             System.out.println("[INFO] PHS Failed with NR, tries again with AR");
             this.reopen = true;
-            SearchResult toReturnAR = this._search(domain);
+            SearchResultImpl toReturnAR = this._search(domain);
             toReturnAR.increase(toReturn);
             // Revert to base state
             this.reopen = false;
@@ -386,7 +386,8 @@ public class PHS extends GenericSearchAlgorithm {
             return 0;
         }
 
-        @Override
+        // TODO ..............
+        //@Override
         public SearchQueueElement getParent() {return this.parent;}
     }
 

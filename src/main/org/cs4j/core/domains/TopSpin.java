@@ -68,6 +68,11 @@ public class TopSpin extends SingleGoalSearchDomain {
         TopSpinPossibleParameters.put("pdb-data", String.class);
     }
 
+    // TODO
+    public String getInputFileName() {
+        return "";
+    }
+
     @Override
     public Map<String, Class> getPossibleParameters() {
         return TopSpin.TopSpinPossibleParameters;
@@ -440,6 +445,10 @@ public class TopSpin extends SingleGoalSearchDomain {
         return new PackedElement(result);
     }
 
+    public SearchState unpackLite(PackedElement packed) {
+        return this.unpack(packed);
+    }
+
     @Override
     public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
@@ -476,7 +485,9 @@ public class TopSpin extends SingleGoalSearchDomain {
         /**
          * A default constructor (required for the {@see initialState()} function
          */
-        private TopSpinState() { }
+        private TopSpinState() {
+            super(TopSpin.this);
+        }
 
         /**
          * A copy constructor of the state
@@ -484,6 +495,7 @@ public class TopSpin extends SingleGoalSearchDomain {
          * @param state The state to copy (must be of TopSpinState type)
          */
         private TopSpinState(SearchState state) {
+            super(TopSpin.this);
             TopSpinState tss = (TopSpinState)state;
             this.h = tss.h;
             this.d = tss.d;

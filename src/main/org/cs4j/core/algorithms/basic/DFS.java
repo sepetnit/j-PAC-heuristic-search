@@ -2,7 +2,7 @@ package org.cs4j.core.algorithms.basic;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.PackedElement;
 import org.cs4j.core.collections.SearchQueueElement;
 
@@ -48,7 +48,7 @@ public class DFS extends GenericSearchAlgorithm {
     }
 
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         double goalCost = Double.MAX_VALUE;
         this.domain = domain;
         // Initialize all the data structures relevant to the search
@@ -200,9 +200,11 @@ public class DFS extends GenericSearchAlgorithm {
             return 0;
         }
 
+        /*
         @Override
         public SearchQueueElement getParent() {
             return this.parent;
         }
+        */
     }
 }

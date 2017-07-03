@@ -8,7 +8,7 @@ import java.util.TreeMap;
  *
  * @author Matthew Hatem
  */
-public interface SearchResult {
+public interface OldSearchResult {
 
     /**
      * Returns whether a solution to the problem exists
@@ -17,12 +17,16 @@ public interface SearchResult {
      */
     boolean hasSolution();
 
+    boolean problemSolved();
+
+    void setProblemSolved();
+
     /**
      * Returns the solution path.
      *
      * @return the solution path
      */
-    List<Solution> getSolutions();
+    //List<Solution> getSolutions();
 
     /**
      *
@@ -35,7 +39,7 @@ public interface SearchResult {
      * (this is assumed to be the last one) #TODO: Is this assumption Ok?
      * @return the best solution found
      */
-    Solution getBestSolution();
+    //Solution getBestSolution();
 
     /**
      * Returns expanded count in the first iteration of running
@@ -102,18 +106,18 @@ public interface SearchResult {
     /**
      * Increases the statistics by the values of the previous search
      */
-    void increase(SearchResult previous);
+    void increase(SearchResultImpl previous);
 
-    void addConcreteResult(SearchResult result);
+    void addConcreteResult(SearchResultImpl result);
 
-    List<SearchResult> getConcreteResults();
+    List<SearchResultImpl> getConcreteResults();
 
     double getAverageExpanded();
 
         /**
          * Interface for search iterations.
          */
-    interface Iteration {
+    interface Iterationn {
 
         /**
          * Returns the bound for this iteration.
@@ -140,7 +144,7 @@ public interface SearchResult {
     /**
      * The Solution interface.
      */
-    interface Solution {
+    interface Solutionn {
 
         /**
          * Returns a list of operators used to construct this solution.

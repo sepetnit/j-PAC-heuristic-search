@@ -109,7 +109,10 @@ public class RawGraph extends SingleGoalSearchDomain {
         transitions.put(a0, new RawGraphEdge[]{a0a1, a0a2, a0a6});
     }
 
-
+    // TODO
+    public String getInputFileName() {
+        return "";
+    }
 
     @Override
     public SearchState initialState() {
@@ -162,6 +165,10 @@ public class RawGraph extends SingleGoalSearchDomain {
         return new PackedElement(node.hashCode());
     }
 
+    public SearchState unpackLite(PackedElement packed) {
+        return this.unpack(packed);
+    }
+
     @Override
     public SearchState unpack(PackedElement packed) {
         assert packed.getLongsCount() == 1;
@@ -209,6 +216,7 @@ public class RawGraph extends SingleGoalSearchDomain {
         RawGraphNode parent;
 
         private RawGraphNode(char name, double h) {
+            super(RawGraph.this);
             this.name = name;
             this.h = h;
         }

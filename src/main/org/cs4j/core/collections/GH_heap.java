@@ -1,6 +1,6 @@
 package org.cs4j.core.collections;
 
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 
 import java.util.*;
 
@@ -76,7 +76,7 @@ public class GH_heap<E extends SearchQueueElement> implements SearchQueue<E> {
         gh_node node = new gh_node(e);
         TreeMap<gh_node,ArrayList<E>> treeOfNode = (node.inTree ? tree : outOfFocalTree);
 /*        if(!node.inTree){
-            System.out.println("[INFO] add Node not in Focal!");
+            System.out.println("[INFO] add LazyAstarNode not in Focal!");
         }*/
 
         ArrayList<E> list;
@@ -175,7 +175,7 @@ public class GH_heap<E extends SearchQueueElement> implements SearchQueue<E> {
         if(debug) debugNode(e,"peek");
         if(e.getF() > w*fmin){
 /*            System.out.println(e);
-            System.out.println("\u001B[32m"+"[INFO] This Node is out of focal"+ "\u001B[0m");*/
+            System.out.println("\u001B[32m"+"[INFO] This LazyAstarNode is out of focal"+ "\u001B[0m");*/
         }
         return e;
     }
@@ -285,17 +285,17 @@ public class GH_heap<E extends SearchQueueElement> implements SearchQueue<E> {
         ArrayList<E> list = treeOfNode.get(node);
 
 /*        if(!node.inTree){
-            System.out.println("[INFO] remove Node not in Focal!");
+            System.out.println("[INFO] remove LazyAstarNode not in Focal!");
         }*/
 
         if(list == null) {
             TreeMap<gh_node,ArrayList<E>> treeOfNode2 = (!node.inTree ? tree : outOfFocalTree);
             ArrayList<E> list2 = treeOfNode2.get(node);
             if(list2 == null){
-                System.out.println("\u001B[31m"+"[WARNING] This Node is in NO list"+ "\u001B[0m");
+                System.out.println("\u001B[31m"+"[WARNING] This LazyAstarNode is in NO list"+ "\u001B[0m");
             }
             else{
-                System.out.println("\u001B[31m"+"[WARNING] This Node is in the WRONG list"+ "\u001B[0m");
+                System.out.println("\u001B[31m"+"[WARNING] This LazyAstarNode is in the WRONG list"+ "\u001B[0m");
             }
             System.out.println("\ne:"+e);
             System.out.println("tree size:"+treeOfNode.size());

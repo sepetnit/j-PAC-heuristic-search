@@ -84,5 +84,5 @@ public interface SearchQueueElement {
     /**
      * @return Element's parent element;
      */
-    SearchQueueElement getParent();
+    //SearchQueueElement getParent();
 }

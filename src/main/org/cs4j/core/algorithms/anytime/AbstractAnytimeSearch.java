@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.*;
 
 import java.util.*;
@@ -19,7 +19,7 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
     protected SearchDomain domain;
 
     // OPEN and CLOSED lists
-//    protected SearchQueue<Node> open;
+//    protected SearchQueue<LazyAstarNode> open;
     protected SearchQueue<Node> open;//gh_heap
 
     protected Map<PackedElement, Node> closed;
@@ -263,7 +263,7 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
      * @param domain The domain
      * @return The new solution found
      */
-    private static SearchResult.Solution constructSolution(Node goal, SearchDomain domain) {
+    private static SearchResultImpl.Solution constructSolution(Node goal, SearchDomain domain) {
         Node currentNode;
         SearchResultImpl.SolutionImpl solution = new SearchResultImpl.SolutionImpl(domain);
         List<Operator> path = new ArrayList<>();
@@ -307,7 +307,7 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
      * @param domain The domain to apply the search on
      */
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         // Initially all the data structures are cleaned
         this.domain = domain;
         this.incumbentSolution=Double.MAX_VALUE;
@@ -332,7 +332,7 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
         // n in OPEN ==> n in CLOSED -Thus- ~(n in CLOSED) ==> ~(n in OPEN)
         this.closed.put(initialNode.packed, initialNode);
 
-        SearchResult results = this._search();
+        SearchResultImpl results = this._search();
         if(results.hasSolution())
             this.incumbentSolution=results.getSolutions().get(0).getCost();
 
@@ -346,17 +346,17 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
      * @return a better solution, if exists
      */
     @Override
-    public SearchResult continueSearch() {
+    public SearchResultImpl continueSearch() {
         this.iteration++;
         this._initDataStructures(false,false);
-        SearchResult results = this._search();
+        SearchResultImpl results = this._search();
 
         // Update total search results, which contains the effort over all the iterations
         this.totalSearchResults.addIteration(this.iteration,this.incumbentSolution,results.getExpanded(), results.getGenerated());
         this.totalSearchResults.increase(results);
 
         if(results.hasSolution()) {
-            SearchResult.Solution bestSolution = results.getBestSolution();
+            SearchResultImpl.Solution bestSolution = results.getBestSolution();
             double solutionCost = bestSolution.getCost();
             assert solutionCost<this.incumbentSolution;
             this.incumbentSolution = solutionCost;
@@ -384,10 +384,10 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
      * Returns a SearchResults object that contains all the search results so
      */
     @Override
-    public SearchResult getTotalSearchResults() { return this.totalSearchResults; }
+    public SearchResultImpl getTotalSearchResults() { return this.totalSearchResults; }
 
     /**
-     * The Node is the basic data structure which is used by the algorithm during the search -
+     * The LazyAstarNode is the basic data structure which is used by the algorithm during the search -
      * OPEN and CLOSED lists contain nodes which are created from the domain states
      */
     public final class Node extends SearchQueueElementImpl implements BucketHeap.BucketHeapElement {
@@ -469,13 +469,15 @@ public abstract class AbstractAnytimeSearch extends GenericSearchAlgorithm imple
             return 0;
         }
 
+        /*
         @Override
         public SearchQueueElement getParent() {return this.parent;}
+        */
 
         /**
          * Default constructor which creates the node from some given state
          *
-         * {see Node(State, Node, State, Operator, Operator)}
+         * {see LazyAstarNode(State, LazyAstarNode, State, Operator, Operator)}
          *
          * @param state The state from which the node should be created
          */

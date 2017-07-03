@@ -93,8 +93,8 @@ public class RBTree<K extends RBTreeElement<K,V>,V> {
         pathBlackCount = verifyProperty5Helper(n.right, blackCount, pathBlackCount);
         return pathBlackCount;
     }
-    /*private Node<K,V> lookupNode(K key) {
-        Node<K,V> n = root;
+    /*private LazyAstarNode<K,V> lookupNode(K key) {
+        LazyAstarNode<K,V> n = root;
         while (n != null) {
             int compResult = key.compareTo(n.key);
             if (compResult == 0) {
@@ -124,7 +124,7 @@ public class RBTree<K extends RBTreeElement<K,V>,V> {
         return key.getNode();
     }
     /*public V lookup(K key) {
-        Node<K,V> n = lookupNode(key);
+        LazyAstarNode<K,V> n = lookupNode(key);
         return n == null ? null : n.value;
     }*/
     private void rotateLeft(RBTreeNode<K,V> n) {
@@ -258,7 +258,7 @@ public class RBTree<K extends RBTreeElement<K,V>,V> {
         }
     }
     /*public void delete(K key) {
-        Node<K,V> n = lookupNode(key);
+        LazyAstarNode<K,V> n = lookupNode(key);
         delete(n);
     }*/
     public void delete(K key) {

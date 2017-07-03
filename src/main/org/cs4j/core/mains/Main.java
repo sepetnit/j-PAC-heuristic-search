@@ -1,11 +1,11 @@
 package org.cs4j.core.mains;
 
 import org.cs4j.core.*;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.algorithms.familiar.EES;
 import org.cs4j.core.algorithms.familiar.PTS;
 import org.cs4j.core.algorithms.familiar.RBFS;
-import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.algorithms.weighted.WRAStar;
 import org.cs4j.core.domains.*;
 import org.cs4j.core.data.Weights;
@@ -17,8 +17,8 @@ import java.util.Arrays;
 public class Main {
 
     public double[] testSearchAlgorithm(SearchDomain domain, SearchAlgorithm algo) {
-        SearchResult result = algo.search(domain);
-        SearchResult.Solution sol = result.getSolutions().get(0);
+        SearchResultImpl result = algo.search(domain);
+        SearchResultImpl.Solution sol = result.getSolutions().get(0);
         //System.out.println(result.getWallTimeMillis());
         //System.out.println(result.getCpuTimeMillis());
 //        System.out.println("Generated: "+result.getGenerated());
@@ -42,7 +42,7 @@ public class Main {
 
     public void testAstar() throws FileNotFoundException {
         SearchDomain domain = createFifteenPuzzleKorf("20");
-        SearchAlgorithm algo = new WAStar();
+        SearchAlgorithm algo = new WAstar();
         testSearchAlgorithm(domain, algo);
     }
 
@@ -160,8 +160,8 @@ public class Main {
 
         SearchDomain domain = mainTest.createFifteenPuzzleUnitWithPDB555("1.in");
         //SearchDomain domain = mainTest.createFifteenPuzzleKorf("2.in");
-        SearchAlgorithm alg = new WAStar();
-        SearchResult result = alg.search(domain);
+        SearchAlgorithm alg = new WAstar();
+        SearchResultImpl result = alg.search(domain);
         if (result.hasSolution()) {
             double d[] = new double[]{
                     1,
@@ -182,10 +182,10 @@ public class Main {
         Main mainTest = new Main();
         SearchDomain domain = mainTest.createGridPathFinding("1.in");
         //SearchAlgorithm alg = new EES(1, true);
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         alg.setAdditionalParameter("weight", "1.0");
         alg.setAdditionalParameter("reopen", "true");
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         assert result.getSolutions().size() == 1;
         if (result.hasSolution()) {
             double d[] = new double[]{
@@ -211,12 +211,12 @@ public class Main {
         alg.setAdditionalParameter("restart-closed-list", false + "");
         alg.setAdditionalParameter("weight", "1.000001");
         /*
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         alg.setAdditionalParameter("weight", "1.000001");
         alg.setAdditionalParameter("reopen", "false");
         alg.setAdditionalParameter("bpmx", "false");
         */
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         assert result.getSolutions().size() == 1;
         if (result.hasSolution()) {
             double d[] = new double[]{
@@ -237,8 +237,8 @@ public class Main {
     public static void mainPancakesDomain(String[] args) throws IOException {
         Main mainTest = new Main();
         SearchDomain domain = mainTest.createPancakesUnit("2.in");
-        SearchAlgorithm alg = new WAStar();
-        SearchResult result = alg.search(domain);
+        SearchAlgorithm alg = new WAstar();
+        SearchResultImpl result = alg.search(domain);
         if (result.hasSolution()) {
             double d[] = new double[]{
                     1,
@@ -258,10 +258,10 @@ public class Main {
     public static void mainDockyardRobotDomain() throws IOException {
         Main mainTest = new Main();
         SearchDomain domain = mainTest.createDockyardRobot("19.in");
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         alg.setAdditionalParameter("weight", "1.0");
         alg.setAdditionalParameter("reopen", "true");
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         if (result.hasSolution()) {
             double d[] = new double[]{
                     1,
@@ -281,8 +281,8 @@ public class Main {
     public static void mainVacuumRobotDomain(String[] args) throws IOException {
         Main mainTest = new Main();
         SearchDomain domain = mainTest.createVacuumRobot("8.in");
-        SearchAlgorithm alg = new WAStar();
-        SearchResult result = alg.search(domain);
+        SearchAlgorithm alg = new WAstar();
+        SearchResultImpl result = alg.search(domain);
         if (result.getSolutions().size() > 0) {
             double d[] = new double[]{
                     1,
@@ -311,10 +311,10 @@ public class Main {
 
         domain.setAdditionalParameter("pdb-data",
                 "0-" + (9*8) + "-{0,1,2}-input\\topspin\\topspin10\\Size10Spin4Pattern_0_1_2");
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         alg.setAdditionalParameter("weight", 5 + "");
         alg.setAdditionalParameter("reopen", true + "");
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         if (result.getSolutions().size() > 0) {
             double d[] = new double[]{
                     1,
@@ -324,7 +324,7 @@ public class Main {
                     result.getGenerated(),
                     result.getExpanded(),
                     ((SearchResultImpl) result).reopened};
-            SearchResult.Solution s = result.getSolutions().get(0);
+            SearchResultImpl.Solution s = result.getSolutions().get(0);
             System.out.println(s.dumpSolution());
             System.out.println(Arrays.toString(d));
         } else {
@@ -346,10 +346,10 @@ public class Main {
                 "2-" + (11*10*9*8*7) + "-{0,1,2,3,4,5}-input\\topspin\\topspin12\\Size12Spin4Pattern_0_1_2_3_4_5");
         */
         domain.setAdditionalParameter("heuristic", "random-pdb");
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         alg.setAdditionalParameter("weight", 6 + "");
         alg.setAdditionalParameter("reopen", true + "");
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         if (result.getSolutions().size() > 0) {
             double d[] = new double[]{
                     1,
@@ -359,7 +359,7 @@ public class Main {
                     result.getGenerated(),
                     result.getExpanded(),
                     ((SearchResultImpl) result).reopened};
-            SearchResult.Solution s = result.getSolutions().get(0);
+            SearchResultImpl.Solution s = result.getSolutions().get(0);
             System.out.println(s.dumpSolution());
             System.out.println(Arrays.toString(d));
         } else {
@@ -370,11 +370,11 @@ public class Main {
     public static void mainRawGraphDomain(String[] args) throws IOException {
         Main mainTest = new Main();
         SearchDomain domain = mainTest.createRawGraph();
-        SearchAlgorithm alg = new WAStar();
+        SearchAlgorithm alg = new WAstar();
         //alg.setAdditionalParameter("weight", "1.5");
         //alg.setAdditionalParameter("bpmx", true + "");
 
-        SearchResult result1 = alg.search(domain);
+        SearchResultImpl result1 = alg.search(domain);
         if (result1.getSolutions().size() > 0) {
             double d[] = new double[]{
                     result1.getSolutions().get(0).getLength(),
@@ -390,7 +390,7 @@ public class Main {
         }
 
         alg.setAdditionalParameter("reopen", false + "");
-        SearchResult result2 = alg.search(domain);
+        SearchResultImpl result2 = alg.search(domain);
         if (result2.getSolutions().size() > 0) {
             double d[] = new double[]{
                     result2.getSolutions().get(0).getLength(),
@@ -407,7 +407,7 @@ public class Main {
         /*
         SearchAlgorithm alg2 = new WRAStar();
 
-        SearchResult result3 = alg2.search(domain);
+        SearchResultImpl result3 = alg2.search(domain);
         if (result3.getSolutions().size() > 0) {
             double d[] = new double[]{
                     result3.getSolutions().get(0).getLength(),
@@ -429,7 +429,7 @@ public class Main {
         SearchDomain domain = mainTest.createFifteenPuzzleKorf("2.in");
         SearchAlgorithm alg = new PTS();
         alg.setAdditionalParameter("max-cost", "80");
-        SearchResult result = alg.search(domain);
+        SearchResultImpl result = alg.search(domain);
         if (result.hasSolution()) {
             double d[] = new double[]{
                     1,
@@ -463,11 +463,11 @@ public class Main {
                     output.writeln("InstanceID,Found,Depth,Generated, Expanded,Reopened");
                     for (int i = 1; i <= 100; ++i) {
                         SearchDomain domain = mainTest.createFifteenPuzzleKorf(i + "");
-                        SearchAlgorithm alg = new WAStar();
+                        SearchAlgorithm alg = new WAstar();
                         alg.setAdditionalParameter("weight", totalWeight + "");
                         alg.setAdditionalParameter("reopen", reopen + "");
                         System.out.println("Solving instance " + i + " For weight " + totalWeight + " reopen? " + reopen);
-                        SearchResult result = alg.search(domain);
+                        SearchResultImpl result = alg.search(domain);
                         double d[];
                         if (result.hasSolution()) {
                             d = new double[]{
@@ -516,7 +516,7 @@ public class Main {
                     SearchDomain domain = new Pancakes(is);
                     alg.setAdditionalParameter("weight", totalWeight + "");
 //                    System.out.println("Solving instance " + i + " For weight " + totalWeight + " reopen? " + reopen);
-                    SearchResult result = alg.search(domain);
+                    SearchResultImpl result = alg.search(domain);
                     double d[];
                     if (result.hasSolution()) {
                         d = new double[]{
@@ -586,7 +586,7 @@ public class Main {
 
     public static void randomWalkInstances() throws IOException {
         System.out.println("randomWalkInstances started");
-        SearchAlgorithm Astar = new WAStar();
+        SearchAlgorithm Astar = new WAstar();
         int iterationStep = 5;
         int stepNum = 4;
         int iterations = 1000;
@@ -630,7 +630,7 @@ public class Main {
             domain.setInitialState(randomState);
 //            System.out.println(domain.initialState().dumpState());
             //solving
-            SearchResult result = Astar.search(domain);
+            SearchResultImpl result = Astar.search(domain);
             if (result.hasSolution()) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(i);
@@ -655,7 +655,7 @@ public class Main {
         output.close();
 
 
-/*        SearchResult result = alg.search(domain);
+/*        SearchResultImpl result = alg.search(domain);
         if (result.hasSolution()) {
             double d[] = new double[]{
                     1,
@@ -722,7 +722,7 @@ public class Main {
                 System.out.println("emptyFocalRatio:"+i+", pancakesNum:"+pancakesNum[j]);
                 alg.setAdditionalParameter("emptyFocalRatio", i + "");
 //            alg.setAdditionalParameter("emptyFocalRatio", "200");
-//        SearchAlgorithm alg = new WAStar();
+//        SearchAlgorithm alg = new WAstar();
 //        SearchAlgorithm alg = new EES(1);
                 Main.mainDP(args, pancakesNum[j], alg);
             }

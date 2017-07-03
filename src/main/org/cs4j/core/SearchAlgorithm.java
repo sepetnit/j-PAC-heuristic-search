@@ -28,12 +28,12 @@ public interface SearchAlgorithm extends SearchConfigurable {
      */
     String getName();
 
-    SearchResult concreteSearch(MultipleGoalsSearchDomain domain);
+    SearchResultImpl concreteSearch(MultipleGoalsSearchDomain domain);
 
-    SearchResult concreteSearch(SingleGoalSearchDomain domain);
+    SearchResultImpl concreteSearch(SingleGoalSearchDomain domain);
 
 
-    SearchResult search(SearchDomain domain);
+    SearchResultImpl search(SearchDomain domain);
 
     boolean improveStateHValue(SearchState s, SearchDomain domain);
 

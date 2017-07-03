@@ -1,6 +1,6 @@
 package org.cs4j.core.algorithms.pac;
 
-import org.cs4j.core.SearchResult;
+import org.cs4j.core.SearchResultImpl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +35,7 @@ public class AnytimePTS4PAC extends AnytimePACSearch {
 
     @Override
     // Resort OPEN before continuing the search, because the PTS evaluation function considers the incumbent solution
-    public SearchResult continueSearch() {
+    public SearchResultImpl continueSearch() {
         // Resort open according to the new incumbent @TODO: Study if this actually helps or not?
         List<Node> openNodes = new ArrayList<Node>(this.open.size());
         while(this.open.size()>0)

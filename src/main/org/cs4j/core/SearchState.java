@@ -1,9 +1,17 @@
 package org.cs4j.core;
 
+import org.cs4j.core.collections.PackedElement;
+
 /**
  * The State interface.
  */
 public abstract class SearchState {
+
+    public SearchDomain domain;
+
+    public SearchState(SearchDomain domain) {
+        this.domain = domain;
+    }
 
     /**
      * Returns the parent state which allows to reconstruct the found solution path
@@ -18,6 +26,11 @@ public abstract class SearchState {
      * @return the heuristic estimate
      */
     public abstract double getH();
+
+    // Default implementation
+    public double[] getHToAllGoals() {
+        return null;
+    }
 
     /**
      * Updates the h value with the given one
@@ -47,7 +60,11 @@ public abstract class SearchState {
      * @return The copied state
      */
     // TODO
-    public SearchState copy() {return null;};
+    public SearchState copy() {return null;}
+
+    public PackedElement pack() {
+        return this.domain.pack(this);
+    }
 
     /**
      * Returns a string representation of the state

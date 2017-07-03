@@ -1,11 +1,11 @@
 package org.cs4j.core.mains;
 
 import org.cs4j.core.SearchDomain;
+import org.cs4j.core.algorithms.weighted.WAstar;
 import org.cs4j.core.data.Weights;
 import org.cs4j.core.OutputResult;
 import org.cs4j.core.SearchAlgorithm;
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.weighted.WAStar;
+import org.cs4j.core.SearchResultImpl;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -72,8 +72,8 @@ public class WAStar_EES_Pancakes_GAPK_Experiment {
      *
      * @return A new double array which contains all the fields for the solution
      */
-    private double[] _getSolutionResult(SearchResult result) {
-        SearchResult.Solution solution = result.getSolutions().get(0);
+    private double[] _getSolutionResult(SearchResultImpl result) {
+        SearchResultImpl.Solution solution = result.getSolutions().get(0);
         return new double[]{
                 1,
                 solution.getLength(),
@@ -100,7 +100,7 @@ public class WAStar_EES_Pancakes_GAPK_Experiment {
      ******************************************************************************************************************/
 
     /**
-     * Runs an experiment using the WAStar and EES algorithms in a SINGLE THREAD!
+     * Runs an experiment using the GenericWAstar and EES algorithms in a SINGLE THREAD!
      *
      * @param size Size of pancakes problem
      * @param firstInstance The id of the first instance to solve
@@ -131,14 +131,14 @@ public class WAStar_EES_Pancakes_GAPK_Experiment {
                     double weight = w.getWeight();
                     output.write(i + "," + w.wg + "," + w.wh + "," + weight + ",");
                     for (boolean reopen : this.reopenPossibilities) {
-                        SearchAlgorithm alg = new WAStar();
+                        SearchAlgorithm alg = new WAstar();
                         alg.setAdditionalParameter("weight", weight + "");
                         alg.setAdditionalParameter("reopen", reopen + "");
                         //SearchAlgorithm alg = new EES(weight, reopen);
                         System.out.println("[INFO] Solving : " +
                                 "(Instance- " + i + ", Gap-" + currentGap + ", Weight- " + weight + ", Reopen- " + reopen + ")");
                         try {
-                            SearchResult result = alg.search(domain);
+                            SearchResultImpl result = alg.search(domain);
                             // No solution
                             if (!result.hasSolution()) {
                                 output.appendNewResult(this._getNoSolutionResult());

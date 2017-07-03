@@ -4,13 +4,12 @@ import jxl.Workbook;
 import jxl.read.biff.BiffException;
 import jxl.write.*;
 import jxl.write.Number;
-import jxl.write.biff.RowsExceededException;
 import org.cs4j.core.SearchAlgorithm;
 import org.cs4j.core.SearchDomain;
-import org.cs4j.core.SearchResult;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.algorithms.kgoal.KBidirectionalAstar;
 import org.cs4j.core.algorithms.kgoal.KxAstar;
+import org.cs4j.core.algorithms.kgoal.LazyKWAstarMin;
 import org.cs4j.core.domains.GridPathFinding;
 
 import java.io.*;
@@ -18,7 +17,6 @@ import java.util.*;
 
 /**
  * Created by user on 2017-04-03.
- *
  */
 public class MainKGoalSearch {
     private SearchDomain gp;
@@ -28,7 +26,7 @@ public class MainKGoalSearch {
     public void MainKxAstarSearch() {
         try {
             InputStream is = new FileInputStream(new File(
-                    "input/gridpathfinding/k-goal/ost003d.map/1.in"));
+                    "input/gridpathfinding/k-goal/brc202d.map/5/4.in"));
             this.gp = new GridPathFinding(is);
             this.alg = new KxAstar();
             this.alg.search(this.gp);
@@ -42,10 +40,25 @@ public class MainKGoalSearch {
     public void MainKBidirectionalAstarSearch() {
         try {
             InputStream is = new FileInputStream(new File(
-                    "input/gridpathfinding/k-goal/brc202d.map/1.in"));
+                    "input/gridpathfinding/k-goal/brc202d.map/5/4.in"));
             this.gp = new GridPathFinding(is);
             this.alg = new KBidirectionalAstar();
-            SearchResult result = this.alg.search(this.gp);
+            SearchResultImpl result = this.alg.search(this.gp);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    // Constructor
+    public void MainLazyKAstarSearch() {
+        try {
+            InputStream is = new FileInputStream(new File(
+                    "input/gridpathfinding/k-goal/brc202d.map/2/1.in"));
+            this.gp = new GridPathFinding(is);
+            this.alg = new LazyKWAstarMin();
+            SearchResultImpl result = this.alg.search(this.gp);
+            System.out.println("DONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNE");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -71,35 +84,28 @@ public class MainKGoalSearch {
                 "input/gridpathfinding/k-goal/" + mapName + ".map/" +
                         goalsCount + "/{instance-index}.in";
 
-        for (Class<? extends SearchAlgorithm> algCls: algs) {
+        for (Class<? extends SearchAlgorithm> algCls : algs) {
             try {
                 SearchAlgorithm alg = algCls.newInstance();
                 System.out.println("Solving for alg : " + alg.getName());
                 SearchResultImpl res = new SearchResultImpl();
                 for (int instanceNum = 1; instanceNum < instancesCount; ++instanceNum) {
-                    try {
-                        InputStream is = new FileInputStream(
-                                new File(basicPathName.replace("{instance-index}",
-                                        instanceNum + "")
-                                ));
-                        GridPathFinding instance = new GridPathFinding(is);
-                        SearchResult singleResult = alg.search(instance);
-                        if (singleResult != null) {
-                            res.addConcreteResult(singleResult);
-                            System.out.println(singleResult.getExpanded());
-                            res.setExpanded(res.getExpanded() + singleResult.getExpanded());
-                        }
-                    } catch (IOException e) {
-                        throw e;
+                    String fileName = basicPathName.replace("{instance-index}",
+                            instanceNum + "");
+                    GridPathFinding instance = new GridPathFinding(fileName);
+                    SearchResultImpl singleResult = alg.search(instance);
+                    if (singleResult != null) {
+                        res.addConcreteResult(singleResult);
+                        System.out.println(singleResult.getExpanded());
+                        res.setExpanded(res.getExpanded() + singleResult.getExpanded());
                     }
                 }
                 toReturn.put(alg.getName(), res.getAverageExpanded());
-            }
-            catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InstantiationException e) {
-               // TODO
-               // e.printStackTrace();
+                // TODO
+                // e.printStackTrace();
             }
         }
         return toReturn;
@@ -107,7 +113,7 @@ public class MainKGoalSearch {
 
     private Map<Integer, Map<String, Double>> runGridPathFindingExperimentForGoalsCounts(
             String mapName, int[] goalsCounts, int instancesCount) throws FileNotFoundException {
-                Map<Integer, Map<String, Double>> toReturn = new TreeMap<>();
+        Map<Integer, Map<String, Double>> toReturn = new TreeMap<>();
         for (int goalsCount : goalsCounts) {
             toReturn.put(goalsCount, runGridPathFindingExperiment(mapName,
                     goalsCount, instancesCount));
@@ -115,15 +121,15 @@ public class MainKGoalSearch {
         return toReturn;
     }
 
-    private Map<String, Map<Integer, Map<String, Double>>> runGridPathFindingExperimentOverMaps() throws FileNotFoundException {
-        String[] mapsNames = new String[] {"brc202d", "ost003d", "den400d"};
-        int[] goalsCounts = new int[] {2, 3};//, 4, 5, 10, 15, 20, 30, 50, 100};
+    private Map<String, Map<Integer, Map<String,
+            Double>>> runGridPathFindingExperimentOverMaps(String[] mapsNames, int[] goalsCounts)
+            throws FileNotFoundException {
 
         Map<String, Map<Integer, Map<String, Double>>> toReturn = new TreeMap<>();
-        for (String mapName: mapsNames) {
+        for (String mapName : mapsNames) {
             toReturn.put(mapName,
                     this.runGridPathFindingExperimentForGoalsCounts(mapName,
-                            goalsCounts, 4));
+                            goalsCounts, 10));
         }
         return toReturn;
     }
@@ -134,7 +140,8 @@ public class MainKGoalSearch {
     private static WritableCellFormat cellFormatDecimal =
             new WritableCellFormat(new NumberFormat("#,###.00"));
 
-    private static void createSummary(Map<String, Map<Integer, Map<String, Double>>> summary)
+    private static void createSummary(Map<String, Map<Integer, Map<String, Double>>> summary,
+                                      String[] mapNames)
             throws IOException {
         try {
             String path = "C:\\Users\\user\\Documents\\Work\\Git\\j-heuristic-search-galdreiman" +
@@ -157,7 +164,7 @@ public class MainKGoalSearch {
             // Final average of the following format: <goals-count => <alg-name, expanded>>
             Map<Integer, Map<String, Double>> averageExpandedStates = new TreeMap<>();
 
-            for (String mapName : summary.keySet()) {
+            for (String mapName : mapNames) {
                 // TODO: Sheet name
                 WritableSheet existingSheet = writableWorkbook.getSheet(mapName);
 
@@ -184,6 +191,10 @@ public class MainKGoalSearch {
                 int currentCol = 1;
 
                 for (int goalsCount : goalsCounts) {
+
+                    Map<String, Double> currentGoalsCountData =
+                            averageExpandedStates.getOrDefault(goalsCount, new TreeMap<>());
+
                     currentRow = 0;
                     // Add domain name
                     writableSheet.addCell(new Label(currentCol, currentRow++, goalsCount + ""));
@@ -195,14 +206,14 @@ public class MainKGoalSearch {
                                         results.get(algName), cellFormatDecimal));
 
                         // Update average
-                        Map<String, Double> currentGoalsCountData =
-                                averageExpandedStates.getOrDefault(goalsCount, new TreeMap<>());
                         double currentExpanded =
                                 currentGoalsCountData.getOrDefault(algName, 0.0);
                         currentExpanded += results.get(algName);
                         currentGoalsCountData.put(algName, currentExpanded);
 
                     }
+
+                    averageExpandedStates.put(goalsCount, currentGoalsCountData);
                     currentCol++;
                 }
             }
@@ -211,12 +222,34 @@ public class MainKGoalSearch {
             if (existingSheet != null) {
                 writableSheet = existingSheet;
             } else {
-                writableSheet = writableWorkbook.createSheet("average", sheetsCount++);
+                writableSheet = writableWorkbook.createSheet("average", sheetsCount);
             }
 
-            //for ()
+            for (Integer goalCount : averageExpandedStates.keySet()) {
+                Map<String, Double> currentData = averageExpandedStates.get(goalCount);
+                for (String algName : currentData.keySet()) {
+                    currentData.put(algName, currentData.get(algName) / summary.size());
+                }
+            }
 
+            // Get all names of algorithms
 
+            int currentCol = 1;
+            for (int goalsCount : averageExpandedStates.keySet()) {
+                Map<String, Double> currentData = averageExpandedStates.get(goalsCount);
+                int currentRow = 0;
+                // Add count of goals
+                writableSheet.addCell(new Label(currentCol, currentRow++, goalsCount + ""));
+                for (String algName : currentData.keySet()) {
+                    writableSheet.addCell(new Label(0, currentRow, algName + ""));
+                    // Add the result
+                    writableSheet.addCell(
+                            new Number(currentCol, currentRow++,
+                                    currentData.get(algName), cellFormatDecimal));
+
+                }
+                currentCol++;
+            }
 
             writableWorkbook.write();
             writableWorkbook.close();
@@ -234,9 +267,19 @@ public class MainKGoalSearch {
 
         MainKGoalSearch MKGS = new MainKGoalSearch();
 
-        MKGS.createSummary(MKGS.runGridPathFindingExperimentOverMaps());
-        //MKGS.MainKBidirectionalAstarSearch();
+        String[] mapNames = new String[]{"brc202d", "ost003d", "den400d"};
+        int[] goalsCounts = new int[]{/*2, 3, 4, 5, 10, 15, 20, 30, */50, 100};
 
+        MKGS.createSummary(MKGS.runGridPathFindingExperimentOverMaps(mapNames, goalsCounts),
+                mapNames);
+        /*
+        System.out.println("---------------------------------------------------");
+        MKGS.MainKxAstarSearch();
+        System.out.println("---------------------------------------------------");
+        MKGS.MainKBidirectionalAstarSearch();
+        System.out.println("---------------------------------------------------");
+        //MKGS.MainLazyKAstarSearch();
         System.out.println("Test Ended");
+        */
     }
 }

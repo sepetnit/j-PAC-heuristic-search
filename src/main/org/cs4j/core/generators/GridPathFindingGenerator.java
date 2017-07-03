@@ -16,7 +16,7 @@ import java.util.*;
 public class GridPathFindingGenerator extends GeneralInstancesGenerator {
 
     private static final int MIN_START_GOAL_MANHATTAN_DISTANCE = 5000;
-    private static final int MAX_TRIES_TO_SINGLE_INSTANCE = 100;
+    private static final int MAX_TRIES_TO_SINGLE_INSTANCE = 1000;
 
     private final Set<Character> OBSTACLE_CHARACTERS;
 
@@ -626,7 +626,6 @@ public class GridPathFindingGenerator extends GeneralInstancesGenerator {
             }
         }
     }
-
 
     private static void mainGenerateInstanceFromPreparedMap(String args[]) throws IOException {
         String[] outputPaths =

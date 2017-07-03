@@ -2,7 +2,7 @@ package org.cs4j.core.algorithms.familiar;
 
 import org.cs4j.core.*;
 import org.cs4j.core.algorithms.auxiliary.SearchQueueElementImpl;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 import org.cs4j.core.collections.*;
 
 import java.math.BigDecimal;
@@ -23,9 +23,9 @@ public class EES extends GenericSearchAlgorithm {
     // cleanup is implemented as a binary heap and actually contains nodes ordered by their f values
     private BinHeap<Node> cleanup;
     // Closed list
-    // private LongObjectOpenHashMap<Node> closed;
+    // private LongObjectOpenHashMap<LazyAstarNode> closed;
     private TreeMap<PackedElement, Node> closed;
-//    private Map<PackedElement, Node> closed;
+//    private Map<PackedElement, LazyAstarNode> closed;
 
     private SearchResultImpl result;
 
@@ -194,7 +194,7 @@ public class EES extends GenericSearchAlgorithm {
      * see edu.unh.ai.search.SearchAlgorithm#search(java.lang.Object)
      */
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         // Init all the queues relevant to search (destroy previous results)
         this._initDataStructures();
 
@@ -711,9 +711,11 @@ public class EES extends GenericSearchAlgorithm {
         @Override
         public double getDhat() { return this.dHat; }
 
+        /*
         @Override
         public SearchQueueElement getParent() {
             return this.parent;
         }
+        */
     }
 }

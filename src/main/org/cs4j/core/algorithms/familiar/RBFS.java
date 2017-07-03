@@ -17,7 +17,7 @@
 package org.cs4j.core.algorithms.familiar;
 
 import org.cs4j.core.*;
-import org.cs4j.core.algorithms.auxiliary.SearchResultImpl;
+import org.cs4j.core.SearchResultImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +63,7 @@ public class RBFS extends GenericSearchAlgorithm {
     }
 
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         this.domain = domain;
 
         result = new SearchResultImpl();

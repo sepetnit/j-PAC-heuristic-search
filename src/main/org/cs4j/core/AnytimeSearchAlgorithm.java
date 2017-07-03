@@ -10,11 +10,11 @@ public interface AnytimeSearchAlgorithm extends SearchAlgorithm {
      *
      * @return A better solution, if such exists
      */
-    SearchResult continueSearch();
+    SearchResultImpl continueSearch();
 
     /**
      * Returns a SearchResults object that contains all the search results
      * found till now
      */
-    SearchResult getTotalSearchResults();
+    SearchResultImpl getTotalSearchResults();
 }

@@ -98,14 +98,14 @@ public class PACSearchFramework extends GenericSearchAlgorithm {
      * @param domain The domain to apply the search on
      */
     @Override
-    public SearchResult search(SearchDomain domain) {
+    public SearchResultImpl search(SearchDomain domain) {
         AnytimeSearchAlgorithm anytimeSearchAlgorithm=this.createAnytimeSearchAlgorithm();
         PACCondition pacCondition = this.createPacCondition(domain,this.epsilon,this.delta);
         if(anytimeSearchAlgorithm instanceof AnytimePACSearch)
             ((AnytimePACSearch)anytimeSearchAlgorithm).setPacCondition(pacCondition);
 
         // Run an anytime search
-        SearchResult result = anytimeSearchAlgorithm.search(domain);
+        SearchResultImpl result = anytimeSearchAlgorithm.search(domain);
         if(result.hasSolution()==false) return result;
 
         // Check solution after it is found to see if we should halt

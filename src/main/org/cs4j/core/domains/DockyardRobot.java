@@ -62,6 +62,11 @@ public class DockyardRobot extends SingleGoalSearchDomain {
     //private static final double PopCostFact = 0.05d;
     private static final double PopCostFact = 5d;
 
+    // TODO
+    public String getInputFileName() {
+        return "";
+    }
+
     /**
      * Init the possible operators for the given state
      *
@@ -480,6 +485,10 @@ public class DockyardRobot extends SingleGoalSearchDomain {
         */
 
         return new PackedElement(packed);
+    }
+
+    public SearchState unpackLite(PackedElement packed) {
+        return this.unpack(packed);
     }
 
     /**
@@ -1267,6 +1276,7 @@ public class DockyardRobot extends SingleGoalSearchDomain {
             }
             return (l < this.cranes.size() && this.cranes.get(l) == box) ? l : -1;
         }
+
     }
 
 
@@ -1337,7 +1347,9 @@ public class DockyardRobot extends SingleGoalSearchDomain {
         /**
          * A default constructor (required for unpack operation)
          */
-        private DRobotState() { }
+        private DRobotState() {
+            super(DockyardRobot.this);
+        }
 
         /**
          * Constructs a DRobotState using the initial data
@@ -1348,6 +1360,7 @@ public class DockyardRobot extends SingleGoalSearchDomain {
          * @param rl The current location of the robot
          */
         private DRobotState(DockyardRobot dr, Location[] ls, int rb, int rl) {
+            super(DockyardRobot.this);
             this.init(dr, ls, rb, rl);
         }
 
@@ -1357,6 +1370,7 @@ public class DockyardRobot extends SingleGoalSearchDomain {
          * @param state The state to copy
          */
         private DRobotState(DRobotState state) {
+            super(DockyardRobot.this);
             this.h = state.h;
             this.d = state.d;
             this.depth = state.depth;
