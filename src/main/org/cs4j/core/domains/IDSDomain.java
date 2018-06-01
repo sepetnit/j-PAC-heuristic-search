@@ -6,6 +6,7 @@ import org.cs4j.core.SearchState;
 import org.cs4j.core.collections.PackedElement;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -164,6 +165,119 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
     }
 
 
+    public void setupTestIDS(){
+        IDSGraphNode a1 = new IDSGraphNode(0, 0, 0, 0, null);
+        IDSGraphNode a2 = new IDSGraphNode(0, 0, 1, 0, null);
+        IDSGraphNode a3 = new IDSGraphNode(0, 0, 2, 0, null);
+        IDSGraphNode a4 = new IDSGraphNode(0, 0, 3, 0, null);
+
+        a1.setName("a1");
+        a2.setName("a2");
+        a3.setName("a3");
+        a4.setName("a4");
+
+
+        IDSGraphNode b1 = new IDSGraphNode(0, 1, 0, 0, null);
+        IDSGraphNode b2 = new IDSGraphNode(0, 1, 1, 0, null);
+        IDSGraphNode b3 = new IDSGraphNode(0, 1, 2, 0, null);
+        IDSGraphNode b4 = new IDSGraphNode(0, 1, 3, 0, null);
+
+        b1.setName("b1");
+        b2.setName("b2");
+        b3.setName("b3");
+        b4.setName("b4");
+
+
+        IDSGraphNode c1 = new IDSGraphNode(0, 2, 0, 0, null);
+        IDSGraphNode c2 = new IDSGraphNode(0, 2, 1, 0, null);
+        IDSGraphNode c3 = new IDSGraphNode(0, 2, 2, 0, null);
+        IDSGraphNode c4 = new IDSGraphNode(0, 2, 3, 0, null);
+
+        c1.setName("c1");
+        c2.setName("c2");
+        c3.setName("c3");
+        c4.setName("c4");
+
+
+        IDSGraphEdge a1a2 = new IDSGraphEdge(a1, a2, 5);
+        IDSGraphEdge a1a3 = new IDSGraphEdge(a1, a3, 5);
+        IDSGraphEdge a1a4 = new IDSGraphEdge(a1, a4, 5);
+        IDSGraphEdge a2a3 = new IDSGraphEdge(a2, a3, 5);
+        IDSGraphEdge a2a4 = new IDSGraphEdge(a2, a4, 5);
+        IDSGraphEdge a3a4 = new IDSGraphEdge(a3, a4, 5);
+
+        IDSGraphEdge a1b1 = new IDSGraphEdge(a1, b1, 10);
+
+
+        IDSGraphEdge b1b2 = new IDSGraphEdge(b1, b2, 5);
+        IDSGraphEdge b1b3 = new IDSGraphEdge(b1, b3, 5);
+        IDSGraphEdge b1b4 = new IDSGraphEdge(b1, b4, 5);
+        IDSGraphEdge b2b3 = new IDSGraphEdge(b2, b3, 5);
+        IDSGraphEdge b2b4 = new IDSGraphEdge(b2, b4, 5);
+        IDSGraphEdge b3b4 = new IDSGraphEdge(b3, b4, 5);
+
+        IDSGraphEdge b1c1 = new IDSGraphEdge(b1, c1, 10);
+
+
+        IDSGraphEdge c1c2 = new IDSGraphEdge(c1, c2, 1);
+        IDSGraphEdge c1c3 = new IDSGraphEdge(c1, c3, 5);
+        IDSGraphEdge c1c4 = new IDSGraphEdge(c1, c4, 5);
+        IDSGraphEdge c2c3 = new IDSGraphEdge(c2, c3, 1);
+        IDSGraphEdge c2c4 = new IDSGraphEdge(c2, c4, 5);
+        IDSGraphEdge c3c4 = new IDSGraphEdge(c3, c4, 5);
+
+
+        this.transitions.put(a1, new ArrayList<>(Arrays.asList(a1a2, a1a3, a1a4, a1b1)));
+        this.transitions.put(a2, new ArrayList<>(Arrays.asList(a1a2, a2a3, a2a4)));
+        this.transitions.put(a3, new ArrayList<>(Arrays.asList(a2a3, a1a3, a3a4)));
+        this.transitions.put(a4, new ArrayList<>(Arrays.asList(a3a4, a2a4, a1a4)));
+
+        this.transitions.put(b1, new ArrayList<>(Arrays.asList(b1b2, b1b3, b1b4, b1c1)));
+        this.transitions.put(b2, new ArrayList<>(Arrays.asList(b1b2, b2b3, b2b4)));
+        this.transitions.put(b3, new ArrayList<>(Arrays.asList(b2b3, b1b3, b3b4)));
+        this.transitions.put(b4, new ArrayList<>(Arrays.asList(b3b4, b2b4, b1b4)));
+
+        this.transitions.put(c1, new ArrayList<>(Arrays.asList(c1c2, c1c3, c1c4)));
+        this.transitions.put(c2, new ArrayList<>(Arrays.asList(c1c2, c2c3, c2c4)));
+        this.transitions.put(c3, new ArrayList<>(Arrays.asList(c2c3, c1c3, c3c4)));
+        this.transitions.put(c4, new ArrayList<>(Arrays.asList(c3c4, c2c4, c1c4)));
+
+        this.nodes.put(a1.hashCode(), a1);
+        this.nodes.put(a2.hashCode(), a2);
+        this.nodes.put(a3.hashCode(), a3);
+        this.nodes.put(a4.hashCode(), a4);
+
+        this.nodes.put(b1.hashCode(), b1);
+        this.nodes.put(b2.hashCode(), b2);
+        this.nodes.put(b3.hashCode(), b3);
+        this.nodes.put(b4.hashCode(), b4);
+
+        this.nodes.put(c1.hashCode(), c1);
+        this.nodes.put(c2.hashCode(), c2);
+        this.nodes.put(c3.hashCode(), c3);
+        this.nodes.put(c4.hashCode(), c4);
+
+        ArrayList<IDSGraphNode> s1 = new ArrayList<>(Arrays.asList(a1, a2, a3, a4));
+        ArrayList<IDSGraphNode> s2 = new ArrayList<>(Arrays.asList(b1, b2, b3, b4));
+        ArrayList<IDSGraphNode> s3 = new ArrayList<>(Arrays.asList(c1, c2, c3, c4));
+
+        this.buildings.put(0, new ArrayList<>(Arrays.asList(s1, s2, s3)));
+
+        c3.setGoal(true);
+        this.goals.add(c3);
+
+        b4.setGoal(true);
+        this.goals.add(b4);
+
+        this.validGoals = new boolean[this.goals.size()];
+        this.validGoalsIndexes = new int[this.goals.size()];
+        this.setAllGoalsValid();
+
+        this.initialState = a3;
+
+    }
+
+
     public void printDomain(){
         for(int i = 0; i < this.buildings.size(); i++){
             ArrayList<ArrayList<IDSGraphNode>> building = this.buildings.get(i);
@@ -211,7 +325,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     protected PackedElement getNthGoalFromAllGoals(int goalIndex) {
-        return null;
+        return new PackedElement(this.goals.get(goalIndex).hashCode());
     }
 
     @Override
@@ -226,8 +340,10 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     protected boolean stateIsOneOfValidGoals(SearchState s) {
+        if(this.goals.contains(s))
+            return this.validGoals[this.goals.indexOf(s)];
 
-        return this.goals.contains(s);
+        return false;
     }
 
     @Override
@@ -393,6 +509,10 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
         public String getName(){
             return this.name;
+        }
+
+        public void setName(String name){
+            this.name = name;
         }
     }
 

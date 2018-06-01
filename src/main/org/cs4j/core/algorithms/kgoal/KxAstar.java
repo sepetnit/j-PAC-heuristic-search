@@ -66,6 +66,9 @@ public class KxAstar extends GenericSearchAlgorithm {
             // Only the i'th goal is relevant
             this.searchDomain.setValidityOfOnlyGoal(i);
             singleResult = this.basicAlgorithm.search(this.searchDomain);
+            System.out.println(singleResult);
+            System.out.println("found " + singleResult.solutionsCount() + " solutions");
+            System.out.println(singleResult.getBestSolution());
             // Get the first result
             if (singleResult.solutionsCount() == 0) {
                 KxAstar.logger.warn("No solution for goal {}", i+1);
@@ -74,6 +77,7 @@ public class KxAstar extends GenericSearchAlgorithm {
                 logger.error("LENNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN: " + singleResult.getBestSolution().getLength());
                 this.result.addSolution(singleResult.getSolutions().get(0));
                 this.result.setExpanded(this.result.getExpanded() + singleResult.getExpanded());
+                this.result.setGenerated(this.result.getGenerated() + singleResult.getGenerated());
                 this.result.addConcreteResult(singleResult);
             }
             // In any case increase the time
@@ -81,7 +85,6 @@ public class KxAstar extends GenericSearchAlgorithm {
         }
         // print total time
         System.out.println("totalTime=" + totalTime);
-        System.out.println("result = ");
         System.out.println(this.result);
 
         return this.result;

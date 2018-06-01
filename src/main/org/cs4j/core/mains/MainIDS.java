@@ -15,8 +15,9 @@ public class MainIDS {
 
         try {
             domain.setupIDSDomain(3, storiesRange, devicesRange, 10);
+//            domain.setupTestIDS();
             domain.printDomain();
-//            alg.concreteSearch(domain);
+            alg.concreteSearch(domain);
         } catch (IOException e) {
             e.printStackTrace();
         }
