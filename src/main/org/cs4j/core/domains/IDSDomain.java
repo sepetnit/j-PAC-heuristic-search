@@ -11,7 +11,7 @@ import java.util.*;
 
 public class IDSDomain extends MultipleGoalsSearchDomain {
 
-    private SearchState [] goals;
+    private ArrayList<IDSGraphNode> goals;
     private IDSGraphNode initialState;
     Map<Integer, IDSGraphNode> nodes;
     Map<IDSGraphNode, ArrayList<IDSGraphEdge>> transitions;
@@ -25,6 +25,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
 
     public IDSDomain(){
+        this.goals = new ArrayList<>();
         this.initialState = null;
         this.nodes = new HashMap<>();
         this.transitions = new HashMap<>();
@@ -38,10 +39,10 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
      *                     in a building and index 1 is the maximal number
      * @param deviceRange an array of size = 2, where index 0 is the minimal number of devices (vertices)
      *                    in a story and index 1 is the maximal number
-     * @param domain a domain instance to set up
+     * @param k the number of goals (number of sensors)
      * @return the new IDSDomain instance
      */
-    public void setupIDSDomain(int buildingsNum, int[] storiesRange, int[] deviceRange, IDSDomain domain) throws IOException {
+    public void setupIDSDomain(int buildingsNum, int[] storiesRange, int[] deviceRange, int k) throws IOException {
 
         // validate input
         if(buildingsNum <= 0)
@@ -52,6 +53,8 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         if(deviceRange == null || deviceRange.length != 2 ||
                 deviceRange[RANGE_MIN] < 1 || deviceRange[RANGE_MAX] < deviceRange[RANGE_MIN])
             throw new IOException("invalid deviceRange");
+        if(k <= 0)
+            throw new IOException("k has to be > 0");
 
 
         // setup the instance
@@ -62,7 +65,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
             // get storiesNum such that: storiesRange[RANGE_MIN] <= storiesNum <= storiesRange[RANGE_MAX]
             int storiesNum = storiesRange[RANGE_MIN] + rand.nextInt(storiesUpperBound);
-            ArrayList<IDSGraphNode> stories = new ArrayList<>();
+            ArrayList<ArrayList<IDSGraphNode>> stories = new ArrayList<>();
             for(int story = 0; story < storiesNum; story++){
                 int devicesNum = deviceRange[RANGE_MIN] + rand.nextInt(devicesUpperBound);
                 ArrayList<IDSGraphNode> clique = new ArrayList<>();
@@ -73,7 +76,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
                     // TODO - set the heuristic correctly
                     IDSGraphNode newState = new IDSGraphNode(device, building, story, 1, null);
                     clique.add(newState);
-                    domain.nodes.put(newState.hashCode(), newState);
+                    this.nodes.put(newState.hashCode(), newState);
                 }
 
                 // create transitions
@@ -86,16 +89,69 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
                             neighbors.add(newEdge);
                         }
                     }
-                    domain.transitions.put(clique.get(i), neighbors);
+                    this.transitions.put(clique.get(i), neighbors);
                 }
+
+                // add the story to the building's stories
+                stories.add(clique);
             }
+
+            // add the stories created to the buildings map
+            this.buildings.put(building, stories);
+        }
+
+        // setup goals
+        for(int i = 0; i < k; i++){
+
+            // choose random building
+            int randBuilding = rand.nextInt(this.buildings.size());
+            ArrayList<ArrayList<IDSGraphNode>> building = this.buildings.get(randBuilding);
+
+            // choose random story
+            int randStory = rand.nextInt(building.size());
+            ArrayList<IDSGraphNode> story = building.get(randStory);
+
+            // choose random device
+            int randDevice = rand.nextInt(story.size());
+            IDSGraphNode device = story.get(randDevice);
+
+            // could loop forever if all the devices of a story are goals already
+            while(this.goals.contains(device)){
+                randDevice = rand.nextInt(story.size());
+                device = story.get(randDevice);
+            }
+
+            // if we get here - the device is not a goal already
+            device.setGoal(true);
+            this.goals.add(device);
         }
     }
 
 
     @Override
     protected SearchState createInitialState() {
-        return null;
+        Random rand = new Random();
+
+        // choose random building
+        int randBuilding = rand.nextInt(this.buildings.size());
+        ArrayList<ArrayList<IDSGraphNode>> building = this.buildings.get(randBuilding);
+
+        // choose random story
+        int randStory = rand.nextInt(building.size());
+        ArrayList<IDSGraphNode> story = building.get(randStory);
+
+        // choose random device
+        int randDevice = rand.nextInt(story.size());
+        IDSGraphNode device = story.get(randDevice);
+
+        // could loop forever if all the devices of a story are goals already
+        while(this.goals.contains(device)){
+            randDevice = rand.nextInt(story.size());
+            device = story.get(randDevice);
+        }
+
+        this.initialState = device;
+        return device;
     }
 
     @Override
@@ -223,7 +279,8 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         private int building;
         private int story;
         private double h;
-        IDSGraphNode parent;
+        private boolean isGoal;
+        private IDSGraphNode parent;
 
         private IDSGraphNode(String name,double h) {
             super(IDSDomain.this);
@@ -237,6 +294,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
             this.story = story;
             this.device = device;
             this.parent = parent;
+            this.isGoal = false;
         }
 
         @Override
@@ -271,6 +329,14 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         @Override
         public String dumpStateShort() {
             return this.dumpState();
+        }
+
+        public boolean isGoal() {
+            return isGoal;
+        }
+
+        public void setGoal(boolean goal) {
+            isGoal = goal;
         }
     }
 
