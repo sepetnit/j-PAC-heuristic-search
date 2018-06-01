@@ -81,6 +81,8 @@ public class KxAstar extends GenericSearchAlgorithm {
         }
         // print total time
         System.out.println("totalTime=" + totalTime);
+        System.out.println("result = ");
+        System.out.println(this.result);
 
         return this.result;
     }

@@ -15,10 +15,10 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
 
     protected Logger logger;
 
-    private boolean[] validGoals;
+    protected boolean[] validGoals;
 
     // Cache of indexes of valid goals in the goals array
-    private int[] validGoalsIndexes;
+    protected int[] validGoalsIndexes;
 
     private boolean useCache;
 
@@ -28,7 +28,7 @@ public abstract class MultipleGoalsSearchDomain implements SearchDomain {
     private SearchState basicInitialState;
     private PackedElement packedBasicInitialState;
 
-    private SearchState initialState;
+    protected SearchState initialState;
     private PackedElement packedInitialState;
 
     @Override

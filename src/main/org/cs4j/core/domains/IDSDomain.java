@@ -12,7 +12,6 @@ import java.util.*;
 public class IDSDomain extends MultipleGoalsSearchDomain {
 
     private ArrayList<IDSGraphNode> goals;
-    private IDSGraphNode initialState;
     Map<Integer, IDSGraphNode> nodes;
     Map<IDSGraphNode, ArrayList<IDSGraphEdge>> transitions;
     Map<Integer, ArrayList<ArrayList<IDSGraphNode>>> buildings;
@@ -22,6 +21,8 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
     private static final int MIN_COST = 1;
     private static final int MAX_COST = 10;
     private static final int COST_UPPER_BOUND = MAX_COST - MIN_COST;
+    private static final int STORY_COST_BOOST = 3;
+    private static final int BUILDING_COST_BOOST = 5;
 
 
     public IDSDomain(){
@@ -74,7 +75,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
                 for(int device = 0; device < devicesNum; device++){
 
                     // TODO - set the heuristic correctly
-                    IDSGraphNode newState = new IDSGraphNode(device, building, story, 1, null);
+                    IDSGraphNode newState = new IDSGraphNode(building, story, device, 0, null);
                     clique.add(newState);
                     this.nodes.put(newState.hashCode(), newState);
                 }
@@ -98,6 +99,35 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
             // add the stories created to the buildings map
             this.buildings.put(building, stories);
+        }
+
+        // connect buildings and stories
+        for(int i = 0; i < this.buildings.size(); i++){
+            ArrayList<ArrayList<IDSGraphNode>> building = this.buildings.get(i);
+
+            // connect stories of building i
+            for(int j = 0; j < building.size() - 1; j++){
+                IDSGraphNode storyNode = building.get(j).get(0);
+                IDSGraphNode nextStoryNode = building.get(j + 1).get(0);
+                int cost = MIN_COST + rand.nextInt(COST_UPPER_BOUND) + STORY_COST_BOOST;
+                IDSGraphEdge newEdge = new IDSGraphEdge(storyNode, nextStoryNode, cost);
+
+                this.transitions.get(storyNode).add(newEdge);
+                this.transitions.get(nextStoryNode).add(newEdge);
+            }
+
+            IDSGraphNode buildingConnectionNode = building.get(0).get(0);
+
+            // connect building i to all other buildings
+            for(int j = 0; j < this.buildings.size(); j++){
+                if(i != j){
+                    IDSGraphNode nextConnectionNode = this.buildings.get(j).get(0).get(0);
+                    int cost = MIN_COST + rand.nextInt(COST_UPPER_BOUND) + BUILDING_COST_BOOST;
+                    IDSGraphEdge newEdge = new IDSGraphEdge(buildingConnectionNode, nextConnectionNode, cost);
+
+                    this.transitions.get(buildingConnectionNode).add(newEdge);
+                }
+            }
         }
 
         // setup goals
@@ -125,8 +155,28 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
             device.setGoal(true);
             this.goals.add(device);
         }
+
+        this.validGoals = new boolean[this.goals.size()];
+        this.validGoalsIndexes = new int[this.goals.size()];
+        this.setAllGoalsValid();
+
+        this.createInitialState();
     }
 
+
+    public void printDomain(){
+        for(int i = 0; i < this.buildings.size(); i++){
+            ArrayList<ArrayList<IDSGraphNode>> building = this.buildings.get(i);
+            for(int j = 0; j < building.size(); j++){
+                ArrayList<IDSGraphNode> story = building.get(j);
+                for(int k = 0; k < story.size(); k++){
+                    System.out.println(story.get(k).dumpState());
+                    for(IDSGraphEdge edge : this.transitions.get(story.get(k)))
+                        System.out.println(edge.dumpEdge());
+                }
+            }
+        }
+    }
 
     @Override
     protected SearchState createInitialState() {
@@ -156,7 +206,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     public boolean goalsAreExplicit() {
-        return false;
+        return true;
     }
 
     @Override
@@ -171,17 +221,18 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     public int totalGoalsCount() {
-        return 0;
+        return this.goals.size();
     }
 
     @Override
     protected boolean stateIsOneOfValidGoals(SearchState s) {
-        return false;
+
+        return this.goals.contains(s);
     }
 
     @Override
     public int getGoalIndexForStateIfValid(SearchState s) {
-        return 0;
+        return this.goals.indexOf(s);
     }
 
     @Override
@@ -206,6 +257,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
             return edge.a;
         } else {
             // TODO
+            this.logger.error("applying bad operator");
             assert false;
             return null;
         }
@@ -255,7 +307,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     public int maxGeneratedSize() {
-        throw new UnsupportedOperationException();
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -323,7 +375,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
         @Override
         public String dumpState() {
-            return this.name;
+            return this.name + " is goal = " + this.isGoal;
         }
 
         @Override
@@ -337,6 +389,10 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
         public void setGoal(boolean goal) {
             isGoal = goal;
+        }
+
+        public String getName(){
+            return this.name;
         }
     }
 
@@ -364,6 +420,10 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
             IDSGraphNode s = (IDSGraphNode)state;
             assert s.equals(this.a) || s.equals(this.b);
             return this;
+        }
+
+        public String dumpEdge(){
+            return "a = " + a.getName() + " b = " + b.getName();
         }
     }
 
