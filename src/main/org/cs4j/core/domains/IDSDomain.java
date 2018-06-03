@@ -12,6 +12,8 @@ import java.util.*;
 
 public class IDSDomain extends MultipleGoalsSearchDomain {
 
+    private static IDSGraphNode currGoal = null;
+//    public static boolean setHToZero = false;     // for Dijkstra comparison
     private ArrayList<IDSGraphNode> goals;
     Map<Integer, IDSGraphNode> nodes;
     Map<IDSGraphNode, ArrayList<IDSGraphEdge>> transitions;
@@ -347,6 +349,13 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
     }
 
     @Override
+    public void setValidityOfOnlyGoal(int goal) {
+        this.setAllGoalsInvalid();
+        this.setGoalValid(goal);
+        IDSDomain.currGoal = goals.get(goal);
+    }
+
+    @Override
     public int getGoalIndexForStateIfValid(SearchState s) {
         return this.goals.indexOf(s);
     }
@@ -441,6 +450,18 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     }
 
+    public int getNumOfNodes() {
+        int sum = 0;
+        for (int i = 0; i < this.buildings.size(); i++){
+            ArrayList<ArrayList<IDSGraphNode>> building = this.buildings.get(i);
+            for(int j = 0; j < building.size(); j++){
+                sum += building.get(j).size();
+            }
+        }
+
+        return sum;
+    }
+
     private class IDSGraphNode extends SearchState {
         private String name;
         private int device;
@@ -481,7 +502,27 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         }
 
         public double getH() {
-            return this.h;
+
+            // if there is no currGoal something went wrong - but i don't want to crash
+            if(IDSDomain.currGoal == null){
+                System.out.println("no currGoal - h set to 0");
+                return 0;
+            }
+
+            // else - calculate the h according to the current goal
+            int goalBuilding = IDSDomain.currGoal.building;
+            int goalStory = IDSDomain.currGoal.story;
+
+            // if goal is in the same building
+            if(goalBuilding == this.building) {
+
+                // the h is at least the cost of traveling stories times the difference between the stories
+                return Math.abs(goalStory - this.story) * STORY_COST_BOOST;
+            }
+
+            // the goal is in a different building - need to get to story 0, go to the other building
+            // and go to the goal's story
+            return (goalStory + this.story) * STORY_COST_BOOST + BUILDING_COST_BOOST;
         }
 
         @Override
