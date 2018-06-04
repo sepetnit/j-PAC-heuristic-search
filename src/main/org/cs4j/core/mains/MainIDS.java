@@ -22,18 +22,22 @@ public class MainIDS {
 
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter(new File("test.csv"));
+            pw = new PrintWriter(new File("output.csv"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         StringBuilder sb = new StringBuilder();
         sb.append("id");
         sb.append(',');
-        sb.append("Expanded Nodes");
+        sb.append("KxAStar Expanded Nodes");
         sb.append(',');
-        sb.append("Generated Nodes");
+        sb.append("KxAStar Generated Nodes");
         sb.append(',');
-        sb.append("Total Nodes");
+        sb.append("lazyKWAstarMin Expanded Nodes");
+        sb.append(',');
+        sb.append("lazyKWAstarMin Generated Nodes");
+        sb.append(',');
+        sb.append("Domain Total Nodes");
         sb.append('\n');
 
         int iterations = 10;
@@ -45,13 +49,14 @@ public class MainIDS {
                 IDSDomain domain = new IDSDomain();
                 domain.setupIDSDomain(5, storiesRange, devicesRange, 15);
                 SearchResultImpl resKxA = kxAstar.concreteSearch(domain);
-
-
-//            SearchResultImpl res2 = lazyKWAstarMin.concreteSearch(domain);
-
                 System.out.println(resKxA);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+                domain.setAllGoalsValid();
+
+                SearchResultImpl resLazy = lazyKWAstarMin.concreteSearch(domain);
+                System.out.println(resLazy);
                 System.out.println("-------------------------------------------");
-//            System.out.println(res2);
 
 
                 sb.append("" + i);
@@ -59,6 +64,10 @@ public class MainIDS {
                 sb.append("" + resKxA.getExpanded());
                 sb.append(',');
                 sb.append("" + resKxA.getGenerated());
+                sb.append(',');
+                sb.append("" + resLazy.getExpanded());
+                sb.append(',');
+                sb.append("" + resLazy.getGenerated());
                 sb.append(',');
                 sb.append("" + domain.getNumOfNodes());
                 sb.append('\n');

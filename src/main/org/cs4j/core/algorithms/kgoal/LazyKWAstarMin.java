@@ -19,6 +19,7 @@ public class LazyKWAstarMin extends GenericWAstar<LazyKWAstarMin.LazyAstarNode, 
     // The domain for the search
     protected MultipleGoalsSearchDomain domain;
 
+    @Override
     protected boolean shouldStop(SearchResultImpl result) {
         return result.solutionsCount() == this.domain.totalGoalsCount();
     }
@@ -52,6 +53,8 @@ public class LazyKWAstarMin extends GenericWAstar<LazyKWAstarMin.LazyAstarNode, 
             SearchResultImpl concreteResult = new SearchResultImpl();
             concreteResult.addSolution(sol);
             newResult.addConcreteResult(concreteResult);
+            newResult.setExpanded(result.getExpanded());
+            newResult.setGenerated(result.getGenerated());
         }
 
         result = newResult;

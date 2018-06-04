@@ -14,7 +14,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     private static IDSGraphNode currGoal = null;
 //    public static boolean setHToZero = false;     // for Dijkstra comparison
-    private ArrayList<IDSGraphNode> goals;
+    private static ArrayList<IDSGraphNode> goals;
     Map<Integer, IDSGraphNode> nodes;
     Map<IDSGraphNode, ArrayList<IDSGraphEdge>> transitions;
     Map<Integer, ArrayList<ArrayList<IDSGraphNode>>> buildings;
@@ -149,18 +149,18 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
             IDSGraphNode device = story.get(randDevice);
 
             // could loop forever if all the devices of a story are goals already
-            while(this.goals.contains(device)){
+            while(IDSDomain.goals.contains(device)){
                 randDevice = rand.nextInt(story.size());
                 device = story.get(randDevice);
             }
 
             // if we get here - the device is not a goal already
             device.setGoal(true);
-            this.goals.add(device);
+            IDSDomain.goals.add(device);
         }
 
-        this.validGoals = new boolean[this.goals.size()];
-        this.validGoalsIndexes = new int[this.goals.size()];
+        this.validGoals = new boolean[IDSDomain.goals.size()];
+        this.validGoalsIndexes = new int[IDSDomain.goals.size()];
         this.setAllGoalsValid();
 
         this.createInitialState();
@@ -271,8 +271,8 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         b4.setGoal(true);
         this.goals.add(b4);
 
-        this.validGoals = new boolean[this.goals.size()];
-        this.validGoalsIndexes = new int[this.goals.size()];
+        this.validGoals = new boolean[IDSDomain.goals.size()];
+        this.validGoalsIndexes = new int[IDSDomain.goals.size()];
         this.setAllGoalsValid();
 
         this.initialState = a3;
@@ -311,7 +311,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         IDSGraphNode device = story.get(randDevice);
 
         // could loop forever if all the devices of a story are goals already
-        while(this.goals.contains(device)){
+        while(IDSDomain.goals.contains(device)){
             randDevice = rand.nextInt(story.size());
             device = story.get(randDevice);
         }
@@ -327,23 +327,27 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     protected PackedElement getNthGoalFromAllGoals(int goalIndex) {
-        return new PackedElement(this.goals.get(goalIndex).hashCode());
+        return new PackedElement(IDSDomain.goals.get(goalIndex).hashCode());
     }
 
     @Override
     protected List<PackedElement> getAllGoalsInternal() {
-        return null;
+        ArrayList<PackedElement> allGoals = new ArrayList<>();
+        for(IDSGraphNode goal : IDSDomain.goals){
+            allGoals.add(new PackedElement(goal.hashCode()));
+        }
+        return allGoals;
     }
 
     @Override
     public int totalGoalsCount() {
-        return this.goals.size();
+        return IDSDomain.goals.size();
     }
 
     @Override
     protected boolean stateIsOneOfValidGoals(SearchState s) {
-        if(this.goals.contains(s))
-            return this.validGoals[this.goals.indexOf(s)];
+        if(IDSDomain.goals.contains(s))
+            return this.validGoals[IDSDomain.goals.indexOf(s)];
 
         return false;
     }
@@ -357,7 +361,7 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
 
     @Override
     public int getGoalIndexForStateIfValid(SearchState s) {
-        return this.goals.indexOf(s);
+        return IDSDomain.goals.indexOf(s);
     }
 
     @Override
@@ -487,6 +491,19 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         }
 
         @Override
+        public double[] getHToAllGoals() {
+            if(IDSDomain.goals == null || IDSDomain.goals.size() == 0)
+                return new double[0];
+
+            double[] hVals = new double[IDSDomain.goals.size()];
+            for(int i = 0; i < IDSDomain.goals.size(); i++){
+                hVals[i] = this.getH(i);
+            }
+
+            return hVals;
+        }
+
+        @Override
         public boolean equals(Object other) {
             try {
                 IDSGraphNode node = (IDSGraphNode)other;
@@ -499,6 +516,31 @@ public class IDSDomain extends MultipleGoalsSearchDomain {
         @Override
         public SearchState getParent() {
             return this.parent;
+        }
+
+        private double getH(int goal){
+            // if there is no goals something went wrong - but i don't want to crash
+            if(IDSDomain.goals == null){
+                System.out.println("no goals - h set to 0");
+                return 0;
+            }
+
+            IDSGraphNode currGoal = IDSDomain.goals.get(goal);
+
+            // else - calculate the h according to the current goal
+            int goalBuilding = currGoal.building;
+            int goalStory = currGoal.story;
+
+            // if goal is in the same building
+            if(goalBuilding == this.building) {
+
+                // the h is at least the cost of traveling stories times the difference between the stories
+                return Math.abs(goalStory - this.story) * STORY_COST_BOOST;
+            }
+
+            // the goal is in a different building - need to get to story 0, go to the other building
+            // and go to the goal's story
+            return (goalStory + this.story) * STORY_COST_BOOST + BUILDING_COST_BOOST;
         }
 
         public double getH() {
